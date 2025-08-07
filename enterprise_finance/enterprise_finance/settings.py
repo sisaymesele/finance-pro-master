@@ -11,15 +11,13 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 
-from dotenv import load_dotenv
-
-
-
 import os
-load_dotenv()
-
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,6 +89,7 @@ TEMPLATES = [
                 #social
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+
             ],
         },
     },
@@ -213,8 +212,8 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_AUTH_EXTRA_ARGUMENTS = {
 
 
 #oauth credential
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv("GOOGLE_OAUTH2_KEY")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv("GOOGLE_OAUTH2_SECRET")
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
 
 # social auth

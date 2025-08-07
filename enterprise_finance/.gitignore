@@ -1,0 +1,12 @@
+.env
+db.sqlite3
+
+# Ignore SQLite DB
+enterprise_finance/db.sqlite3
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/

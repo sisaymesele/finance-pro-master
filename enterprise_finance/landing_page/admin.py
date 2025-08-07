@@ -48,3 +48,14 @@ class DocumentationAdmin(admin.ModelAdmin):
         return mark_safe(obj.content[:60] + "...")
 
     short_content.short_description = 'Content Preview'
+
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    list_display = (
+        'site_name', 'privacy', 'copy_right', 'terms',
+        'address', 'phone', 'email', 'website',
+        'google_map_embed_url', 'facebook', 'twitter', 'linkedin',
+        'instagram', 'youtube'
+    )
+

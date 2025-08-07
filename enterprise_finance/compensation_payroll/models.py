@@ -93,7 +93,7 @@ class PersonnelList(models.Model):
     ]
     # employer information
 
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     # personnel_list information
     personnel_id = models.CharField(max_length=50, verbose_name="Personnel ID")
     first_name = models.CharField(max_length=50)
@@ -154,7 +154,7 @@ class PersonnelList(models.Model):
         if ' ' in self.personnel_id:
             raise ValidationError({'personnel_id': 'Personnel ID should not contain spaces'})
 
-        if self.organization_name:
+        if self.organization_name_id:
             query = PersonnelList.objects.filter(
                 personnel_id=self.personnel_id,
                 organization_name=self.organization_name
@@ -174,7 +174,7 @@ class PersonnelList(models.Model):
 
 
 class PayrollMonthComponent(models.Model):
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     year = models.CharField(max_length=4, choices=YEAR_CHOICES, default=str(datetime.datetime.now().year),
                             help_text='payroll processing year')
     month = models.CharField(max_length=12, choices=MONTH_CHOICES, default=datetime.datetime.now().strftime('%B'),
@@ -236,14 +236,12 @@ class PayrollMonthComponent(models.Model):
 
 
 class RegularPayroll(models.Model):
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     # personnel_list information
 
-    personnel_full_name = models.ForeignKey(PersonnelList, on_delete=models.SET_NULL, null=True,
-                                            help_text='Please select personnel full name')
+    personnel_full_name = models.ForeignKey(PersonnelList, on_delete=models.PROTECT, help_text='Please select personnel full name')
 
-    payroll_month = models.ForeignKey(PayrollMonthComponent, on_delete=models.SET_NULL, null=True,
-                                      help_text='Payroll processing month')
+    payroll_month = models.ForeignKey(PayrollMonthComponent, on_delete=models.PROTECT, help_text='Payroll processing month')
     # fully taxable compensation
     basic_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True,
                                        validators=[MinValueValidator(Decimal('0.00'))],
@@ -376,12 +374,32 @@ class RegularPayroll(models.Model):
     bank_account_type = models.CharField(max_length=70, blank=True, null=True)
     processing_date = models.DateField(null=True, blank=True, default=datetime.date.today)
 
-    def __str__(self):
-        # Shows "Month - Personnel Name"
-        return f"{self.payroll_month} - {self.personnel_full_name}"
-
     # def __str__(self):
-    #     return f"Payroll month: {self.payroll_month} - Personnel full name: {self.personnel_full_name}"
+    #     if self.payroll_month_id:
+    #         payroll = str(self.payroll_month)
+    #     else:
+    #         payroll = "No Payroll Month"
+    #
+    #     if self.personnel_full_name_id:
+    #         personnel = str(self.personnel_full_name)
+    #     else:
+    #         personnel = "No Personnel"
+    #
+    #     return f"{payroll} - {personnel}"
+
+    def __str__(self):
+        try:
+            payroll = str(self.payroll_month)
+        except self.__class__.payroll_month.RelatedObjectDoesNotExist:
+            payroll = "No Payroll Month"
+
+        try:
+            personnel = str(self.personnel_full_name)  # or .name if you want only the name field
+        except self.__class__.personnel_full_name.RelatedObjectDoesNotExist:
+            personnel = "No Personnel"
+
+        return f"{payroll} - {personnel}"
+
 
     class Meta:
         verbose_name = "             Regular Payroll"
@@ -545,11 +563,10 @@ class EarningAdjustment(models.Model):
     ]
 
     # Model fields as described
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     #
-    record_month = models.ForeignKey(RegularPayroll, on_delete=models.SET_NULL, null=True,
-                                          related_name='earning_adjustments')
-    payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.SET_NULL, null=True)
+    record_month = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='earning_adjustments')
+    payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE)
     case = models.CharField(max_length=90, choices=ADJUSTMENT_CASES_CHOICES)
 
     component = models.CharField(max_length=90, choices=EARNING_ADJUSTMENT_COMPONENTS_CHOICES)
@@ -615,35 +632,42 @@ class EarningAdjustment(models.Model):
                                   help_text="Date when this record was created")
     updated_at = models.DateField(default=datetime.date.today, help_text="Date when this record was last updated")
 
+
     def clean(self):
-        if not self.payroll_needing_adjustment or not self.record_month:
+        # First, ensure both ForeignKeys are set
+        if not self.payroll_needing_adjustment_id or not self.record_month_id:
             raise ValidationError("Both 'payroll needing adjustment' and 'record month' must be set.")
 
-        if self.record_month:
-            # perdiem check
-            if self.earning_amount and self.component == 'per_diem' and (
-                    (
-                            not self.record_month.personnel_full_name.daily_per_diem or self.record_month.personnel_full_name.daily_per_diem == Decimal(
-                        '0.00'))
-            ):
-                raise ValidationError({
-                    'earning_amount': 'To process per diem you should add daily per diem amount in personnel list.'
-                })
+        # Safely get related objects
+        payroll_adj = getattr(self, 'payroll_needing_adjustment', None)
+        record_month_obj = getattr(self, 'record_month', None)
 
-            # hardship check
+        if record_month_obj:
+            personnel = getattr(record_month_obj, 'personnel_full_name', None)
+            payroll_month = getattr(record_month_obj, 'payroll_month', None)
+
+            # Example check using personnel
+            if self.earning_amount and self.component == 'per_diem':
+                if not personnel or not getattr(personnel, 'daily_per_diem', None) or personnel.daily_per_diem == 0:
+                    raise ValidationError({
+                        'earning_amount': 'To process per diem you should add daily per diem amount in personnel list.'
+                    })
 
             allowed_environments = ['adverse', 'very_adverse', 'extremely_adverse']
-
-            if self.record_month.personnel_full_name.working_environment not in allowed_environments and self.earning_amount is not None:
-                if self.component == 'hardship_allowance' and self.earning_amount > 0:
+            if personnel and payroll_month and self.earning_amount is not None:
+                working_env = getattr(personnel, 'working_environment', None)
+                if working_env not in allowed_environments and self.component == 'hardship_allowance' and self.earning_amount > 0:
                     raise ValidationError({
                         'earning_amount': (
-                            'The condition should be either "adverse", "very_adverse", or "extremely_adverse" to process hardship allowance. '
-                            'Please appropriately select the working environment type in the personnel list list above.'
+                            'The condition should be either "adverse", "very_adverse", or "extremely_adverse" '
+                            'to process hardship allowance. Please appropriately select the working environment '
+                            'type in the personnel list above.'
                         )
                     })
 
         super().clean()
+
+
 
     def save(self, *args, **kwargs):
         EarningAdjustmentBusinessService(self).perform_all_calculations()
@@ -682,11 +706,10 @@ class DeductionAdjustment(models.Model):
     ]
 
     # Model fields as described
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     #
-    record_month = models.ForeignKey(RegularPayroll, on_delete=models.SET_NULL, null=True,
-                                          related_name='deduction_adjustments')
-    payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.SET_NULL, null=True)
+    record_month = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='deduction_adjustments')
+    payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE)
     case = models.CharField(max_length=90, choices=ADJUSTMENT_CASES_CHOICES)
 
     component = models.CharField(max_length=90, choices=DEDUCTION_ADJUSTMENT_COMPONENTS_CHOICES)
@@ -730,7 +753,7 @@ class SeverancePay(models.Model):
         ('harassment', 'Sexual Harassment'),
     ]
 
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     year = models.CharField(max_length=4, choices=YEAR_CHOICES, default=str(datetime.datetime.now().year),
                             help_text='Severance processing year')
     month = models.CharField(max_length=12, choices=MONTH_CHOICES, default=datetime.datetime.now().strftime('%B'),
@@ -790,7 +813,7 @@ class SeverancePay(models.Model):
 
 
 class AbsenceDeduction(models.Model):
-    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.SET_NULL, null=True, blank=True)
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     monthly_salary = models.DecimalField(max_digits=12, decimal_places=2)
     absence_days = models.IntegerField()
     absence_deduction_amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True)

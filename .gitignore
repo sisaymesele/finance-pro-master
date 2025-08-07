@@ -1,0 +1,6 @@
+# Ignore SQLite database
+enterprise_finance/db.sqlite3
+
+# Ignore Python cache folders
+__pycache__/
+*.pyc

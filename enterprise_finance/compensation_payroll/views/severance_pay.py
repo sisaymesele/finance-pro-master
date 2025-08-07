@@ -7,11 +7,12 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from compensation_payroll.models import SeverancePay
 from compensation_payroll.forms import SeverancePayForm
-
-# export
-import openpyxl
-from io import BytesIO
 from django.http import HttpResponse
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.utils import get_column_letter
+from datetime import datetime
+from compensation_payroll.services.excel_export import ExportUtilityService
 
 
 
@@ -123,12 +124,6 @@ def delete_severance_pay(request, pk):
 
 
 # export
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment
-from openpyxl.utils import get_column_letter
-from datetime import datetime
 
 @login_required
 def export_severance_pay_to_excel(request):
@@ -137,38 +132,41 @@ def export_severance_pay_to_excel(request):
     ws = wb.active
     ws.title = "Severance Pay"
 
-    # Exclude unnecessary fields
+    # Title row (1st)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=19)
+    title_cell = ws.cell(row=1, column=1)
+    title_cell.value = "Severance Pay Detail"
+    title_cell.font = Font(size=14, bold=True)
+    title_cell.alignment = Alignment(horizontal='center', vertical='center')
+
+    # Fields to export (excluding relations and 'id')
     excluded_fields = {'id'}
     field_names = [
         field.name for field in SeverancePay._meta.get_fields()
         if not field.is_relation and field.name not in excluded_fields
     ]
 
-    # Convert field names to "Title Case With Line Breaks"
-    def format_header(name):
-        parts = name.replace("_", " ").title().split()
-        # Join with line breaks every max 3 words
-        lines = [' '.join(parts[i:i+3]) for i in range(0, len(parts), 3)]
-        return "\n".join(lines)
+    # Header row (2nd row)
+    export_util = ExportUtilityService()
+    headers = [export_util.split_header_to_lines(field) for field in field_names]
+    ws.append(headers)
 
-    header_titles = [format_header(name) for name in field_names]
-    ws.append(header_titles)
-
-    # Style headers
+    # Style header row
     header_fill = PatternFill(start_color="FF0070C0", end_color="FF0070C0", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFF")
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    for cell in ws[1]:
+    for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
 
-    # Fetch and write data rows
+    # Query data
     severance_pays = SeverancePay.objects.filter(
         organization_name=request.user.organization_name
     ).values_list(*field_names)
 
+    # Data rows
     for row_data in severance_pays:
         cleaned_row = [
             value.replace(tzinfo=None) if isinstance(value, datetime) else value
@@ -176,19 +174,18 @@ def export_severance_pay_to_excel(request):
         ]
         ws.append(cleaned_row)
 
-    # Auto-fit column widths
+    # Auto-adjust column widths
     for col_idx, column_cells in enumerate(ws.columns, 1):
         max_length = max(len(str(cell.value)) if cell.value else 0 for cell in column_cells)
-        adjusted_width = min(max(max_length + 2, 12), 15)
+        adjusted_width = min(max(max_length + 2, 12), 20)
         ws.column_dimensions[get_column_letter(col_idx)].width = adjusted_width
 
-    # Prepare HTTP response
+    # Prepare response
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     response["Content-Disposition"] = "attachment; filename=severance_payrolls.xlsx"
 
-    # Save workbook to response
     wb.save(response)
     return response
 

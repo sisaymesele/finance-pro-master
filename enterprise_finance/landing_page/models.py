@@ -77,3 +77,24 @@ class Documentation(models.Model):
 
     def __str__(self):
         return self.title
+
+class SiteSettings(models.Model):
+    site_name = models.CharField(max_length=255, default='My Website')
+    privacy = models.TextField(max_length=500, null=True, blank=True)
+    copy_right = models.TextField(max_length=500, null=True, blank=True)
+    terms = models.TextField(max_length=500, null=True, blank=True)
+    address = models.TextField()
+    phone = models.CharField(max_length=30)
+    email = models.EmailField()
+    website = models.URLField(blank=True, null=True)
+    google_map_embed_url = models.URLField(blank=True, null=True, max_length=500)
+
+    # Social Media
+    facebook = models.URLField(blank=True, null=True)
+    twitter = models.URLField(blank=True, null=True)
+    linkedin = models.URLField(blank=True, null=True)
+    instagram = models.URLField(blank=True, null=True)
+    youtube = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.site_name} - Site Settings"

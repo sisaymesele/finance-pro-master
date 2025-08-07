@@ -9,8 +9,9 @@ urlpatterns = [
     path('pricing/', views.pricing_list, name='pricing_list'),
     path('video/', views.video_list, name='video_list'),
     path('qa/', views.qa_list, name='qa_list'),
-    path('contact/', views.contact_list, name='contact_list'),
+    path('contact/', views.contact, name='contact'),
     path('about/', views.about_list, name='about_list'),
+    path('privacy-terms/', views.privacy_and_terms, name='privacy_and_terms'),
 
     path('blog-post/', views.blog_post_list, name='blog_post_list'),  # Added trailing slash here
     path('blog-post/<slug:slug>', views.blog_post_detail, name='blog_post_detail'),  # Added trailing slash here

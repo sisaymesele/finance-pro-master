@@ -1,9 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import *
+from .models import BlogPost, Documentation, VideoPost, SiteSettings
+
+
 # Create your views here.
 
 def landing_page(request):
-    return render(request, 'landing-page.html')
+    settings = SiteSettings.objects.all()
+    return render(request, 'landing_page.html', {'settings': settings})
+
 
 def feature_list(request):
     return render(request, 'partial/feature.html')
@@ -20,8 +24,6 @@ def video_list(request):
 def qa_list(request):
     return render(request, 'partial/qa.html')
 
-def contact_list(request):
-    return render(request, 'partial/contact.html')
 
 def about_list(request):
     return render(request, 'partial/about.html')
@@ -34,7 +36,6 @@ def organization_compatible(request):
 
 def compliance_standards(request):
     return render(request, 'partial/compliance_standard.html')
-
 
 def blog_post_list(request):
     blog_posts = BlogPost.objects.all().order_by('-created_at')
@@ -71,3 +72,12 @@ def documentation_detail(request, slug):
         'document': document,
         'documents': documents,
     })
+
+
+def privacy_and_terms(request):
+    settings = SiteSettings.objects.all()
+    return render(request, 'privacy_and_terms.html', {'settings': settings})
+
+def contact(request):
+    settings = SiteSettings.objects.all()
+    return render(request, 'contact.html', {'settings': settings})

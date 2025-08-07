@@ -1,0 +1,85 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="message">
+        {% for message in messages %}
+        <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    </div>
+    <div>
+        <div class="row" id="profile-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <a class="btn btn-primary" href="{% url 'create_organizational_profile' %}">
+                    Create Organizational Profile
+                </a>
+                <h1 class="mx-auto">Organizational Profiles</h1>
+            </div>
+
+
+            <div class="col-md-12 mb-4">
+                <div class="table-responsive" id="profile-list"
+                     style="max-height: 70vh; overflow-y: auto; overflow-x: auto;">
+                    <table class="table table-success table-striped-columns w-100">
+                        <thead>
+                        <tr>
+                            <th>Organization Name</th>
+                            <th>Address</th>
+                            <th>Employer TIN</th>
+                            <th>Type</th>
+                            <th>Contact Personnel</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for profile in organizational_profiles %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'update_organizational_profile' profile.pk %}">
+                                    {{ profile.organization_name }}
+                                </a>
+                            </td>
+                            <td>{{ profile.organization_address }}</td>
+                            <td>{{ profile.employer_tin }}</td>
+                            <td>{{ profile.get_organization_type_display }}</td>
+                            <td>{{ profile.contact_personnel }}</td>
+                            <td>
+                                <a
+                                        class="btn btn-warning"
+                                        href="{% url 'update_organizational_profile' profile.pk %}"
+
+                                >
+                                    Update
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   href="{% url 'delete_organizational_profile' profile.pk %}"
+                                   hx-get="{% url 'delete_organizational_profile' profile.pk %}"
+                                   hx-trigger="click"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-push-url="true">
+                                    Delete
+                                </a>
+
+
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <li>No organizational profiles found.</li>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+
+

@@ -1,0 +1,97 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-2">
+        <a href="{% url 'create_payroll_month_and_component' %}"
+           class="btn btn-success mb-2"
+           hx-get="{% url 'create_payroll_month_and_component' %}"
+           hx-target="#full-page-container"
+           hx-push-url="true"
+           hx-trigger="click">
+           Create New Payroll Month and Components
+        </a>
+    </div>
+
+    <div class="text-center">
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="row" id="payroll-container">
+        <h2>Payroll Month and Component List</h2>
+
+        <div class="mb-4">
+            <div class="card" id="payroll-list" style="max-height: 70vh; overflow-y: auto;">
+                <div class="table-responsive col-md-12" style="overflow-x: auto; max-width: 100%;">
+                    <table class="table table-bordered table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Year</th>
+                                <th>Month</th>
+                                <th>Payroll Month</th>
+                                <th>Selected Components</th>
+                                <th>Update</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in payroll_month_and_components %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ c.year }}</td>
+                                <td>{{ c.get_month_display }}</td>
+                                <td>
+                                    <a href="{% url 'update_payroll_month_and_component' c.pk %}"
+                                       hx-get="{% url 'update_payroll_month_and_component' c.pk %}"
+                                       hx-trigger="click"
+                                       hx-target="#full-page-container"
+                                       hx-swap="innerHTML"
+                                       hx-push-url="true">
+                                        {{ c.payroll_month }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled mb-0">
+                                        {% for item in c.selected_components %}
+                                            <li>✓ {{ item }}</li>
+                                        {% empty %}
+                                            <li>No components selected</li>
+                                        {% endfor %}
+                                    </ul>
+                                </td>
+                                <td>
+                                    <a class="btn btn-warning"
+                                       href="{% url 'update_payroll_month_and_component' c.pk %}"
+                                       hx-get="{% url 'update_payroll_month_and_component' c.pk %}"
+                                       hx-trigger="click"
+                                       hx-target="#full-page-container"
+                                       hx-swap="innerHTML"
+                                       hx-push-url="true">
+                                       Update
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="btn btn-danger"
+                                       href="{% url 'delete_payroll_month_and_component' c.pk %}"
+                                       hx-get="{% url 'delete_payroll_month_and_component' c.pk %}"
+                                       hx-trigger="click"
+                                       hx-target="#full-page-container"
+                                       hx-swap="innerHTML"
+                                       hx-push-url="true">
+                                       Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

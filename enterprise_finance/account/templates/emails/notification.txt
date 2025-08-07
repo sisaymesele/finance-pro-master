@@ -1,0 +1,14 @@
+
+
+
+Hello {{ user.first_name }},
+
+{{ message|striptags }}
+
+Thanks,
+Your Company
+
+---
+
+This message was sent to {{ user.email }}.
+If you no longer wish to receive these emails, please contact support.

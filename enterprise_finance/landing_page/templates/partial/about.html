@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">About Us</h2>
+      <p class="text-muted fs-5">Committed to simplifying payroll and compensation with accuracy, compliance, and trust.</p>
+    </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <p class="text-muted text-center mb-4">
+          Our mission is to empower organizations to manage their workforce compensation smoothly and compliantly,
+          allowing them to focus on growth and employee satisfaction. We blend industry expertise, technology, and
+          customer-centric service to deliver solutions that stand the test of time.
+        </p>
+      </div>
+    </div>
+
+    <div class="row text-center">
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-semibold">Integrity</h5>
+        <p class="text-muted small">We uphold transparency and accuracy in every calculation and process.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-semibold">Compliance</h5>
+        <p class="text-muted small">Staying current with laws and regulations to keep your business safe.</p>
+      </div>
+      <div class="col-md-4 mb-3">
+        <h5 class="fw-semibold">Innovation</h5>
+        <p class="text-muted small">Continuously improving to meet evolving payroll and compensation challenges.</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="{% url 'contact_list' %}" class="btn btn-primary px-4 py-2">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+
+
+
+{% endblock %}

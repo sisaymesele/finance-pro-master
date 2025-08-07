@@ -1,0 +1,41 @@
+
+
+
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+
+{% block content %}
+  <h3 class="text-center">Show Regular Payroll Journal Entry Report by Month</h3>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Months List</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for payroll in payroll_months %}
+        <tr>
+          <td>
+            <a
+              hx-get="{% url 'payroll_by_month_journal_entry' payroll.payroll_month__slug %}"
+              hx-target="#full-page-container"
+              hx-swap="innerHTML"
+              hx-trigger="click once"
+              hx-push-url="{% url 'payroll_by_month_journal_entry' payroll.payroll_month__slug %}"
+              href="{% url 'payroll_by_month_journal_entry' payroll.payroll_month__slug %}"
+            >
+              {{ payroll.payroll_month__payroll_month }} - Click to show journal entry report by month
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div id="journal-entry-report" class="mt-4">
+    <!-- The journal entry report will be loaded here dynamically -->
+  </div>
+{% endblock %}

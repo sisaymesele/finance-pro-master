@@ -1,0 +1,117 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+{% block content %}
+<div class="container-fluid my-5">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h1 class="mb-4">Combined Adjustment Summary</h1>
+
+        <a href="{% url 'export_personnel_total_adjustment' %}" class="btn btn-success" target="_blank">
+            Export Total Adjustment to Excel
+        </a>
+
+        <!-- Search Form -->
+        <form
+                method="get"
+                action="{% url 'combined_personnel_adjustment' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'combined_personnel_adjustment' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search combined adjustment list..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+    </div>
+
+
+    {% if payroll_data %}
+    <div class="table-responsive shadow rounded">
+        <table class="table table-bordered table-hover align-middle text-center mb-0"
+               aria-describedby="payrollSummaryDesc">
+            <caption id="payrollSummaryDesc" class="visually-hidden">
+                Combined payroll adjustments including gross pay, pension contributions, deductions, net pay, and
+                expenses.
+            </caption>
+            <thead class="table-primary">
+            <tr>
+                <th>#</th>
+                <th>Month</th>
+                <th>First Name</th>
+                <th>Father Name</th>
+                <th>Last Name</th>
+                <th>Adjusted Taxable Gross</th>
+                <th>Adjusted Non-Taxable Gross</th>
+                <th>Adjusted Total Gross</th>
+                <th>Adjusted Pensionable</th>
+                <th>Adjusted Employee Pension</th>
+                <th>Adjusted Employer Pension</th>
+                <th>Adjusted Total Pension</th>
+                <th>Adjusted Employment Income Tax</th>
+                <th>Earning Adjustment Deduction</th>
+                <th>Other Adjustment Deduction</th>
+                <th>Adjusted Total Deduction</th>
+                <th class="text-success">Adjusted Net Pay</th>
+                <th>Adjusted Total Expense</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in payroll_data %}
+            {% with a=row.earning_adjustment_item combined=row.combined_adjustment %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ row.payroll.payroll_month }}</td>
+                <td>{{ row.payroll.personnel_full_name.first_name }}</td>
+                <td>{{ row.payroll.personnel_full_name.father_name }}</td>
+                <td>{{ row.payroll.personnel_full_name.last_name }}</td>
+
+                <td>{{ a.taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.non_taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.adjusted_pensionable|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.employee_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.employer_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+
+                <td>{{ a.earning_adjustment_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ a.adjusted_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+
+                <td>{{ combined.total_adjustment_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+
+                <td class="text-end fw-semibold text-success">{{ combined.net_monthly_adjustment|default:"0.00"|floatformat:2|intcomma }}</td>
+
+                <td>{{ a.expense|default:"0.00"|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endwith %}
+            {% empty %}
+            <tr>
+                <td colspan="13" class="text-center text-muted">No payroll data available.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+
+    <!-- Pagination -->
+    <div id="pagination">
+        {% include 'pagination.html' %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning text-center" role="alert">
+        No adjustment data available.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

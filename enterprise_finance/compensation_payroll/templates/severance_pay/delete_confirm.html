@@ -1,0 +1,45 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="container-fluid d-flex justify-content-center align-items-center" style="height: 40vh;">
+    <div class="row justify-content-center w-100">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4">Confirm Deletion</h2>
+                <p class="text-center mb-4">
+                    Are you sure you want to delete "<strong>{{ severance_pay }}</strong>"?
+                </p>
+
+                <!-- HTMX Form for Deletion -->
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center">
+                        <button
+                            type="submit"
+                            class="btn btn-danger me-2"
+                            hx-post="{% url 'delete_severance_pay' severance_pay.pk %}"
+                            hx-target="#full-page-container"
+                            hx-swap="innerHTML"
+                            hx-push-url="true"
+                        >
+                            Yes, Delete
+                        </button>
+                    </div>
+                </form>
+
+                <!-- HTMX Cancel Button -->
+                <div class="d-flex justify-content-center mt-3">
+                    <a class="btn btn-secondary"
+                       href="{% url 'severance-pay-list' %}"
+                       hx-get="{% url 'severance-pay-list' %}"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="mb-3">
+        <a
+                href="{% url 'payroll_month_and_component_list' %}"
+                class="btn btn-secondary"
+                hx-get="{% url 'payroll_month_and_component_list' %}"
+                hx-trigger="click"
+                hx-target="#full-page-container"
+                hx-swap="innerHTML"
+                hx-push-url="true"
+        >
+            Back to Payroll Month and Components List
+        </a>
+    </div>
+<div class="container-fluid">
+    <div>
+        <div class="row" id="payroll-container">
+            <h2>Payroll Month and Component Form</h2>
+
+            <div class="col-md-12 mb-4">
+                <div class="p-3 border rounded shadow-lg" id="form-container">
+                    <h4>Payroll Month and Component Form</h4>
+                    <h4>
+                        {% if edit_mode %}
+                        Update Payroll Month and Component: {{ editing_payroll_month_and_component.payroll_month }}
+                        {% else %}
+                        Create Payroll Month and Component
+                        {% endif %}
+                    </h4>
+
+                    <!-- Display Form Error Messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- End Form Error -->
+
+                    <form
+                            action="{% if form.instance.id %}{% url 'update_payroll_month_and_component' form.instance.id %}{% else %}{% url 'create_payroll_month_and_component' %}{% endif %}"
+                            method="POST"
+                            hx-post="{% if form.instance.id %}{% url 'update_payroll_month_and_component' form.instance.id %}{% else %}{% url 'create_payroll_month_and_component' %}{% endif %}"
+                            hx-target="#full-page-container"
+                            hx-swap="innerHTML"
+                            hx-push-url="true"
+                    >
+                        {% csrf_token %}
+                        <div class="row col-md-3">
+                                {% for field in form.visible_fields|slice:":2" %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors.as_ul }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        <div class="row">
+
+                            <div class="col-md-3">
+                                <h3 class="text-success">Earnings</h3>
+                                {% for field in form.visible_fields|slice:"2:10" %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors.as_ul }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-3">
+                                <h3 class="text-success">Earnings</h3>
+                                {% for field in form.visible_fields|slice:"10:16" %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors.as_ul }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-3">
+                                <h3 class="text-success">Earnings</h3>
+                                {% for field in form.visible_fields|slice:"16:23" %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors.as_ul }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-3">
+                                <h3 class="text-primary">Deductions</h3>
+                                {% for field in form.visible_fields|slice:"23:33" %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors.as_ul }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            {% if edit_mode %} Update {% else %} Create {% endif %}
+                        </button>
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

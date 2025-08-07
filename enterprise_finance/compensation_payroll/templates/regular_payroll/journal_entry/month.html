@@ -1,0 +1,573 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+{% block content %}
+
+<div>
+
+    <a class="btn btn-danger mb-2"
+       hx-get="{% url 'payroll_month_for_journal_entry' %}"
+       hx-target="#full-page-container"
+       hx-swap="innerHTML"
+       hx-trigger="click once"
+       hx-push-url="{% url 'payroll_month_for_journal_entry' %}"
+       href="{% url 'payroll_month_for_journal_entry' %}"
+       class="nav-link text-white">
+        Back to Month List for Payroll Journal Entry
+    </a>
+
+
+    <div class="container">
+
+        <div class="row mb-2" style="border: 1px solid #ccc;">
+            {% for entry in aggregate_by_month %}
+            <div class="table-responsive" id="aggregate-accrual-entry-{{ entry.id }}">
+                <table class="table table-bordered table-striped table-sm">
+                    <thead style="border-bottom: 2px solid #000;">
+                    <tr style="text-align: center;">
+                        <th colspan="3">
+                            <h4>Regular Payroll Accruals Entry for Month: {{ payroll_month.month }} Year: {{ payroll_month.year }}</h4>
+                        </th>
+                    </tr>
+                    </thead>
+                    <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    <!--            fully taxable-->
+                    {% if entry.aggregate_basic_salary %}
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td>{{ entry.aggregate_basic_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_overtime %}
+                    <tr>
+                        <td>Overtime</td>
+                        <td>{{ entry.aggregate_overtime|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_housing_allowance %}
+                    <tr>
+                        <td>Housing Allowance</td>
+                        <td>{{ entry.aggregate_housing_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_position_allowance %}
+                    <tr>
+                        <td>Position Allowance</td>
+                        <td>{{ entry.aggregate_position_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_commission %}
+                    <tr>
+                        <td>Commission</td>
+                        <td>{{ entry.aggregate_commission|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_telephone_allowance %}
+                    <tr>
+                        <td>Telephone Allowance</td>
+                        <td>{{ entry.aggregate_telephone_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_one_time_bonus %}
+                    <tr>
+                        <td>One Time Bonus</td>
+                        <td>{{ entry.aggregate_one_time_bonus|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_causal_labor_wage %}
+                    <tr>
+                        <td>Causal Labor Wage</td>
+                        <td>{{ entry.aggregate_causal_labor_wage|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    <!-------------------- taxable               -->
+                    <!--partial taxable-->
+                    {% if entry.aggregate_transport_home_to_office_taxable %}
+                    <tr>
+                        <td>Transport Home to Office Taxable</td>
+                        <td>{{ entry.aggregate_transport_home_to_office_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if entry.aggregate_transport_home_to_office_non_taxable %}
+                    <tr>
+                        <td>Transport Home to Office Non-Taxable</td>
+                        <td>{{ entry.aggregate_transport_home_to_office_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_fuel_home_to_office_taxable %}
+                    <tr>
+                        <td>Fuel Home to Office Taxable</td>
+                        <td>{{ entry.aggregate_fuel_home_to_office_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if entry.aggregate_fuel_home_to_office_non_taxable %}
+                    <tr>
+                        <td>Fuel Home to Office Non-Taxable</td>
+                        <td>{{ entry.aggregate_fuel_home_to_office_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+
+                    {% if entry.aggregate_transport_for_work_taxable %}
+                    <tr>
+                        <td>Transport for Work Taxable</td>
+                        <td>{{ entry.aggregate_transport_for_work_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if entry.aggregate_transport_for_work_non_taxable %}
+                    <tr>
+                        <td>Transport for Work Non-Taxable</td>
+                        <td>{{ entry.aggregate_transport_for_work_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_fuel_for_work_taxable %}
+                    <tr>
+                        <td>Fuel for Work Taxable</td>
+                        <td>{{ entry.aggregate_fuel_for_work_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if entry.aggregate_fuel_for_work_non_taxable %}
+                    <tr>
+                        <td>Fuel for Work Non-Taxable</td>
+                        <td>{{ entry.aggregate_fuel_for_work_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_per_diem_taxable %}
+                    <tr>
+                        <td>Per Diem Taxable</td>
+                        <td>{{ entry.aggregate_per_diem_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if entry.aggregate_per_diem_non_taxable %}
+                    <tr>
+                        <td>Per Diem Non-Taxable</td>
+                        <td>{{ entry.aggregate_per_diem_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_hardship_allowance_taxable %}
+                    <tr>
+                        <td>Hardship Allowance Taxable</td>
+                        <td>{{ entry.aggregate_hardship_allowance_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    {% if entry.aggregate_hardship_allowance_non_taxable %}
+                    <tr>
+                        <td>Hardship Allowance Non-Taxable</td>
+                        <td>{{ entry.aggregate_hardship_allowance_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    <!--partial taxable -->
+                    <!--        full non taxable-->
+                    {% if entry.aggregate_public_cash_award %}
+                    <tr>
+                        <td>Public Cash Award</td>
+                        <td>{{ entry.aggregate_public_cash_award|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_incidental_operation_allowance %}
+                    <tr>
+                        <td>Incidental Operation Allowance</td>
+                        <td>{{ entry.aggregate_incidental_operation_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_medical_allowance %}
+                    <tr>
+                        <td>Medical Allowance</td>
+                        <td>{{ entry.aggregate_medical_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_cash_gift %}
+                    <tr>
+                        <td>Cash Gift</td>
+                        <td>{{ entry.aggregate_cash_gift|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_tuition_fees %}
+                    <tr>
+                        <td>Tuition Fees</td>
+                        <td>{{ entry.aggregate_tuition_fees|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    <!-- fully non-taxable -->
+
+                    {% if entry.aggregate_personal_injury %}
+                    <tr>
+                        <td>Personal Injury</td>
+                        <td>{{ entry.aggregate_personal_injury|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_child_support_payment %}
+                    <tr>
+                        <td>Child Support Payment</td>
+                        <td>{{ entry.aggregate_child_support_payment|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    <!--        total gross end-->
+                    <!--              deductions start -->
+
+                    {% if entry.aggregate_charitable_donation %}
+                    <tr>
+                        <td>Charitable Donation Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_charitable_donation|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_saving_plan %}
+                    <tr>
+                        <td>Saving Plan Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_saving_plan|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_loan_payment %}
+                    <tr>
+                        <td>Loan Payment Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_loan_payment|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_court_order %}
+                    <tr>
+                        <td>Court Order Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_court_order|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_workers_association %}
+                    <tr>
+                        <td>Workers Association Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_workers_association|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_personnel_insurance_saving %}
+                    <tr>
+                        <td>Personnel Insurance Saving Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_personnel_insurance_saving|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_university_cost_share_pay %}
+                    <tr>
+                        <td>University Cost Share Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_university_cost_share_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_red_cross %}
+                    <tr>
+                        <td>Red Cross Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_red_cross|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_party_contribution %}
+                    <tr>
+                        <td>Party Contribution Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_party_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_other_deduction %}
+                    <tr>
+                        <td>Other Deduction Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_other_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employment_income_tax %}
+                    <tr>
+                        <td>Regular Employment Income Tax Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employee_pension_contribution %}
+                    <tr>
+                        <td>Regular Employee Pension Contribution Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_net_pay %}
+                    <tr>
+                        <td>Regular Net Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employer_pension_contribution %}
+                    <tr>
+                        <td>Regular Employer Pension Contribution(Expense)</td>
+                        <td>{{ entry.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employer_pension_contribution %}
+                    <tr>
+                        <td>Regular Employer Pension Contribution Payable</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                     {% if entry.aggregate_regular_expense %}
+                    <tr>
+                        <td>Total Debit</td>
+                        <td>{{ entry.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                     {% if entry.aggregate_regular_expense %}
+                    <tr>
+                        <td>Total Credit</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <!-- Print button for accrual -->
+            <div class="m-2 d-flex justify-content-center align-items-center">
+               <button class="btn btn-success" onclick="printCommon('aggregate-accrual-entry-{{ entry.id }}')">
+                    Save or Print Accrual Entry for {{ entry.payroll_month__month }} {{ entry.payroll_month__year }}
+                </button>
+            </div>
+            <hr>
+
+            {% endfor %}
+        </div>
+        <!--second tale after payment-->
+        <div class="" style="border: 1px solid #ccc;">
+            {% for entry in aggregate_by_month %}
+            <div class="table-responsive" id="aggregate-payment-entry-{{ entry.id }}">
+                <table class="table table-striped">
+                    <thead style="border-bottom: 2px solid #000;">
+                    <tr>
+                        <th colspan="3">
+                            <h4 class="text-center">Regular Payroll Payment Entry for Month: {{ payroll_month.month }}
+                                Year: {{ payroll_month.year }}</h4>
+                        </th>
+                    </tr>
+                    </thead>
+                    <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Debit</th>
+                        <th>Credit</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% if entry.aggregate_regular_net_pay %}
+                    <tr>
+                        <td>Regular Net Payable</td>
+                        <td>{{ entry.aggregate_regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+                    <!--              deductions payable-->
+
+                    {% if entry.aggregate_charitable_donation %}
+                    <tr>
+                        <td>Charitable Donation Payable</td>
+                        <td>{{ entry.aggregate_charitable_donation|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_saving_plan %}
+                    <tr>
+                        <td>Saving Plan Payable</td>
+                        <td>{{ entry.aggregate_saving_plan|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_loan_payment %}
+                    <tr>
+                        <td>Loan Payment Payable</td>
+                        <td>{{ entry.aggregate_loan_payment|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_court_order %}
+                    <tr>
+                        <td>Court Order Payable</td>
+                        <td>{{ entry.aggregate_court_order|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_workers_association %}
+                    <tr>
+                        <td>Workers Association Payable</td>
+                        <td>{{ entry.aggregate_workers_association|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_personnel_insurance_saving %}
+                    <tr>
+                        <td>Personnel Insurance Saving Payable</td>
+                        <td>{{ entry.aggregate_personnel_insurance_saving|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_university_cost_share_pay %}
+                    <tr>
+                        <td>University Cost Share Payable</td>
+                        <td>{{ entry.aggregate_university_cost_share_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_red_cross %}
+                    <tr>
+                        <td>Red Cross Payable</td>
+                        <td>{{ entry.aggregate_red_cross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_party_contribution %}
+                    <tr>
+                        <td>Party Contribution Payable</td>
+                        <td>{{ entry.aggregate_party_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_other_deduction %}
+                    <tr>
+                        <td>Other Deduction Payable</td>
+                        <td>{{ entry.aggregate_other_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employment_income_tax %}
+                    <tr>
+                        <td>Regular Employment Income Tax Payable</td>
+                        <td>{{ entry.aggregate_regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employee_pension_contribution %}
+                    <tr>
+                        <td>Regular Employee Pension Contribution Payable</td>
+                        <td>{{ entry.aggregate_regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_employer_pension_contribution %}
+                    <tr>
+                        <td>Regular Employer Pension Contribution Payable</td>
+                        <td>{{ entry.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td></td>
+                    </tr>
+                    {% endif %}
+
+                    {% if entry.aggregate_regular_expense %}
+                    <tr>
+                        <td>Cash</td>
+                        <td></td>
+                        <td>{{ entry.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    {% endif %}
+
+                    </tbody>
+                </table>
+            </div>
+            <hr>
+            <!-- Print button for payment -->
+            <div class="m-2 d-flex justify-content-center align-items-center">
+                <button class="btn btn-success" onclick="printCommon('aggregate-payment-entry-{{ entry.id }}')">
+                    Save or Print Payment Entry for {{ entry.payroll_month__month }} {{ entry.payroll_month__year }}
+                </button>
+            </div>
+            <hr>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

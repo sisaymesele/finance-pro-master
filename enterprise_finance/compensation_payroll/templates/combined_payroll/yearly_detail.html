@@ -1,0 +1,262 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid my-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h2 class="mb-4 text-center">Combined Yearly Payroll Detail</h2>
+        <a href="{% url 'export_combined_yearly_detail_to_excel' %}?search={{ search_query }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel-fill me-1"></i> Export to Excel
+        </a>
+    </div>
+
+    {% for year in page_obj %}
+    <div class="card shadow rounded-4 border-start border-3 border-primary mb-4">
+
+        <div class="card-header bg-primary text-white rounded-top d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Combined Yearly Payroll Detail: {{ year.year }}</h5>
+
+            <!-- Button toggles collapse -->
+            <button class="btn btn-sm btn-light"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#combined_yearly_detail_{{ forloop.counter }}"
+                    aria-expanded="true"
+                    aria-controls="combined_yearly_detail_{{ forloop.counter }}">
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
+        </div>
+
+        <!-- Collapse body (initially shown, remove 'show' to start collapsed) -->
+        <div id="combined_yearly_detail_{{ forloop.counter }}" class="collapse show">
+            <div class="card-body">
+
+                <h3 class="mb-0 text-center">Combined Yearly Payroll Detail: {{ year.year }}</h3>
+                <hr class="my-4 border-2 border-primary"/>
+
+                <div class="row gy-4">
+                    <!-- Left Column: Payroll Components -->
+                    <div class="col-lg-8">
+                        {% if year.regular_item_by_component %}
+                        <div class="mb-4 table-responsive">
+                            <h6 class="fw-bold text-primary">Regular Payroll</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Component</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for key, val in year.regular_item_by_component.items %}
+                                {% if val %}
+                                <tr>
+                                    <td>{{ key }}</td>
+                                    <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                <tr>
+                                    <th>Employee Pension</th>
+                                    <td class="text-end">{{ year.regular.employee_pension|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Employer Pension</th>
+                                    <td class="text-end">{{ year.regular.employer_pension|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Employment Income Tax</th>
+                                    <td class="text-end">{{ year.regular.employment_income_tax|floatformat:2|intcomma }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% if year.show_earning %}
+                        <div class="mb-4 table-responsive">
+                            <h6 class="fw-bold text-primary">Earning Adjustments</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Component</th>
+                                    <th class="text-end">Earning</th>
+                                    <th class="text-end">Taxable</th>
+                                    <th class="text-end">Non-Taxable</th>
+                                    <th class="text-end">Employee Pension</th>
+                                    <th class="text-end">Employer Pension</th>
+                                    <th class="text-end">Total Pension</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for comp, vals in year.earning_adj_by_component.items %}
+                                {% if vals.earning_amount %}
+                                <tr>
+                                    <td>{{ comp }}</td>
+                                    <td class="text-end">{{ vals.earning_amount|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">{{ vals.taxable|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">{{ vals.non_taxable|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">{{ vals.employee_pension_contribution|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">{{ vals.employer_pension_contribution|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">{{ vals.total_pension|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% if year.show_deduction %}
+                        <div class="mb-4 table-responsive">
+                            <h6 class="fw-bold text-primary">Deduction Adjustments</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Component</th>
+                                    <th class="text-end">Deduction Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for comp, val in year.deduction_adj_by_component.items %}
+                                {% if val %}
+                                <tr>
+                                    <td>{{ comp }}</td>
+                                    <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% with s=year.severance %}
+                        {% if s.taxable_gross or s.gross or s.employment_income_tax or s.total_severance_deduction or s.net or s.expense %}
+                        <div class="mb-4 table-responsive">
+                            <h6 class="fw-bold text-primary">Severance Pay</h6>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Component</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>Taxable Gross</td>
+                                    <td class="text-end">{{ s.taxable_gross|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Gross</td>
+                                    <td class="text-end">{{ s.gross|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Employment Income Tax</td>
+                                    <td class="text-end">{{ s.employment_income_tax|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Severance Deduction</td>
+                                    <td class="text-end">{{ s.total_severance_deduction|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Net Severance</td>
+                                    <td class="text-end">{{ s.net|floatformat:2|intcomma }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Expense</td>
+                                    <td class="text-end">{{ s.expense|floatformat:2|intcomma }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    <!-- Right Column: Summary -->
+                    <div class="col-lg-4 table-responsive">
+                        <h6 class="fw-bold text-primary">Total Summary</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                            <tr>
+                                <th>Component</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Taxable Gross</td>
+                                <td class="text-end">{{ year.totals.taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Non-Taxable Gross</td>
+                                <td class="text-end">{{ year.totals.non_taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Gross</td>
+                                <td class="text-end">{{ year.totals.gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Pensionable</td>
+                                <td class="text-end">{{ year.totals.pensionable|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Employee Pension</td>
+                                <td class="text-end">{{ year.totals.employee_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Employer Pension</td>
+                                <td class="text-end">{{ year.totals.employer_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Pension</td>
+                                <td class="text-end">{{ year.totals.total_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Employment Income Tax</td>
+                                <td class="text-end">{{ year.totals.employment_income_tax|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Deduction</td>
+                                <td class="text-end">{{ year.totals.total_deduction|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Final Net Pay</td>
+                                <td class="text-end">{{ year.totals.final_net_pay|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <td>Expense</td>
+                                <td class="text-end">{{ year.totals.expense|floatformat:2|intcomma }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-3 no-print">
+                        <button class="btn btn-outline-primary btn-sm"
+                                onclick="printCombinedDetail('combined_yearly_detail_{{ forloop.counter }}')">
+                            <i class="bi bi-printer"></i> Print / Save
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    {% empty %}
+    <div class="alert alert-warning text-center mt-4">No payroll data found for the year.</div>
+    {% endfor %}
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4">
+        {% include "pagination.html" %}
+    </div>
+
+</div>
+
+<!-- Make sure you have Bootstrap JS loaded in your base template for collapse to work -->
+
+{% endblock %}

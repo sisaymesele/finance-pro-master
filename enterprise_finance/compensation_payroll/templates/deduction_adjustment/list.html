@@ -1,0 +1,128 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Messages -->
+    {% for message in messages %}
+    <p class="text-danger my-1">{{ message }}</p>
+    {% endfor %}
+
+    <!-- Header Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <a href="{% url 'create_deduction_adjustment' %}" class="btn btn-success"
+           hx-get="{% url 'create_deduction_adjustment' %}"
+           hx-trigger="click"
+           hx-target="#full-page-container"
+           hx-swap="innerHTML"
+           hx-push-url="true"
+        >
+            ➕ Create Deduction Adjustment
+        </a>
+
+        <h2 class="fs-5 flex-grow-1 text-center text-md-start mb-0">Deduction Adjustment List</h2>
+
+        <a href="{% url 'export_deduction_adjustment_list_to_excel' %}" class="btn btn-success btn-sm py-1 px-2">
+            Export to Excel
+        </a>
+
+        <form
+                method="get"
+                action="{% url 'deduction_adjustment_list' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'deduction_adjustment_list' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search monthly deduction..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+    </div>
+
+    <!-- Deductions Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-sm">
+            <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Record Month</th>
+                <th>Adjusted Payroll Month</th>
+                <th>First Name</th>
+                <th>Father Name</th>
+                <th>Last Name</th>
+                <th>Case</th>
+                <th>Component</th>
+                <th>Deduction Amount</th>
+                <th>Period Start</th>
+                <th>Period End</th>
+                <th>Months Covered</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+                <th>Update</th>
+                <th>Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for deduction in page_obj %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ deduction.record_month.payroll_month }}</td>
+                <td>{{ deduction.payroll_needing_adjustment.payroll_month }}</td>
+                <td>{{ deduction.record_month.personnel_full_name.first_name }}</td>
+                <td>{{ deduction.record_month.personnel_full_name.father_name }}</td>
+                <td>{{ deduction.record_month.personnel_full_name.last_name }}</td>
+                <td>{{ deduction.get_case_display }}</td>
+                <td>{{ deduction.get_component_display }}</td>
+                <td>{{ deduction.deduction_amount|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ deduction.period_start }}</td>
+                <td>{{ deduction.period_end }}</td>
+                <td>{{ deduction.months_covered }}</td>
+                <td>{{ deduction.created_at }}</td>
+                <td>{{ deduction.updated_at }}</td>
+                <td>
+                    <a href="{% url 'update_deduction_adjustment' deduction.pk %}"
+                       class="btn btn-warning"
+                       hx-get="{% url 'update_deduction_adjustment' deduction.pk %}"
+                       hx-trigger="click"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true"
+                    >
+                        ✏️
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'delete_deduction_adjustment' deduction.pk %}"
+                       class="btn btn-danger"
+                       hx-get="{% url 'delete_deduction_adjustment' deduction.pk %}"
+                       hx-trigger="click"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-push-url="true"
+                    >
+                        🗑️
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="18">No deduction adjustments found.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination">
+        {% include 'pagination.html' %}
+    </div>
+</div>
+{% endblock %}

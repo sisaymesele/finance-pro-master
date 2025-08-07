@@ -1,0 +1,264 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Basic Meta -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary Meta Tags -->
+    <title>PayrollPro | Automated Compensation & Payroll Management SaaS Platform</title>
+    <meta
+        name="description"
+        content="PayrollPro automates payroll processing, tax compliance, and compensation management for businesses of all sizes. Reduce errors and save time with our cloud-based payroll solution."
+    />
+    <meta
+        name="keywords"
+        content="payroll software, compensation management, HR SaaS, payroll automation, tax compliance, salary processing, personnel benefits, payroll reporting"
+    />
+    <meta name="author" content="PayrollPro" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Social Media Meta -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="PayrollPro | Automated Compensation & Payroll Management" />
+    <meta
+        property="og:description"
+        content="Cloud-based payroll solution that automates compensation, tax compliance, and reporting for modern businesses."
+    />
+    <meta property="og:image" content="https://yourdomain.com/images/social-preview.jpg" />
+    <meta property="og:url" content="https://yourdomain.com" />
+    <meta property="og:site_name" content="PayrollPro" />
+
+    <!-- Twitter Card Meta -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="PayrollPro | Automated Payroll Management" />
+    <meta
+        name="twitter:description"
+        content="Streamline your payroll processing with our automated compensation management platform."
+    />
+    <meta name="twitter:image" content="https://yourdomain.com/images/twitter-preview.jpg" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- Preload Critical Resources -->
+    <link
+        rel="preload"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        as="style"
+    />
+    <link
+        rel="preload"
+        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+        as="style"
+    />
+    <link
+        rel="preload"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+        as="style"
+    />
+
+    <!-- DNS Prefetch -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+
+    <!-- CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+        crossorigin="anonymous"
+    />
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+        integrity="sha512-c42qTSw/wPZ3/5LBzD+Bw5f7bSF2oxou6wEb+I/lqeaKV5FDIfMvvRp772y4jcJLKuGUOpbJMdg/BTl50fJYAw=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+        rel="stylesheet"
+        integrity="sha384-2h4N00EFsD6LJ6J4A8+Y4GFeVpM8yV1A6WJ5Q6d5L5Z5F5C5E5Q5k5E5f5E5E5E5"
+        crossorigin="anonymous"
+    />
+
+    <link rel="stylesheet" href="{% static 'landing_page/css/style.css' %}" />
+
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yourdomain.com" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-white bg-info sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">PayrollPro</a>
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+            >
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div
+                class="collapse navbar-collapse justify-content-end"
+                id="navbarNav"
+            >
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="{% url "home" %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "feature_list" %}">Feature</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "how_it_work_list" %}">How It Works</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "pricing_list" %}">Pricing</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "video_list" %}">Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "qa_list" %}">Q&A</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "contact_list" %}">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "about_list" %}">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "blog_post_list" %}">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url "documentation_list" %}">Documentation</a></li>
+                    <li class="nav-item btn btn-warning me-2"><a class="nav-link" href="{% url "register" %}">Sign Up</a></li>
+                    <li class="nav-item btn btn-warning"><a class="nav-link" href="{% url "login" %}">Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+
+    <!--call-->
+    <section class="py-5 bg-primary text-white text-center">
+        <div class="container">
+            <h2 class="fw-bold">Ready to streamline your payroll?</h2>
+            <p class="lead">Start your 16-day free trial and experience PayrollPro today.</p>
+            <a href="#" class="btn btn-light btn-lg">Get Started Free</a>
+        </div>
+    </section>
+    <!--call-->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row g-4">
+
+                <!-- Brand & Contact Info -->
+                <div class="col-md-4 col-lg-3">
+                    <h5 class="fw-bold">PayrollPro</h5>
+                    <p class="small text-white-50">
+                        Simplifying payroll, compensation, and compliance for businesses
+                        of all sizes.
+                    </p>
+                    <ul class="list-unstyled small text-white-50">
+                        <li><i class="bi bi-telephone-fill me-2"></i>+1 (555) 123-4567</li>
+                        <li><i class="bi bi-envelope-fill me-2"></i>support@payrollpro.com</li>
+                        <li><i class="bi bi-geo-alt-fill me-2"></i>123 Payroll St, Suite 100, NY, USA</li>
+                    </ul>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-white" aria-label="Facebook"
+                            ><i class="bi bi-facebook fs-5"></i
+                        ></a>
+                        <a href="#" class="text-white" aria-label="Twitter"
+                            ><i class="bi bi-twitter-x fs-5"></i
+                        ></a>
+                        <a href="#" class="text-white" aria-label="LinkedIn"
+                            ><i class="bi bi-linkedin fs-5"></i
+                        ></a>
+                        <a href="#" class="text-white" aria-label="Instagram"
+                            ><i class="bi bi-instagram fs-5"></i
+                        ></a>
+                        <a href="#" class="text-white" aria-label="YouTube"
+                            ><i class="bi bi-youtube fs-5"></i
+                        ></a>
+                    </div>
+                </div>
+
+                <!-- Core Features -->
+                <div class="col-md-4 col-lg-3">
+                    <h6 class="text-uppercase fw-semibold">Core Features</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url "home" %}" class="text-white-50 text-decoration-none">Home</a></li>
+                        <li><a href="{% url "feature_list" %}" class="text-white-50 text-decoration-none">Feature</a></li>
+                        <li><a href="{% url "how_it_work_list" %}" class="text-white-50 text-decoration-none">How It Works</a></li>
+                        <li><a href="{% url "pricing_list" %}" class="text-white-50 text-decoration-none">Pricing</a></li>
+                        <li><a href="{% url "video_list" %}" class="text-white-50 text-decoration-none">Video</a></li>
+                        <li><a href="{% url "qa_list" %}" class="text-white-50 text-decoration-none">Q&A</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support & Content -->
+                <div class="col-md-4 col-lg-3">
+                    <h6 class="text-uppercase fw-semibold">Support & Content</h6>
+                    <ul class="list-unstyled small">
+                        <li><a href="{% url "blog_post_list" %}" class="text-white-50 text-decoration-none">Blog</a></li>
+                        <li><a href="{% url "documentation_list" %}" class="text-white-50 text-decoration-none">Documentation</a></li>
+                        <li><a href="{% url "contact_list" %}" class="text-white-50 text-decoration-none">Contact</a></li>
+                        <li><a href="{% url "about_list" %}" class="text-white-50 text-decoration-none">About</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company & Newsletter -->
+           <div class="col-md-12 col-lg-3">
+    <h6 class="text-uppercase fw-semibold">Social & Contact</h6>
+    <ul class="list-unstyled small">
+        <li class="mb-2">
+            <a href="https://www.facebook.com/yourpage" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/24/733/733547.png" alt="Facebook" width="18" class="me-2">
+                Facebook
+            </a>
+        </li>
+        <li class="mb-2">
+            <a href="https://twitter.com/yourhandle" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/24/733/733579.png" alt="Twitter" width="18" class="me-2">
+                Twitter / X
+            </a>
+        </li>
+        <li class="mb-2">
+            <a href="https://www.linkedin.com/company/yourcompany" target="_blank" class="text-white-50 text-decoration-none d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/24/174/174857.png" alt="LinkedIn" width="18" class="me-2">
+                LinkedIn
+            </a>
+        </li>
+        <li class="mb-2">
+            <a href="mailto:support@payrollpro.com" class="text-white-50 text-decoration-none d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/24/732/732200.png" alt="Email" width="18" class="me-2">
+                support@payrollpro.com
+            </a>
+        </li>
+        <li>
+            <a href="tel:+15551234567" class="text-white-50 text-decoration-none d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/24/597/597177.png" alt="Phone" width="18" class="me-2">
+                +1 (555) 123-4567
+            </a>
+        </li>
+    </ul>
+</div>
+
+            <hr class="border-light my-4" />
+
+            <!-- Bottom Footer -->
+            <div class="d-flex justify-content-between flex-wrap small">
+                <p class="mb-0 text-white-50">&copy; 2025 PayrollPro. All rights reserved.</p>
+                <div>
+                    <a href="#" class="text-white-50 text-decoration-none me-3"
+                        >Privacy Policy</a
+                    >
+                    <a href="#" class="text-white-50 text-decoration-none">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

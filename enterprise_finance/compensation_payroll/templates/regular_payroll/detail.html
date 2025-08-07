@@ -1,0 +1,202 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+<a href="{% url 'regular_payroll_list' payroll_month.slug %}" class="btn btn-secondary mb-2 no-print">Back to Payroll List</a>
+
+<div class="container-fluid mt-2" id="regular_payroll_detail_print" style="width:80%;">
+
+    <div class="text-center mb-3">
+        <h5 class="mb-1">Payslip for Regular Payroll<br>Processing Date {{ regular_payroll.processing_date }}</h5>
+        <h6 class="mb-0">Bank: {{ regular_payroll.personnel_full_name.bank_name }}</h6>
+        <h6 class="mb-0">{{ regular_payroll.personnel_full_name.organization_name.organization_name }}</h6>
+    </div>
+
+    <div class="row g-2 mb-3" style="border:1px solid #ccc;">
+        <!-- Organizational Info -->
+        <div class="col-md-6 p-2 bg-light border-end">
+            <table class="table table-bordered table-sm mb-0 small">
+                <thead>
+                    <tr><th colspan="2" class="text-center bg-secondary text-white">Organizational Information</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Organizational Name</td><td>{{ regular_payroll.personnel_full_name.organization_name.organization_name }}</td></tr>
+                    <tr><td>Employer TIN</td><td>{{ regular_payroll.personnel_full_name.organization_name.employer_tin }}</td></tr>
+                    <tr><td>Organization Type</td><td>{{ regular_payroll.personnel_full_name.organization_name.organization_type }}</td></tr>
+                    <tr><td>Contact Personnel</td><td>{{ regular_payroll.personnel_full_name.organization_name.contact_personnel }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Personnel Info -->
+        <div class="col-md-6 p-2 bg-light">
+            <table class="table table-bordered table-sm mb-0 small">
+                <thead>
+                    <tr><th colspan="2" class="text-center bg-secondary text-white">Personnel Information</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>ID</td><td>{{ regular_payroll.personnel_full_name.personnel_id }}</td></tr>
+                    <tr><td>Full Name</td>
+                        <td>{{ regular_payroll.personnel_full_name.first_name }} {{ regular_payroll.personnel_full_name.father_name }} {{ regular_payroll.personnel_full_name.last_name }}</td></tr>
+                    <tr><td>Working Area</td><td>{{ regular_payroll.personnel_full_name.get_working_area_display }}</td></tr>
+                    <tr><td>Position</td><td>{{ regular_payroll.personnel_full_name.position_name }}</td></tr>
+                    <tr><td>TIN</td><td>{{ regular_payroll.personnel_full_name.personnel_tin }}</td></tr>
+                    <tr><td>Pension Number</td><td>{{ regular_payroll.personnel_full_name.pension_number }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Earnings and Deductions side by side -->
+    <div class="row g-2 mb-3" style="border:1px solid #ccc;">
+        <!-- Earnings Components on left -->
+        <div class="col-md-6 p-2 bg-light border-end" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-bordered table-sm mb-0 small">
+                <thead>
+                    <tr><th colspan="3" class="text-center bg-secondary text-white">Earnings Components</th></tr>
+                    <tr>
+                        <th>Component</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# Fully Taxable #}
+                    {% if payroll_month.use_basic_salary %}
+                    <tr><td>Basic Salary</td><td>{{ regular_payroll.basic_salary|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_overtime %}
+                    <tr><td>Overtime</td><td>{{ regular_payroll.overtime|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_housing_allowance %}
+                    <tr><td>Housing Allowance</td><td>{{ regular_payroll.housing_allowance|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_position_allowance %}
+                    <tr><td>Position Allowance</td><td>{{ regular_payroll.position_allowance|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_commission %}
+                    <tr><td>Commission</td><td>{{ regular_payroll.commission|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_telephone_allowance %}
+                    <tr><td>Telephone Allowance</td><td>{{ regular_payroll.telephone_allowance|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_one_time_bonus %}
+                    <tr><td>One Time Bonus</td><td>{{ regular_payroll.one_time_bonus|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_causal_labor_wage %}
+                    <tr><td>Causal Labor Wage</td><td>{{ regular_payroll.causal_labor_wage|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Taxable</td></tr>
+                    {% endif %}
+
+                    {# Partially Taxable #}
+                    {% if payroll_month.use_transport_home_to_office %}
+                    <tr><td>Transport Home to Office Taxable</td><td>{{ regular_payroll.transport_home_to_office_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable</td></tr>
+                    <tr><td>Transport Home to Office Non-Taxable</td><td>{{ regular_payroll.transport_home_to_office_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable (Non-Taxable Portion)</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_transport_for_work %}
+                    <tr><td>Transport for Work Taxable</td><td>{{ regular_payroll.transport_for_work_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable</td></tr>
+                    <tr><td>Transport for Work Non-Taxable</td><td>{{ regular_payroll.transport_for_work_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable (Non-Taxable Portion)</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_fuel_home_to_office %}
+                    <tr><td>Fuel Home to Office Taxable</td><td>{{ regular_payroll.fuel_home_to_office_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable</td></tr>
+                    <tr><td>Fuel Home to Office Non-Taxable</td><td>{{ regular_payroll.fuel_home_to_office_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable (Non-Taxable Portion)</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_fuel_for_work %}
+                    <tr><td>Fuel for Work Taxable</td><td>{{ regular_payroll.fuel_for_work_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable</td></tr>
+                    <tr><td>Fuel for Work Non-Taxable</td><td>{{ regular_payroll.fuel_for_work_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable (Non-Taxable Portion)</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_per_diem %}
+                    <tr><td>Per Diem Taxable</td><td>{{ regular_payroll.per_diem_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable</td></tr>
+                    <tr><td>Per Diem Non-Taxable</td><td>{{ regular_payroll.per_diem_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable (Non-Taxable Portion)</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_hardship_allowance %}
+                    <tr><td>Hardship Allowance Taxable</td><td>{{ regular_payroll.hardship_allowance_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable</td></tr>
+                    <tr><td>Hardship Allowance Non-Taxable</td><td>{{ regular_payroll.hardship_allowance_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td><td>Partially Taxable (Non-Taxable Portion)</td></tr>
+                    {% endif %}
+
+                    {# Fully Non-Taxable #}
+                    {% if payroll_month.use_public_cash_award %}
+                    <tr><td>Public Cash Award</td><td>{{ regular_payroll.public_cash_award|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_incidental_operation_allowance %}
+                    <tr><td>Incidental Operation Allowance</td><td>{{ regular_payroll.incidental_operation_allowance|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_medical_allowance %}
+                    <tr><td>Medical Allowance</td><td>{{ regular_payroll.medical_allowance|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_cash_gift %}
+                    <tr><td>Cash Gift</td><td>{{ regular_payroll.cash_gift|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_tuition_fees %}
+                    <tr><td>Tuition Fees</td><td>{{ regular_payroll.tuition_fees|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_personal_injury %}
+                    <tr><td>Personal Injury</td><td>{{ regular_payroll.personal_injury|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                    {% if payroll_month.use_child_support_payment %}
+                    <tr><td>Child Support Payment</td><td>{{ regular_payroll.child_support_payment|default:"0.00"|floatformat:2|intcomma }}</td><td>Fully Non-Taxable</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Deduction Components on right -->
+        <div class="col-md-6 p-2 bg-light" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-bordered table-sm mb-0 small">
+                <thead>
+                    <tr><th colspan="2" class="text-center bg-secondary text-white">Deduction Components</th></tr>
+                </thead>
+                <tbody>
+                    {% if payroll_month.use_charitable_donation %}<tr><td>Charitable Donation</td><td>{{ regular_payroll.charitable_donation|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_saving_plan %}<tr><td>Saving Plan</td><td>{{ regular_payroll.saving_plan|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_loan_payment %}<tr><td>Loan Payment</td><td>{{ regular_payroll.loan_payment|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_court_order %}<tr><td>Court Order</td><td>{{ regular_payroll.court_order|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_workers_association %}<tr><td>Workers Association</td><td>{{ regular_payroll.workers_association|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_personnel_insurance_saving %}<tr><td>Personnel Insurance Saving</td><td>{{ regular_payroll.personnel_insurance_saving|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_university_cost_share_pay %}<tr><td>University Cost Share Pay</td><td>{{ regular_payroll.university_cost_share_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_red_cross %}<tr><td>Red Cross</td><td>{{ regular_payroll.red_cross|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_party_contribution %}<tr><td>Party Contribution</td><td>{{ regular_payroll.party_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    {% if payroll_month.use_other_deduction %}<tr><td>Other Deduction</td><td>{{ regular_payroll.other_deduction|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
+                    <tr><td>Regular Employment Income Tax</td><td>{{ regular_payroll.regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Regular Employee Pension Contribution</td><td>{{ regular_payroll.regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gross & Net + Employer Contributions -->
+    <div class="row g-2 mb-3" style="border:1px solid #ccc;">
+        <div class="col-md-6 p-2 bg-light border-end">
+            <table class="table table-bordered table-sm mb-0 small">
+                <thead>
+                    <tr><th colspan="2" class="text-center bg-secondary text-white">Gross and Net Pay</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Regular Gross Taxable Pay</td><td>{{ regular_payroll.regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Regular Gross Non-Taxable Pay</td><td>{{ regular_payroll.regular_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Regular Gross Pay</td><td>{{ regular_payroll.regular_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Regular Total Payroll Deduction</td><td>{{ regular_payroll.regular_total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Regular Net Pay</td><td>{{ regular_payroll.regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-6 p-2 bg-light">
+            <table class="table table-bordered table-sm mb-0 small">
+                <thead>
+                    <tr><th colspan="2" class="text-center bg-secondary text-white">Employer Contribution and Expense</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Regular Employer Pension Contribution</td><td>{{ regular_payroll.regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Regular Payroll Expense</td><td>{{ regular_payroll.regular_expense|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="d-flex justify-content-center my-3 no-print">
+    <button class="btn btn-success" onclick="printPayrollPayslip('regular_payroll_detail_print')">Save or Print Payslip</button>
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container py-2">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Dashboard Header -->
+            <div class="text-center mb-5">
+                <h2 class="text-secondary">Latest Announcements</h2>
+            </div>
+
+            <!-- Announcements Section -->
+            <div class="mb-4">
+                {% for ann in announcements %}
+                    <div class="card mb-4 border-start border-primary border-4 shadow-sm bg-light bg-opacity-10 hover-shadow">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
+                                    <i class="fas fa-bullhorn text-primary"></i>
+                                </div>
+                                <h5 class="card-title mb-0 fw-bold text-primary">{{ ann.title }}</h5>
+                            </div>
+                            <p class="card-text text-muted mb-3">{{ ann.message }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="far fa-clock me-1"></i>
+                                    {{ ann.created_at|date:"F j, Y" }}
+                                </small>
+                                {% if forloop.first %}
+                                    <span class="badge bg-success text-white">
+                                        New
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 bg-light bg-opacity-10 rounded-3">
+                        <div class="py-4">
+                            <i class="far fa-bell-slash text-muted fa-3x mb-3"></i>
+                            <h5 class="text-muted">No announcements yet</h5>
+                            <p class="text-muted mb-0">Check back later for updates</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

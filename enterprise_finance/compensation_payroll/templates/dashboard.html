@@ -1,0 +1,692 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+    <title>Dashboard</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+          integrity="sha384-tViUnnbYAV00FLIhhi3v/dWt3Jxw4gZQcNoSCxCIFNJVCx7/D55/wXsrNIRANwdD" crossorigin="anonymous">
+    <!--    graph-->
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
+
+    <!--            htmx-->
+    <script src="https://unpkg.com/htmx.org@2.0.4"
+            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+            crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="{% static 'compensation_payroll/css/style.css' %}">
+
+</head>
+
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}' id="full-page-container">
+<div class="container-fluid">
+    <div class="d-flex" id="wrapper">
+
+        <!-- Sidebar -->
+        <div class="bg-dark text-white overflow-y-auto" id="sidebar" style="width: 250px;">
+            <div class="sidebar-header p-4">
+                <h3>Dashboard</h3>
+            </div>
+            <ul class="nav flex-column p-3">
+
+                {% if user.is_authenticated %}
+
+                <li class="nav-item bg-primary">
+                    <a hx-get="{% url 'organizational_profile' %}"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-trigger="click"
+                       hx-push-url="{% url 'organizational_profile' %}"
+                       href="{% url 'organizational_profile' %}"
+                       class="nav-link text-white">
+                        <i class="bi bi-bank2"></i> Organizational Profile
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <!-- Category Header -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse" href="#personnelManagement"
+                       role="button" aria-expanded="false" aria-controls="personnelManagement">
+                        <i class="bi bi-people"></i> Personnel
+                    </a>
+                    <!-- Collapsible Submenu -->
+                    <div class="collapse" id="personnelManagement">
+                        <ul class="nav flex-column ms-3">
+                            <!-- Personnel List -->
+                            <li class="nav-item">
+                                <a hx-get="{% url 'personnel_list' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'personnel_list' %}"
+                                   href="{% url 'personnel_list' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-list-ul"></i> Manage Personnel
+                                </a>
+                            </li>
+                            <!-- Personnel Graph -->
+                            <li class="nav-item">
+                                <a hx-get="{% url 'personnel_graph' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'personnel_graph' %}"
+                                   href="{% url 'personnel_graph' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-bar-chart-line"></i> Personnel Graph
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+
+                <li class="nav-item bg-primary">
+                    <a hx-get="{% url 'payroll_month_and_component_list' %}"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-trigger="click"
+                       hx-push-url="{% url 'payroll_month_and_component_list' %}"
+                       href="{% url 'payroll_month_and_component_list' %}"
+                       class="nav-link text-white">
+                        <i class="bi bi-calendar3"></i> Payroll Month and Component
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <!-- Main Category Link (Collapsible Trigger) -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse" href="#payrollMenu"
+                       role="button"
+                       aria-expanded="false" aria-controls="payrollMenu" onclick="event.preventDefault();">
+                        <i class="bi bi-file-spreadsheet"></i> Regular Payroll
+                    </a>
+
+                    <!-- Collapsible Submenu -->
+                    <div class="collapse" id="payrollMenu">
+                        <ul class="nav flex-column ms-3">
+                            <!-- Existing Menu Items (Unchanged) -->
+                            <li class="nav-item">
+                                <a hx-get="{% url 'payroll_month_list' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'payroll_month_list' %}"
+                                   href="{% url 'payroll_month_list' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-file-spreadsheet"></i> Make Payroll by Month
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a hx-get="{% url 'payroll_month_for_summary_report' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'payroll_month_for_summary_report' %}"
+                                   href="{% url 'payroll_month_for_summary_report' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-file-spreadsheet"></i> Regular Payroll Monthly Summary Report
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a hx-get="{% url 'payroll_month_for_journal_entry' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'payroll_month_for_journal_entry' %}"
+                                   href="{% url 'payroll_month_for_journal_entry' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-cash-stack"></i> Regular Payroll Journal Entry
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a hx-get="{% url 'payroll_by_year_summary_report' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'payroll_by_year_summary_report' %}"
+                                   href="{% url 'payroll_by_year_summary_report' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-file-text"></i> Regular Payroll Yearly Summary Report
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a hx-get="{% url 'regular_payroll_graph' %}"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-trigger="click"
+                                   hx-push-url="{% url 'regular_payroll_graph' %}"
+                                   href="{% url 'regular_payroll_graph' %}"
+                                   class="nav-link text-white">
+                                    <i class="bi bi-bar-chart-line"></i> Regular Payroll Graphical Report
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
+
+                <li class="nav-item">
+                    <!-- Collapsible Category -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse"
+                       href="#earningAdjustmentCollapse"
+                       role="button"
+                       aria-expanded="false" aria-controls="earningAdjustmentCollapse"
+                       onclick="event.preventDefault();">
+                        <i class="bi bi-pencil-square"></i> Earning Adjustment
+                    </a>
+
+                    <!-- Collapsible Content -->
+                    <ul class="collapse list-unstyled ps-3" id="earningAdjustmentCollapse">
+                        <li>
+                            <a hx-get="{% url 'earning_adjustment_list' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'earning_adjustment_list' %}"
+                               href="{% url 'earning_adjustment_list' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-list"></i> Manage Earning Adjustment List
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'earning_adjustment_detail' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'earning_adjustment_detail' %}"
+                               href="{% url 'earning_adjustment_detail' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-list"></i> Manage Earning Adjustment Detail
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'earning_per_adjusted_month' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'earning_per_adjusted_month' %}"
+                               href="{% url 'earning_per_adjusted_month' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-file-earmark"></i> Earning Adjustment Per Adjusted Payroll Month
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'monthly_earning_adjustment' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'monthly_earning_adjustment' %}"
+                               href="{% url 'monthly_earning_adjustment' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-journal-text"></i> Monthly Earning Adjustment
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li class="nav-item">
+                    <!-- Collapsible Category -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse"
+                       href="#deductionAdjustmentCollapse"
+                       role="button"
+                       aria-expanded="false" aria-controls="deductionAdjustmentCollapse"
+                       onclick="event.preventDefault();">
+                        <i class="bi bi-pencil-square"></i> Deduction Adjustment
+                    </a>
+
+                    <!-- Collapsible Content -->
+                    <ul class="collapse list-unstyled ps-3" id="deductionAdjustmentCollapse">
+                        <li>
+                            <a hx-get="{% url 'deduction_adjustment_list' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'deduction_adjustment_list' %}"
+                               href="{% url 'deduction_adjustment_list' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-list"></i> Manage Deduction Adjustment List
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'deduction_adjustment_detail' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'deduction_adjustment_detail' %}"
+                               href="{% url 'deduction_adjustment_detail' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-list"></i> Manage Deduction Adjustment Detail
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'deduction_per_adjusted_month' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'deduction_per_adjusted_month' %}"
+                               href="{% url 'deduction_per_adjusted_month' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-file-earmark"></i> Deduction Adjustment Per Adjusted Payroll Month
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'monthly_deduction_adjustment' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'monthly_deduction_adjustment' %}"
+                               href="{% url 'monthly_deduction_adjustment' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-journal-text"></i> Monthly Deduction Adjustment
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li class="nav-item">
+                    <!-- Collapsible Category -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse" href="#severancePayCollapse"
+                       role="button"
+                       aria-expanded="false" aria-controls="severancePayCollapse" onclick="event.preventDefault();">
+                        <i class="bi bi-shield-lock"></i> Severance Pay
+                    </a>
+
+                    <!-- Collapsible Content -->
+                    <ul class="collapse list-unstyled ps-3" id="severancePayCollapse">
+                        <li>
+                            <a hx-get="{% url 'severance-pay-list' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'severance-pay-list' %}"
+                               href="{% url 'severance-pay-list' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-list"></i> Manage Severance Pay List
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'severance_pay_summary' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'severance_pay_summary' %}"
+                               href="{% url 'severance_pay_summary' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-file-earmark"></i> Severance Pay Summary
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'severance_pay_journal_entry' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'severance_pay_journal_entry' %}"
+                               href="{% url 'severance_pay_journal_entry' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-journal-text"></i> Severance Pay Journal Entry
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li class="nav-item">
+                    <!-- Collapsible Category -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse"
+                       href="#combinedPersonnelPayrollCollapse"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="combinedPersonnelPayrollCollapse"
+                       onclick="event.preventDefault();">
+                        <i class="bi bi-calculator"></i> Combined Personnel Payroll Summary
+                    </a>
+
+                    <!-- Collapsible Content -->
+                    <ul class="collapse list-unstyled ps-3" id="combinedPersonnelPayrollCollapse">
+                        <li>
+                            <a
+                                    hx-get="{% url 'combined_personnel_detail' %}"
+                                    hx-target="#full-page-container"
+                                    hx-swap="innerHTML"
+                                    hx-trigger="click"
+                                    hx-push-url="{% url 'combined_personnel_detail' %}"
+                                    href="{% url 'combined_personnel_detail' %}"
+                                    class="nav-link text-white d-flex align-items-center gap-2"
+                            >
+                                <i class="bi bi-person-lines-fill fs-5"></i>
+                                <span>Combined Personnel Detail</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_payroll' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_payroll' %}"
+                               href="{% url 'combined_personnel_payroll' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-cash-stack"></i> Combined Personnel Payroll
+                            </a>
+                        </li>
+
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_adjustment' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_adjustment' %}"
+                               href="{% url 'combined_personnel_adjustment' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-sliders"></i> Combined Personnel Adjustment
+                            </a>
+                        </li>
+
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_total' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_total' %}"
+                               href="{% url 'combined_personnel_total' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-calculator"></i> Combined Personnel Total
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_expense' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_expense' %}"
+                               href="{% url 'combined_personnel_expense' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-credit-card-2-back"></i> Combined Personnel Expense
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_net_income' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_net_income' %}"
+                               href="{% url 'combined_personnel_net_income' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-currency-exchange"></i> Combined Net Income
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_employment_income_tax' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_employment_income_tax' %}"
+                               href="{% url 'combined_personnel_employment_income_tax' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-percent"></i> Combined Employment Income Tax
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'combined_personnel_pension' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_personnel_pension' %}"
+                               href="{% url 'combined_personnel_pension' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-piggy-bank"></i> Combined Employee Pension
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+
+                <li class="nav-item">
+                    <!-- Collapsible Category -->
+                    <a class="nav-link text-white bg-primary" data-bs-toggle="collapse"
+                       href="#combinedPayrollDetailCollapse"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="combinedPayrollDetailCollapse"
+                       onclick="event.preventDefault();">
+                        <i class="bi bi-calculator"></i> Combined Payroll Detail Reports
+                    </a>
+
+                    <!-- Collapsible Content -->
+                    <ul class="collapse list-unstyled ps-3" id="combinedPayrollDetailCollapse">
+
+
+                        <li>
+                            <a hx-get="{% url 'combined_monthly_detail' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_monthly_detail' %}"
+                               href="{% url 'combined_monthly_detail' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-calendar-month"></i> Combined Monthly Payroll Detail
+                            </a>
+                        </li>
+
+                        <li>
+                            <a hx-get="{% url 'combined_monthly_summary' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_monthly_summary' %}"
+                               href="{% url 'combined_monthly_summary' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-calendar-month"></i> Combined Monthly Payroll Summary
+                            </a>
+                        </li>
+
+                        <li>
+                            <a hx-get="{% url 'combined_monthly_graph' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_monthly_graph' %}"
+                               href="{% url 'combined_monthly_graph' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-calendar-month"></i> Combined Monthly Payroll Graph
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'combined_yearly_detail' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_yearly_detail' %}"
+                               href="{% url 'combined_yearly_detail' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-calendar-year"></i> Combined Yearly Payroll Detail
+                            </a>
+                        </li>
+                        <li>
+                            <a hx-get="{% url 'combined_yearly_summary' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'combined_yearly_summary' %}"
+                               href="{% url 'combined_yearly_summary' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-calendar-month"></i> Combined Yearly Payroll Summary
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+                <li class="nav-item">
+                    <a hx-get="{% url 'absence_deduction_list' %}"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-trigger="click"
+                       hx-push-url="{% url 'absence_deduction_list' %}"
+                       href="{% url 'absence_deduction_list' %}"
+                       class="nav-link text-white">
+                        <i class="bi bi-x-circle"></i> Absence Deduction
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a hx-get="{% url 'university_cost-sharing_list' %}"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-trigger="click"
+                       hx-push-url="{% url 'university_cost-sharing_list' %}"
+                       href="{% url 'university_cost-sharing_list' %}"
+                       class="nav-link text-white">
+                        <i class="bi bi-bag"></i> University Cost Sharing
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-white">
+                        <i class="bi bi-gear"></i> Settings
+                    </a>
+                </li>
+                <!-- Example single primary button -->
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        Action
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for ppc in payroll_processing_by_months %}
+                        <li><a class="dropdown-item" href="{% url 'payroll_processing_by_month' ppc.id %}">{{
+                            ppc.payroll_month }}</a></li>
+                        {% endfor %}
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#">Separated link</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <li>
+                        <a class="nav-link text-white"
+                           href="{% url 'announcement_list' %}"
+                           hx-get="{% url 'announcement_list' %}"
+                           hx-target="#full-page-container"
+                           hx-swap="innerHTML"
+                           hx-trigger="click"
+                           hx-push-url="{% url 'announcement_list' %}"
+
+                        >
+                            <i class="bi bi-clipboard-data"></i> Latest Announcements
+                        </a>
+                    </li>
+
+                </div>
+
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+
+                {% else %}
+
+                <li><a class="btn btn-primary mb-2" href="{% url 'register' %}">Register</a></li>
+
+                <li><a class="btn btn-primary mb-2" href="{% url 'login' %}">Login</a></li>
+
+                {% endif %}
+
+                <h2>Welcome, {{ user.username }}!</h2>
+                <p>This is your dashboard. Use the navigation above to access your profile, payroll and other
+                    compensation.</p>
+
+            </ul>
+
+        </div>
+
+        <!-- Page Content -->
+        <div id="page-content-wrapper" class="w-100">
+            <nav class="navbar navbar-expand-lg navbar-light bg-info">
+                <div class="container-fluid">
+                    <button class="btn btn-outline-secondary" id="menu-toggle">☰</button>
+                    <div class="d-flex ml-auto">
+                        <button class="btn btn-outline-secondary">Logout</button>
+                    </div>
+                </div>
+            </nav>
+            <div class="container-fluid p-2 w-100" style="overflow: auto;">
+
+                <h2>Welcome to the Dashboard</h2>
+
+                <!-- content start here -->
+                {% block content %}
+
+                {% endblock %}
+                <!-- content end here -->
+
+            </div>
+        </div>
+        <!--    page content-->
+    </div>
+
+    <!--    start footer-->
+
+    <div class="bg-dark text-light w-100">
+        <div class="container">
+            <hr class="bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <p class="mb-0 small">&copy; 2024 YourCompany. All Rights Reserved.</p>
+                <p class="mb-0 small">
+                    <a href="/privacy-policy" class="text-light text-decoration-none">Privacy Policy</a> |
+                    <a href="/terms" class="text-light text-decoration-none">Terms of Service</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!--end footer  -->
+    <!-- Bootstrap 5 JS CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <script src="{% static 'compensation_payroll/js/print_payroll_payslip.js' %}"></script>
+    <script src="{% static 'compensation_payroll/js/print_common.js' %}"></script>
+    <script src="{% static 'compensation_payroll/js/print_combined_detail.js' %}"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+            integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+            integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+            crossorigin="anonymous"></script>
+    <script>
+        // Toggle Sidebar
+        document.getElementById('menu-toggle').addEventListener('click', function () {
+        document.getElementById('sidebar').classList.toggle('d-none');
+        });
+
+         document.body.addEventListener('htmx:configRequest', function (event) {
+         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+         event.detail.headers['X-CSRFToken'] = csrfToken;
+         });
+
+
+    </script>
+</div>
+</body>
+
+</html>

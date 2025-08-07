@@ -1,0 +1,68 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+
+    <!-- Header Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h5 class="mb-3">Monthly Deduction Adjustment</h5>
+
+        <a href="{% url 'export_monthly_deduction_adjustment_to_excel' %}" class="btn btn-success btn-sm py-1 px-2">
+            Export Monthly Deduction Adjustment to Excel
+        </a>
+
+
+        <form
+                method="get"
+                action="{% url 'monthly_deduction_adjustment' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'monthly_deduction_adjustment' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search monthly deduction..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm table-striped">
+            <thead class="table-light">
+            <tr>
+                <th>Record Month</th>
+                <th>Personnel ID</th>
+                <th>First Name</th>
+                <th>Father Name</th>
+                <th>Last Name</th>
+                <th>Monthly Adjusted Deduction</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in monthly_deduction_adjustment %}
+            <tr>
+                <td>{{ item.record_month__payroll_month__payroll_month }}</td>
+                <td>{{ item.record_month__personnel_full_name__personnel_id }}</td>
+                <td>{{ item.record_month__personnel_full_name__first_name }}</td>
+                <td>{{ item.record_month__personnel_full_name__father_name }}</td>
+                <td>{{ item.record_month__personnel_full_name__last_name }}</td>
+                <td>{{ item.monthly_adjusted_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No monthly deduction Adjustment found.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

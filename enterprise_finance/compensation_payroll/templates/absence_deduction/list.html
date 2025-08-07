@@ -1,0 +1,120 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+
+<div class="container">
+    <div class="card">
+        <!-- Form Section -->
+        <div class="col-md-12 mb-4">
+            <div class="p-3 border rounded shadow-lg" id="form-container">
+                <h4>Absence Deduction Form</h4>
+                <h4>
+                    {% if edit_mode %}
+                    Update Absence Deduction for: {{ editing_absence_deduction.monthly_salary }} monthly salary
+                    {% else %}
+                    Create Absence Deduction
+                    {% endif %}
+                </h4>
+                <!-- Display Form Error Messages -->
+                {% for message in messages %}
+                <p style="color: red;">{{ message }}</p>
+                {% endfor %}
+                <form
+                        method="POST"
+                        hx-post="{% if form.instance.pk %}{% url 'update_absence_deduction' form.instance.pk %}{% else %}{% url 'create_absence_deduction' %}{% endif %}"
+                        hx-target="#full-page-container"
+                        hx-swap="innerHTML"
+                >
+                    {% csrf_token %}
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field in form %}
+                            {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <!-- Form Layout: Horizontal with custom fields -->
+                    <div class="form-row d-flex flex-wrap justify-content-between">
+                        {% for field in form %}
+                            <div class="form-group col-md-6 col-sm-12 mb-4">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger">
+                                        {{ field.errors|striptags }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <!-- Add button placed within the form row -->
+                        <div class="form-group col-md-6 col-sm-12 mb-4">
+                            <button class="btn btn-dark w-100">
+                                {% if form.instance.id %}Update{% else %}Add{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Deductions List Section -->
+        <div class="card mb-4">
+            <div class="table-responsive col-md-12" style="max-height: 70vh; overflow-y: auto;">
+                <div style="overflow-x: auto; max-width: 100%;">
+                    <table class="table table-success table-striped-columns" style="width: 100%;">
+                        <thead>
+                        <tr>
+                            <th>Monthly Salary</th>
+                            <th>Absence Days</th>
+                            <th>Absence Deduction Amount</th>
+                            <th>Remaining Salary</th>
+                            <th>Update</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ad in page_obj %}
+                        <tr>
+                            <td>{{ ad.monthly_salary }}</td>
+                            <td>{{ ad.absence_days }}</td>
+                            <td>{{ ad.absence_deduction_amount|default:"0.00"|floatformat:2|intcomma }}</td>
+                            <td>{{ ad.remaining_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                            <td>
+                                <a class="btn btn-warning"
+                                   hx-get="{% url 'update_absence_deduction' ad.pk %}"
+                                   hx-trigger="click"
+                                   hx-target="#full-page-container"
+                                   hx-swap="outerHTML">
+                                    Update
+                                </a>
+                            </td>
+                            <td>
+                                <a class="btn btn-danger"
+                                   hx-post="{% url 'delete_absence_deduction' ad.pk %}"
+                                   hx-trigger="click"
+                                   hx-target="#full-page-container"
+                                   hx-swap="innerHTML"
+                                   hx-confirm="Are you sure you want to delete this absence deduction calculation?"
+                                   href="{% url 'delete_absence_deduction' ad.pk %}">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="pagination">
+                    {% include 'pagination.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

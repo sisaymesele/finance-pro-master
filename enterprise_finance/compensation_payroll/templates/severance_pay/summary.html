@@ -1,0 +1,88 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+
+{% block content %}
+<div style="display: flex; justify-content: center; align-items: center;">
+
+</div>
+
+<div class="container d-flex flex-column align-items-center m-4">
+    <h2 class="mb-3 text-center">Severance Pay Summary</h2>
+
+    <!-- Aggregated by Year-Month -->
+    <div class="card bg-light p-4 mt-4 w-75">
+        <h3 class="text-center card-title">Severance Pay Summary for Each Month</h3>
+
+        {% for summary in severance_summary_month_year %}
+        <div class="table-responsive col-md-12" id="month-severance-summary-{{ summary.id }}">
+            <h4>Severance Pay Summary for {{ summary.month }} - {{ summary.year }}</h4>
+            <hr>
+            <table class="table table-bordered table-striped table-sm">
+                <tbody>
+                <tr>
+                    <td class="fw-bold">Total Gross Severance:</td>
+                    <td>{{ summary.total_gross_severance|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Total Employment Income Tax from Severance Pay:</td>
+                    <td>{{ summary.total_employment_income_tax_from_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Total Net Severance Pay:</td>
+                    <td>{{ summary.total_net_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Print Button for Monthly Summary -->
+        <div class="m-2 d-flex justify-content-center align-items-center">
+            <button class="btn btn-primary mt-2"
+                    onclick="printCommon('month-severance-summary-{{ summary.id }}')">
+                Save or Print Summary for {{ summary.month }} {{ summary.year }}
+            </button>
+
+        </div>
+
+        {% endfor %}
+    </div>
+
+    <!-- Aggregated by Year Only -->
+    <div class="card bg-light p-4 mt-4 w-75">
+        <h4 class="text-center card-title">Severance Pay Summary for Each Year Aggregate</h4>
+
+        {% for summary in severance_summary_year %}
+        <div class="table-responsive col-md-12" id="year-severance-summary-{{ summary.id }}">
+            <h4>Severance Pay Aggregate Summary for {{ summary.year }}</h4>
+            <table class="table table-bordered table-striped table-sm">
+                <tbody>
+                <tr>
+                    <td class="fw-bold">Total Gross Severance:</td>
+                    <td>{{ summary.total_gross_severance|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Total Employment Income Tax from Severance Pay:</td>
+                    <td>{{ summary.total_employment_income_tax_from_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold">Total Net Severance Pay:</td>
+                    <td>{{ summary.total_net_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <button class="btn btn-success mt-2"
+                    onclick="printCommon('year-severance-summary-{{ summary.id }}')">
+                Save or Print Summary for {{ summary.year }}
+            </button>
+        </div>
+
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}

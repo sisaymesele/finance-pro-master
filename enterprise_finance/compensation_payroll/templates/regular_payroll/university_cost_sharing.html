@@ -1,0 +1,46 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+
+{% block content %}
+
+<div class="container m-2">
+    {% if university_cost_shares %}
+    <div class="table-responsive col-md-12" id="university-cost-share">
+        <h4 class="text-center">University Cost Sharing Management</h4>
+        <table class="table table-bordered table-striped table-sm">
+            <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Father Name</th>
+                <th>Last Name</th>
+                <th>Debt</th>
+                <th>Paid</th>
+                <th>Remaining</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for c in university_cost_shares %}
+            <tr>
+                <td>{{ c.personnel_full_name__first_name }}</td>
+                <td>{{ c.personnel_full_name__father_name }}</td>
+                <td>{{ c.personnel_full_name__last_name }}</td>
+                <td>{{ c.university_cost_sharing_debt|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ c.sum_cost_sharing_payed|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ c.remaining_cost_sharing|default:"0.00"|floatformat:2|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <p>No personnels with university cost sharing information to display.</p>
+    {% endif %}
+    <div class="mt-4" style="width: 100%;">
+        <button class="btn btn-success" onclick="printCommon('university-cost-share')">Print</button>
+    </div>
+</div>
+
+{% endblock %}

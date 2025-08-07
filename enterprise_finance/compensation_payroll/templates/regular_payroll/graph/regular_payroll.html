@@ -1,0 +1,14 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+
+{% block content %}
+ <div class="container">
+        <h3>Regular Payroll Graphical Report</h3>
+        <!-- Render the single graph with all months -->
+        <div id="payroll-graph">
+            {{ chart_json|safe }}
+        </div>
+    </div>
+{% endblock %}

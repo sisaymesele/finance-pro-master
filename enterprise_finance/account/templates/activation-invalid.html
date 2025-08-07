@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Activate Invalid{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 40vh;">
+    <div class="text-center">
+        <h2 class="text-danger">Activation link is invalid!</h2>
+        <p>
+            Please ensure you used the correct activation link or
+            <a href="{% url 'register' %}">register again</a>.
+        </p>
+    </div>
+</div>
+{% endblock %}

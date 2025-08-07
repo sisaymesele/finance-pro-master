@@ -1,0 +1,187 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <!-- Page Header -->
+    <div class="row align-items-center mb-4 g-3">
+        <div class="col-12 col-lg-4 text-center text-lg-start">
+            <h3 class="mb-0">Combined Personnel Payroll Detail</h3>
+        </div>
+
+        <!-- Search -->
+        <div class="col-12 col-lg-4">
+            <form method="get"
+                  action="{% url 'combined_personnel_detail' %}"
+                  hx-get="{% url 'combined_personnel_detail' %}"
+                  hx-target="#full-page-container"
+                  hx-trigger="keyup changed delay:800ms from:input[name='search']"
+                  class="d-flex"
+            >
+                <input type="text"
+                       name="search"
+                       class="form-control me-2"
+                       placeholder="Search..."
+                       value="{{ search_query|default_if_none:'' }}">
+                <button class="btn btn-primary" type="submit">Search</button>
+            </form>
+        </div>
+
+        <!-- Export Button -->
+        <div class="col-12 col-lg-4 text-center text-lg-end">
+            <a href="{% url 'export_combined_personnel_detail' %}{% if search_query %}?search={{ search_query }}{% endif %}"
+               class="btn btn-success w-100 w-lg-auto">
+                Export to Excel
+            </a>
+        </div>
+    </div>
+
+    {% if page_obj %}
+        {% for item in payroll_data %}
+            <!-- Payroll Card -->
+            <div class="card shadow-sm mb-5 border-primary mx-auto" style="max-width: 1160px;" id="combined_personnel_payslip_{{ item.payroll.id }}">
+                <div class="card-header bg-primary text-white fw-bold">
+                    Combined Payslip For {{ item.payroll.personnel_full_name }} | {{ item.payroll.payroll_month }}
+                </div>
+
+                <div class="card-body px-4">
+                    <div class="row g-4">
+                        <!-- LEFT COLUMN -->
+                        <div class="col-md-8 pe-md-4 border-end">
+                            <!-- Regular Payroll -->
+                            <div>
+                                <h5 class="text-primary border-bottom pb-1">Regular Payroll</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered table-striped">
+                                        <thead class="table-light">
+                                            <tr><th>Component</th><th class="text-end">Amount</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for key, val in item.regular_item_by_component.items %}
+                                                {% if val %}
+                                                <tr>
+                                                    <td>{{ key }}</td>
+                                                    <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                                </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <tr><td>Employee Pension</td><td class="text-end">{{ item.regular_totals.employee_pension|floatformat:2|intcomma }}</td></tr>
+                                            <tr><td>Employer Pension</td><td class="text-end">{{ item.regular_totals.employer_pension|floatformat:2|intcomma }}</td></tr>
+                                            <tr><td>Employment Income Tax</td><td class="text-end">{{ item.regular_totals.employment_income_tax|floatformat:2|intcomma }}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Earning Adjustment -->
+                            {% if item.show_earning %}
+                            <div>
+                                <h5 class="text-success border-bottom pb-1 mt-4">Earning Adjustment</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered table-striped">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Component</th>
+                                                <th class="text-end">Total</th>
+                                                <th class="text-end">Taxable</th>
+                                                <th class="text-end">Non-Taxable</th>
+                                                <th class="text-end">Employee Pension</th>
+                                                <th class="text-end">Employer Pension</th>
+                                                <th class="text-end">Total Pension</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for component, amounts in item.earning_adj_by_component.items %}
+                                                {% if amounts.earning_amount %}
+                                                <tr>
+                                                    <td>{{ component }}</td>
+                                                    <td class="text-end">{{ amounts.earning_amount|floatformat:2|intcomma }}</td>
+                                                    <td class="text-end">{{ amounts.taxable|floatformat:2|intcomma }}</td>
+                                                    <td class="text-end">{{ amounts.non_taxable|floatformat:2|intcomma }}</td>
+                                                    <td class="text-end">{{ amounts.employee_pension_contribution|floatformat:2|intcomma }}</td>
+                                                    <td class="text-end">{{ amounts.employer_pension_contribution|floatformat:2|intcomma }}</td>
+                                                    <td class="text-end">{{ amounts.total_pension|floatformat:2|intcomma }}</td>
+                                                </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Deduction Adjustment -->
+                            {% if item.show_deduction %}
+                            <div>
+                                <h5 class="text-danger border-bottom pb-1 mt-4">Deduction Adjustment</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered table-striped">
+                                        <thead class="table-light">
+                                            <tr><th>Component</th><th class="text-end">Amount</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for key, val in item.deduction_adj_by_component.items %}
+                                                {% if val %}
+                                                <tr>
+                                                    <td>{{ key }}</td>
+                                                    <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                                </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- RIGHT COLUMN: Summary -->
+                        <div class="col-md-4">
+                            <div>
+                                <h5 class="text-dark border-bottom pb-1">Total Summary</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-bordered table-striped">
+                                        <thead class="table-light">
+                                            <tr><th>Component</th><th class="text-end">Amount</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="table-info"><td>Taxable Gross Pay</td><td class="text-end">{{ item.totals.taxable_gross|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-info"><td>Non-Taxable Gross Pay</td><td class="text-end">{{ item.totals.non_taxable_gross|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-info"><td>Total Gross Pay</td><td class="text-end">{{ item.totals.gross_pay|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-warning"><td>Total Pensionable</td><td class="text-end">{{ item.totals.pensionable|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-warning"><td>Employee Pension</td><td class="text-end">{{ item.totals.employee_pension|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-warning"><td>Employer Pension</td><td class="text-end">{{ item.totals.employer_pension|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-warning"><td>Total Pension</td><td class="text-end">{{ item.totals.total_pension|floatformat:2|intcomma }}</td></tr>
+                                            <tr><td>Income Tax</td><td class="text-end">{{ item.totals.employment_income_tax|floatformat:2|intcomma }}</td></tr>
+                                            <tr><td>Total Deduction</td><td class="text-end">{{ item.totals.deduction|floatformat:2|intcomma }}</td></tr>
+                                            <tr><td>Total Expense</td><td class="text-end">{{ item.totals.expense|floatformat:2|intcomma }}</td></tr>
+                                            <tr class="table-success fw-bold"><td>Final Net Pay</td><td class="text-end"><strong>{{ item.totals.final_net_pay|floatformat:2|intcomma }}</strong></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- row -->
+                </div> <!-- card-body -->
+            </div>
+
+            <!-- Print Button -->
+            <div class="text-center mb-5 no-print">
+                <button class="btn btn-success"
+                        onclick="printCombinedDetail('combined_personnel_payslip_{{ item.payroll.id }}')">
+                    Save or Print Payslip
+                </button>
+            </div>
+        {% endfor %}
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-center">
+            {% include 'pagination.html' %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center">No payroll data found.</div>
+    {% endif %}
+</div>
+
+
+{% endblock %}

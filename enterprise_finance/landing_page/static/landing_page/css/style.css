@@ -1,0 +1,57 @@
+
+/* Container hides horizontal overflow */
+.scroll-row-container {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Inner row flexbox with animation */
+.scroll-row {
+  display: flex;
+  gap: 1rem;
+  /* Repeat content width twice for smooth looping */
+  animation: scroll-left 20s linear infinite;
+}
+
+/* Duplicate the row's content inside the scroll-row for looping */
+.scroll-row > div {
+  flex: 0 0 auto; /* Fix width per item */
+}
+
+/* Animation keyframes for left scrolling */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Duplicate rows inside each container to enable smooth loop */
+.scroll-row.duplicate {
+  margin-left: 1rem; /* small gap between loops */
+}
+
+
+.industry-slider {
+      animation: slide-left 20s linear infinite;
+      width: max-content;
+    }
+
+    .min-w-120 {
+      min-width: 120px;
+    }
+
+    @keyframes slide-left {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .industry-slider:hover {
+      animation-play-state: paused; /* optional pause on hover */
+    }

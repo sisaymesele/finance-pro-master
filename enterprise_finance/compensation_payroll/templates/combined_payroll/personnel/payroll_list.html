@@ -1,0 +1,131 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+        <h2 class="mb-4">Combined Personnel Payroll Summary</h2>
+
+        <!-- Search Form -->
+        <form
+                method="get"
+                action="{% url 'combined_personnel_payroll' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'combined_personnel_payroll' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search combined payroll list..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+        <!-- Export Button -->
+        <a href="{% url 'export_combined_personnel_list' %}" class="btn btn-success mb-3">
+            Export Combined Personnel List to Excel
+        </a>
+
+
+    </div>
+
+
+    {% if payroll_data %}
+    {% for row in payroll_data %}
+    {% with r=row.regular_totals %}
+    {% with a=row.earning_adjustment_item %}
+    {% with c=row.combined_adjustment %}
+    {% with t=row.totals %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <strong>{{ row.payroll.personnel_full_name }}</strong> — {{ row.payroll.payroll_month }}
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped mb-0 align-middle">
+                    <thead class="table-light text-center">
+                    <tr>
+                        <th class="text-start">Type</th>
+                        <th>Taxable Gross</th>
+                        <th>Non-Taxable Gross</th>
+                        <th>Total Gross</th>
+                        <th>Pensionable</th>
+                        <th>Employee Pension</th>
+                        <th>Employer Pension</th>
+                        <th>Total Pension</th>
+                        <th>Employment Income Tax</th>
+                        <th>Total Deduction</th>
+                        <th>Net Pay</th>
+                        <th>Total Expense</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="text-start fw-semibold">Regular</td>
+                        <td>{{ r.taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.non_taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.pensionable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.employee_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.employer_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td class="fw-bold text-success">{{ r.net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ r.expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr class="table-warning">
+                        <td class="text-start fw-semibold">Adjustment</td>
+                        <td>{{ a.taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.non_taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.adjusted_pensionable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.employee_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.employer_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ c.total_adjustment_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td class="fw-bold text-success">{{ c.net_monthly_adjustment|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ a.expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr class="table-success">
+                        <td class="text-start fw-semibold">Total</td>
+                        <td>{{ t.taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.non_taxable_gross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.pensionable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.employee_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.employer_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td class="fw-bold text-success">{{ t.final_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ t.expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endwith %}
+    {% endfor %}
+
+    <!-- Pagination -->
+    <div id="pagination">
+        {% include 'pagination.html' %}
+    </div>
+
+    {% else %}
+    <div class="alert alert-warning text-center">No payroll data available.</div>
+    {% endif %}
+</div>
+{% endblock %}

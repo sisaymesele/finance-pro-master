@@ -1,0 +1,22 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div id="pagination" class="container-fluid d-flex justify-content-center">
+        {% if page_obj.has_previous %}
+        <a class="btn btn-outline-primary me-2" href="?page=1" hx-get="?page=1" hx-target="#full-page-container"
+           hx-swap="innerHTML">First</a>
+        <a class="btn btn-outline-primary me-2" href="?page={{ page_obj.previous_page_number }}"
+           hx-get="?page={{ page_obj.previous_page_number }}" hx-target="#full-page-container" hx-swap="innerHTML">Previous</a>
+        {% endif %}
+
+        <span class="navbar-text mx-3">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+        <a class="btn btn-outline-primary me-2" href="?page={{ page_obj.next_page_number }}"
+           hx-get="?page={{ page_obj.next_page_number }}" hx-target="#full-page-container" hx-swap="innerHTML">Next</a>
+        <a class="btn btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}"
+           hx-get="?page={{ page_obj.paginator.num_pages }}" hx-target="#full-page-container"
+           hx-swap="innerHTML">Last</a>
+        {% endif %}
+    </div>
+</nav>

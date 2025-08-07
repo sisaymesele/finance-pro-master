@@ -1,0 +1,246 @@
+{% extends 'dashboard.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'export_combined_monthly_summary_to_excel' %}" class="btn btn-success mb-3">
+            Export Monthly Payroll Summary to Excel
+        </a>
+    </div>
+
+    <h1 class="mb-4 text-center">Monthly Payroll Summary</h1>
+
+    {% if page_obj %}
+    {% for item in page_obj %}
+    <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Monthly Payroll Summary For {{ item.month }}</h3>
+            <!-- Collapse toggle button -->
+            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#combined_monthly_summary_{{ forloop.counter }}"
+                    aria-expanded="true" aria-controls="combined_monthly_summary_{{ forloop.counter }}">
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
+        </div>
+
+        <div id="combined_monthly_summary_{{ forloop.counter }}" class="collapse show card-body">
+            <h3 class="mb-2 text-center">Monthly Payroll Summary For {{ item.month }}</h3>
+            <hr class="my-4 border-2 border-primary"/>
+
+
+            <div class="row gy-4">
+
+                {% if item.regular.gross > 0 %}
+                <section class="col-12 col-md-6">
+                    <h5 class="border-bottom border-primary pb-1 text-primary">Regular</h5>
+                    <div class="bg-light p-3 rounded">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                            <tr>
+                                <th>Gross</th>
+                                <td>{{ item.regular.gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Taxable Gross</th>
+                                <td>{{ item.regular.taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Non-Taxable</th>
+                                <td>{{ item.regular.non_taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Pensionable</th>
+                                <td>{{ item.regular.pensionable|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Emp. Pension</th>
+                                <td>{{ item.regular.employee_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Empr. Pension</th>
+                                <td>{{ item.regular.employer_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total Pension</th>
+                                <td>{{ item.regular.total_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Income Tax</th>
+                                <td>{{ item.regular.employment_income_tax|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Deductions</th>
+                                <td>{{ item.regular.total_regular_deduction|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Net Pay</th>
+                                <td>{{ item.regular.net_pay|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expense</th>
+                                <td>{{ item.regular.expense|floatformat:2|intcomma }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if item.adjustment.gross > 0 %}
+                <section class="col-12 col-md-6">
+                    <h5 class="border-bottom border-warning pb-1 text-warning">Adjustment</h5>
+                    <div class="bg-light p-3 rounded">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                            <tr>
+                                <th>Gross</th>
+                                <td>{{ item.adjustment.gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Taxable Gross</th>
+                                <td>{{ item.adjustment.taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Non-Taxable</th>
+                                <td>{{ item.adjustment.non_taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Pensionable</th>
+                                <td>{{ item.adjustment.adjusted_pensionable|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Emp. Pension</th>
+                                <td>{{ item.adjustment.employee_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Empr. Pension</th>
+                                <td>{{ item.adjustment.employer_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total Pension</th>
+                                <td>{{ item.adjustment.total_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Income Tax</th>
+                                <td>{{ item.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Deductions</th>
+                                <td>{{ item.adjustment.total_adjustment_deduction|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expense</th>
+                                <td>{{ item.adjustment.expense|floatformat:2|intcomma }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {% endif %}
+
+                {% if item.severance.gross > 0 %}
+                <section class="col-12 col-md-6">
+                    <h5 class="border-bottom border-danger pb-1 text-danger">Severance</h5>
+                    <div class="bg-light p-3 rounded">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                            <tr>
+                                <th>Gross</th>
+                                <td>{{ item.severance.gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Taxable Gross</th>
+                                <td>{{ item.severance.taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Income Tax</th>
+                                <td>{{ item.severance.employment_income_tax|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Deductions</th>
+                                <td>{{ item.severance.total_severance_deduction|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Net</th>
+                                <td>{{ item.severance.net|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expense</th>
+                                <td>{{ item.severance.expense|floatformat:2|intcomma }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {% endif %}
+
+                <section class="col-12 col-md-6">
+                    <h5 class="border-bottom border-success pb-1 text-success">Total</h5>
+                    <div class="bg-light p-3 rounded">
+                        <table class="table table-sm mb-0">
+                            <tbody>
+                            <tr>
+                                <th>Gross</th>
+                                <td>{{ item.totals.gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Taxable Gross</th>
+                                <td>{{ item.totals.taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Non-Taxable</th>
+                                <td>{{ item.totals.non_taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Pensionable</th>
+                                <td>{{ item.totals.pensionable|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Emp. Pension</th>
+                                <td>{{ item.totals.employee_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Empr. Pension</th>
+                                <td>{{ item.totals.employer_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total Pension</th>
+                                <td>{{ item.totals.total_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Income Tax</th>
+                                <td>{{ item.totals.employment_income_tax|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Deductions</th>
+                                <td>{{ item.totals.total_deduction|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Net Pay</th>
+                                <td>{{ item.totals.final_net_pay|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expense</th>
+                                <td>{{ item.totals.expense|floatformat:2|intcomma }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div> <!-- /.row -->
+
+            <div class="d-flex justify-content-end mt-3 no-print">
+                <button class="btn btn-outline-success btn-sm"
+                        onclick="printPayrollPayslip('combined_monthly_summary_{{ forloop.counter }}')">
+                    <i class="bi bi-printer"></i> Save or Print
+                </button>
+            </div>
+        </div> <!-- /.collapse card-body -->
+    </div> <!-- /.card -->
+    {% endfor %}
+    {% else %}
+    <p class="text-center">No monthly payroll summary data available.</p>
+    {% endif %}
+</div>
+{% endblock %}

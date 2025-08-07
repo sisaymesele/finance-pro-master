@@ -1,0 +1,236 @@
+
+
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <!-- Messages -->
+    {% for message in messages %}
+    <p class="text-danger my-1">{{ message }}</p>
+    {% endfor %}
+
+    <!-- Header Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <a href="{% url 'create_earning_adjustment' %}" class="btn btn-success"
+           hx-get="{% url 'create_earning_adjustment' %}"
+           hx-trigger="click"
+           hx-target="#full-page-container"
+           hx-swap="innerHTML"
+           hx-push-url="true">
+            ➕ Create Earning Adjustment
+        </a>
+
+        <h2 class="fs-5 flex-grow-1 text-center text-md-start mb-0">Earning Adjustment List</h2>
+
+
+        <form
+                method="get"
+                action="{% url 'earning_adjustment_detail' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'earning_adjustment_detail' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search earning list..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+    </div>
+
+    {% if search_query %}
+    <p>Search results for: <strong>{{ search_query }}</strong></p>
+    {% endif %}
+
+    <!-- === Grouped by Employee + Month Summary === -->
+    {% for adjustment in monthly_earning_adjustment %}
+    {% with person_id=adjustment.record_month__personnel_full_name__personnel_id %}
+    {% with recorded_month=adjustment.record_month__payroll_month__payroll_month %}
+
+    <div class="border rounded p-3 mb-4">
+        <h4 class="fw-bold">Employee: {{ person_id }} -
+            {{ adjustment.record_month__personnel_full_name__first_name }}
+            {{ adjustment.record_month__personnel_full_name__father_name }}
+            {{ adjustment.record_month__personnel_full_name__last_name }}
+        </h4>
+        <h5>Record Month: {{ recorded_month }}</h5>
+
+        <!-- Recorded Month Earning Adjustment -->
+        <h6 class="mt-3">Recorded Month Earning Adjustment</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Record Month</th>
+                    <th>Adjusted Taxable Gross Pay Per Recorded Month</th>
+                    <th>Adjusted Non Taxable Gross Pay Per Recorded Month</th>
+                    <th>Adjusted Gross Pay Per Recorded Month</th>
+                    <th>Total Taxable Pay Per Recorded Month</th>
+                    <th>Employment Income Tax Total Per Recorded Month</th>
+                    <th>Employment Income Tax On Adjustment Per Recorded Month</th>
+<!--                    -->
+                    <th>Employee Pension Contribution Per Recorded Month</th>
+                    <th>Employer Pension Contribution Per Recorded Month</th>
+                    <th>Total Pension Per Recorded Month</th>
+<!--                    -->
+                    <th>Adjusted Deduction Per Recorded Month</th>
+                    <th>Adjusted Expense Per Recorded Month</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ adjustment.record_month__payroll_month__payroll_month }}</td>
+                    <td>{{ adjustment.recorded_month_adjusted_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_adjusted_non_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_adjusted_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_total_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_employment_income_tax_total|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_employment_income_tax_on_adjustment|default:"0.00"|floatformat:2|intcomma }}</td>
+<!--pension-->
+                    <td>{{ adjustment.recorded_month_adjusted_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_adjusted_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_adjusted_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+<!--net and expense-->
+                    <td>{{ adjustment.recorded_month_earning_adjustment_deduction_total|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ adjustment.recorded_month_adjusted_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Adjusted Payroll Months -->
+        <h6 class="mt-3">Adjusted Payroll Months</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Record Month</th>
+                    <th>Adjusted Payroll Month</th>
+                    <th class="py-1">Original</th>
+                    <th class="py-1">Gross Taxable Pay Per Adjusted Payroll Month</th>
+                    <th class="py-1">Gross Non Taxable Pay Per Adjusted Payroll Month</th>
+                    <th class="py-1">Gross Pay Per Adjusted Payroll Month</th>
+                    <th class="py-1">Total Taxable Pay Per Adjusted Payroll Month</th>
+                    <th class="py-1">Employment Income Tax Total Per Adjusted Payroll Month</th>
+                    <th class="py-1">Employment Income Tax Per Adjusted Payroll Month</th>
+<!--                  -->
+                    <th class="py-1">Employee Pension Contribution Per Adjusted Payroll Month</th>
+                    <th class="py-1">Employer Pension Contribution Per Adjusted Payroll Month</th>
+                    <th class="py-1">Total Pension Per Adjusted Payroll Month</th>
+<!--                    -->
+                    <th class="py-1">Adjusted Deduction Per Adjusted Payroll Month</th>
+                    <th class="py-1">Expense Per Adjusted Payroll Month</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in earning_per_adjusted_month %}
+                {% if item.record_month__personnel_full_name__personnel_id == person_id and item.record_month__payroll_month__payroll_month == recorded_month %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ item.record_month__payroll_month__payroll_month }}</td>
+                    <td>{{ item.payroll_needing_adjustment__payroll_month__payroll_month }}</td>
+                    <td class="text-start py-1">
+                        <span class="badge bg-warning text-dark">Gross Taxable: {{ item.payroll_needing_adjustment__regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</span>
+                        <span class="badge bg-warning text-dark">Regular Employment Income Tax: {{ item.payroll_needing_adjustment__regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</span>
+                    </td>
+                    <td class="py-1">{{ item.adjusted_month_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_total_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_employment_income_tax_total|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+<!--                    -->
+                    <td class="py-1">{{ item.adjusted_month_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+<!--                    -->
+                    <td class="py-1">{{ item.adjusted_month_total_earning_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="py-1">{{ item.adjusted_month_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Individual Entries -->
+        <h6 class="mt-3">Individual Adjustment Entries</h6>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-sm">
+                <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Record Month</th>
+                    <th>Adjusted Payroll Month</th>
+                    <th>First Name</th>
+                    <th>Father Name</th>
+                    <th>Last Name</th>
+                    <th>Component</th>
+                    <th>Earning Amount</th>
+                    <th>Taxable</th>
+                    <th>Non Taxable</th>
+                    <th>Employee Pension</th>
+                    <th>Employer Pension</th>
+                    <th>Total Pension</th>
+                    <th>Period Start</th>
+                    <th>Period End</th>
+                    <th>Months Covered</th>
+                    <th>Created At</th>
+                    <th>Updated At</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for earning in page_obj %}
+                {% if earning.record_month.personnel_full_name.personnel_id == person_id and earning.record_month.payroll_month.payroll_month == recorded_month %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ earning.record_month.payroll_month }}</td>
+                    <td>{{ earning.payroll_needing_adjustment.payroll_month }}</td>
+                    <td>{{ earning.record_month.personnel_full_name.first_name }}</td>
+                    <td>{{ earning.record_month.personnel_full_name.father_name }}</td>
+                    <td>{{ earning.record_month.personnel_full_name.last_name }}</td>
+                    <td>{{ earning.get_component_display }}</td>
+                    <td>{{ earning.earning_amount|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ earning.taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ earning.non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ earning.employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ earning.employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ earning.total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td>{{ earning.period_start }}</td>
+                    <td>{{ earning.period_end }}</td>
+                    <td>{{ earning.months_covered }}</td>
+                    <td>{{ earning.created_at }}</td>
+                    <td>{{ earning.updated_at }}</td>
+                </tr>
+                {% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% endwith %}
+    {% endwith %}
+    {% endfor %}
+
+    <!-- Pagination -->
+    <div id="pagination">
+        {% include 'pagination.html' %}
+    </div>
+
+</div>
+{% endblock %}
+
+
+
+

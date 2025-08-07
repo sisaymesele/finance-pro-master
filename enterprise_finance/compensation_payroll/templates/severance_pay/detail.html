@@ -1,0 +1,113 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+
+<div class="container" id="severance_pay_detail-print">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h4>Severance Payslip</h4>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive col-md-12">
+                <table class="table table-bordered table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th colspan="2"><h3>Severance Payslip for {{ severance_pay.month }} - {{ severance_pay.year }}</h3></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Personnel Information Section -->
+                    <tr class="table-primary">
+                        <th colspan="2" class="text-center"><h5>Personnel Information</h5></th>
+                    </tr>
+                    <tr class="table-light">
+                        <th><h5>Personnel Element</h5></th>
+                        <th><h5>Value</h5></th>
+                    </tr>
+                    <tr>
+                        <td width="40%"><strong>Personnel ID</strong></td>
+                        <td>{{ severance_pay.personnel_full_name.personnel_id }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>First Name</strong></td>
+                        <td>{{ severance_pay.personnel_full_name.first_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Father Name</strong></td>
+                        <td>{{ severance_pay.personnel_full_name.father_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Last Name</strong></td>
+                        <td>{{ severance_pay.personnel_full_name.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Start Date</strong></td>
+                        <td>{{ severance_pay.start_date }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>End Date</strong></td>
+                        <td>{{ severance_pay.end_date }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Service Years</strong></td>
+                        <td>{{ severance_pay.service_years }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Service Days</strong></td>
+                        <td>{{ severance_pay.service_days }}</td>
+                    </tr>
+
+                    <!-- Severance Details Section -->
+                    <tr class="table-primary">
+                        <th colspan="2" class="text-center"><h5>Severance Pay Details</h5></th>
+                    </tr>
+                    <tr class="table-light">
+                        <th><h5>Severance Pay Element</h5></th>
+                        <th><h5>Value</h5></th>
+                    </tr>
+                    <tr>
+                        <td><strong>Severance for Years</strong></td>
+                        <td>{{ severance_pay.severance_for_years|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Severance for Days</strong></td>
+                        <td>{{ severance_pay.severance_for_days|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Gross Severance</strong></td>
+                        <td>{{ severance_pay.gross_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Employment Income Tax fron Severance Pay</strong></td>
+                        <td>{{ severance_pay.employment_income_tax_from_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Net Severance Pay</strong></td>
+                        <td>{{ severance_pay.net_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 d-flex justify-content-center align-items-center">
+    <button class="btn btn-dark" onclick="printCommon('severance_pay_detail-print')">
+        Print Severance Payslip
+    </button>
+
+    <a
+            class="btn btn-success mx-2"
+            href="{% url 'severance-pay-list' %}"
+            hx-get="{% url 'severance-pay-list' %}"
+            hx-target="#full-page-container"
+            hx-swap="innerHTML"
+            hx-push-url="true"
+    >
+        Back to List
+    </a>
+</div>
+
+{% endblock content %}

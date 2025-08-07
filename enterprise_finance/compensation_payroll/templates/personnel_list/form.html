@@ -1,0 +1,67 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'personnel_list' %}"
+       class="btn btn-secondary"
+       hx-get="{% url 'personnel_list' %}"
+       hx-target="#full-page-container"
+       hx-swap="innerHTML"
+       hx-push-url="true">
+        Back to Personnel List
+    </a>
+</div>
+
+<div class="p-3 border rounded shadow-lg" id="form-container">
+    <h4>Each Information Has Financial Impact</h4>
+    <h4>
+        {% if edit_mode %}
+        Update Personnel: {{ editing_personnel.first_name }} {{ editing_personnel.father_name }} {{ editing_personnel.last_name }}
+        {% else %}
+        Create Personnel
+        {% endif %}
+    </h4>
+
+    <form method="POST"
+          {% if edit_mode %}
+          hx-post="{% url 'update_personnel' form.instance.pk %}"
+          {% else %}
+          hx-post="{% url 'create_personnel' %}?next={{ request.GET.next|default:''|urlencode }}"
+          {% endif %}
+          hx-target="#full-page-container"
+          hx-swap="innerHTML"
+          hx-push-url="true">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field in form %}
+                {% for error in field.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Start 3 Column Layout -->
+        <div class="row">
+            {% for field in form %}
+            <div class="col-12 col-sm-6 col-md-3">
+                <p>
+                    {{ field.label_tag }}<br>
+                    {{ field }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <button class="btn btn-dark" type="submit">
+            {{ submit_button_text|default:"Submit" }}
+        </button>
+
+    </form>
+</div>
+{% endblock content %}

@@ -1,0 +1,195 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+
+<div class="container-fluid" id="personnel-container">
+    <!-- Display Form Error Messages -->
+    {% for message in messages %}
+    <p style="color: red;">{{ message }}</p>
+    {% endfor %}
+
+    <div>
+        <div class="row">
+            <div class="mb-3">
+                <a
+                        href="{% url 'create_personnel' %}"
+                        class="btn btn-primary"
+                        hx-get="{% url 'create_personnel' %}"
+                        hx-trigger="click"
+                        hx-target="#full-page-container"
+                        hx-swap="innerHTML"
+                        hx-push-url="true"
+                >
+                    Create Payroll Personnel
+                </a>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <!-- Export Button -->
+                <a href="{% url 'export_personnel' %}" class="btn btn-success">Export to Excel</a>
+
+                <!-- Heading -->
+                <h2 class="mb-0">Payroll Personnel List</h2>
+
+                <!-- Search Form -->
+                <form method="get"
+                      action="{% url 'personnel_list' %}"
+                      class="d-flex"
+                      hx-get="{% url 'personnel_list' %}"
+                      hx-target="#full-page-container"
+                      hx-trigger="keyup changed delay:800ms from:input[name='search']">
+                    <input type="text"
+                           name="search"
+                           class="form-control me-2"
+                           placeholder="Search personnels..."
+                           value="{{ search_query|default_if_none:'' }}">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
+
+            <!--search-->
+
+            <div class="mb-4">
+
+                <div class="table-responsive col-md-12" id="personnel_list"
+                     style="max-height: 70vh; overflow-y: auto;">
+                    <div style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-bordered table-striped table-sm">
+
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Personnel ID</th>
+                                <th>First Name</th>
+                                <th>Father Name</th>
+                                <th>Last Name</th>
+                                <th>Gender</th>
+                                <th>Email</th>
+                                <th>Country Code</th>
+                                <th>Phone</th>
+                                <th>City</th>
+                                <th>Pension Number</th>
+                                <th>Personnel TIN</th>
+                                <th>Salary</th>
+                                <th>Daily Per Diem</th>
+                                <th>University Cost Sharing Debt</th>
+                                <th>Employment Type</th>
+                                <th>Working Area</th>
+                                <th>Section</th>
+                                <th>Position Name</th>
+                                <th>Work Experience</th>
+                                <th>Working Environment</th>
+                                <th>Bank Name</th>
+                                <th>Bank Account ID</th>
+                                <th>Bank Account Type</th>
+                                <th>Registration Date</th>
+                                <th>Update</th>
+                                <th>Delete</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for personnel in page_obj %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>
+                                    <a
+                                            hx-get="{% url 'update_personnel' personnel.pk %}"
+                                            hx-trigger="click"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            href="{% url 'update_personnel' personnel.pk %}"
+                                            hx-push-url="true"
+                                    >
+                                        {{ personnel.personnel_id }}
+                                    </a>
+                                </td>
+                                <td>{{ personnel.first_name }}</td>
+                                <td>{{ personnel.father_name }}</td>
+                                <td>{{ personnel.last_name }}</td>
+                                <td>{{ personnel.gender }}</td>
+                                <td>{{ personnel.email_address }}</td>
+                                <td>{{ personnel.country_code }}</td>
+                                <td>{{ personnel.phone_number }}</td>
+                                <td>{{ personnel.city }}</td>
+                                <td>{{ personnel.pension_number }}</td>
+                                <td>{{ personnel.personnel_tin }}</td>
+                                <td>{{ personnel.basic_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ personnel.daily_per_diem|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ personnel.university_cost_sharing_debt|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ personnel.get_employment_type_display }}</td>
+                                <td>{{ personnel.get_working_area_display }}</td>
+                                <td>{{ personnel.section }}</td>
+                                <td>{{ personnel.position_name }}</td>
+                                <td>{{ personnel.work_experience }}</td>
+                                <td>{{ personnel.get_working_environment_display }}</td>
+                                <td>{{ personnel.bank_name }}</td>
+                                <td>{{ personnel.bank_account_id }}</td>
+                                <td>{{ personnel.get_bank_account_type_display }}</td>
+                                <td>{{ personnel.registration_date }}</td>
+                                <td>
+                                    <a
+                                            class="btn btn-warning"
+                                            hx-get="{% url 'update_personnel' personnel.pk %}"
+                                            hx-trigger="click"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            href="{% url 'update_personnel' personnel.pk %}"
+                                            hx-push-url="true"
+                                    >
+                                        Update
+                                    </a>
+                                </td>
+                                <td>
+                                    <a
+                                            class="btn btn-danger"
+                                            href="{% url 'delete_personnel' personnel.pk %}"
+                                            hx-get="{% url 'delete_personnel' personnel.pk %}"
+                                            hx-trigger="click"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+                                    >
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="pagination">
+                        {% include 'pagination.html' %}
+                    </div>
+                    <div id="employment-count" class="m-5">
+                        <table class="table table-striped table-bordered">
+                            <thead>
+                            <tr>
+                                <th>Employment Type</th>
+                                <th>Personnel by Employment Type</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for entry in count_by_employment %}
+                            <tr>
+                                <td>{{ entry.employment_type }}</td>
+                                <td>{{ entry.employment_count }}</td>
+                            </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>Total Registered Personnel</td>
+                                <td>{{ count_total_personnels }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,263 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container my-4 d-flex flex-column align-items-center">
+
+    <!-- Header Row -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-3 w-100">
+        <h2 class="text-start">Combined Monthly Payroll Detail</h2>
+
+        <a href="{% url 'export_combined_monthly_detail_to_excel' %}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel-fill me-1"></i> Export to Excel
+        </a>
+    </div>
+
+    {% for month in page_obj %}
+    <div class="card shadow-sm border-primary mb-5 w-100 rounded-4 border-start border-3 border-primary">
+
+        <!-- Card Header with Collapse Toggle -->
+        <div class="card-header bg-primary text-white rounded-top d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Combined Monthly Payroll Detail for {{ month.month }}</h5>
+
+            <button class="btn btn-sm btn-light" type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#combined_monthly_detail_{{ forloop.counter }}"
+                    aria-expanded="true"
+                    aria-controls="combined_monthly_detail_{{ forloop.counter }}">
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
+        </div>
+
+        <!-- Collapse Body (start shown, remove "show" to start collapsed) -->
+        <div id="combined_monthly_detail_{{ forloop.counter }}" class="collapse show">
+            <div class="card-body">
+
+                <h3 class="mb-0 text-center">Combined Monthly Payroll Detail for {{ month.month }}</h3>
+                <hr class="my-4 border-2 border-primary"/>
+
+                <div class="row gx-4">
+
+                    <!-- Left Side: Payroll Details -->
+                    <div class="col-md-8 pe-md-4 border-end">
+
+                        {% if month.regular_item_by_component and month.regular_item_by_component.values|length > 0 %}
+                        <h6 class="mb-3 text-primary fw-semibold">Regular Payroll Details</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-bordered table-hover align-middle">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th class="text-start">Component</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for key, val in month.regular_item_by_component.items %}
+                                    {% if val %}
+                                    <tr>
+                                        <td>{{ key }}</td>
+                                        <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                    <tr class="table-secondary fw-semibold">
+                                        <td>Employee Pension</td>
+                                        <td class="text-end">{{ month.regular.employee_pension|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr class="table-secondary fw-semibold">
+                                        <td>Employer Pension</td>
+                                        <td class="text-end">{{ month.regular.employer_pension|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr class="table-secondary fw-semibold">
+                                        <td>Employment Income Tax</td>
+                                        <td class="text-end">{{ month.regular.employment_income_tax|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% if month.show_earning %}
+                        <h6 class="mb-3 text-success fw-semibold">Earning Adjustments</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-bordered table-hover align-middle">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Component</th>
+                                        <th class="text-end">Earning Amount</th>
+                                        <th class="text-end">Taxable</th>
+                                        <th class="text-end">Non-Taxable</th>
+                                        <th class="text-end">Employee Pension</th>
+                                        <th class="text-end">Employer Pension</th>
+                                        <th class="text-end">Total Pension</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for comp, vals in month.earning_adj_by_component.items %}
+                                    {% if vals.earning_amount %}
+                                    <tr>
+                                        <td>{{ comp }}</td>
+                                        <td class="text-end">{{ vals.earning_amount|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ vals.taxable|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ vals.non_taxable|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ vals.employee_pension_contribution|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ vals.employer_pension_contribution|floatformat:2|intcomma }}</td>
+                                        <td class="text-end">{{ vals.total_pension|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% if month.show_deduction %}
+                        <h6 class="mb-3 text-danger fw-semibold">Deduction Adjustments</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-bordered table-hover align-middle">
+                                <thead class="table-danger">
+                                    <tr>
+                                        <th>Component</th>
+                                        <th class="text-end">Deduction Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for comp, val in month.deduction_adj_by_component.items %}
+                                    {% if val %}
+                                    <tr>
+                                        <td>{{ comp }}</td>
+                                        <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% with s=month.severance %}
+                        {% if s.taxable_gross or s.gross or s.employment_income_tax or s.total_severance_deduction or s.net or s.expense %}
+                        <h6 class="mb-3 text-info fw-semibold">Severance Pay</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-bordered table-hover align-middle">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th>Component</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Taxable Gross</td>
+                                        <td class="text-end">{{ s.taxable_gross|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Gross</td>
+                                        <td class="text-end">{{ s.gross|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Employment Income Tax</td>
+                                        <td class="text-end">{{ s.employment_income_tax|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Severance Deduction</td>
+                                        <td class="text-end">{{ s.total_severance_deduction|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Net Severance</td>
+                                        <td class="text-end">{{ s.net|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Expense</td>
+                                        <td class="text-end">{{ s.expense|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    <!-- Right Side: Total Summary -->
+                    <div class="col-md-4 ps-md-4 sticky-md-top" style="top: 80px;">
+                        <h6 class="mb-3 fw-semibold">Total Summary</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered align-middle">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th class="text-start">Component</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Taxable Gross</td>
+                                        <td class="text-end">{{ month.totals.taxable_gross|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Non-Taxable Gross</td>
+                                        <td class="text-end">{{ month.totals.non_taxable_gross|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Gross</td>
+                                        <td class="text-end">{{ month.totals.gross|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Pensionable</td>
+                                        <td class="text-end">{{ month.totals.pensionable|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Employee Pension</td>
+                                        <td class="text-end">{{ month.totals.employee_pension|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Employer Pension</td>
+                                        <td class="text-end">{{ month.totals.employer_pension|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Pension</td>
+                                        <td class="text-end">{{ month.totals.total_pension|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Employment Income Tax</td>
+                                        <td class="text-end">{{ month.totals.employment_income_tax|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Deduction</td>
+                                        <td class="text-end">{{ month.totals.total_deduction|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Final Net Pay</td>
+                                        <td class="text-end fw-semibold">{{ month.totals.final_net_pay|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Expense</td>
+                                        <td class="text-end">{{ month.totals.expense|floatformat:2|intcomma }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end mt-3 no-print">
+                    <button class="btn btn-outline-success btn-sm"
+                            onclick="printCombinedDetail('combined_monthly_detail_{{ forloop.counter }}')">
+                        <i class="bi bi-printer"></i> Save or Print
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% empty %}
+    <p class="text-danger text-center">No payroll data found.</p>
+    {% endfor %}
+
+    <!-- Pagination -->
+    <div class="d-flex justify-content-center mt-4 w-100">
+        {% include "pagination.html" %}
+    </div>
+</div>
+{% endblock %}

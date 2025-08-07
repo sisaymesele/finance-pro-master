@@ -1,0 +1,121 @@
+
+
+/* Center container and ensure it's responsive */
+.container {
+    max-width: 600px; /* Limits width for better readability */
+    width: 90%; /* Ensures responsiveness */
+    margin: 50px auto; /* Centers the form with spacing */
+    padding: 20px;
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
+}
+
+/* Minimal form field styling */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 80%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: #333;
+}
+
+/* Responsive registration class */
+.registration {
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    display: flex;
+    justify-content: center;
+}
+
+
+/* Adjust styles for smaller screens */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
+}
+
+
+/* Card styling for better UI */
+.card {
+    width: 100%;
+    border-radius: 10px;
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
+}
+
+/* Ensure the card doesn't overflow */
+.card {
+    width: 100%;
+    max-width: 100%; /* Prevents overflow */
+    overflow: hidden; /* Avoids content spilling */
+    border-radius: 10px;
+}
+
+/* Make the form fully visible */
+.form-container {
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Button full width */
+.btn {
+    display: block;
+    width: 60%;
+    padding: 0.8rem 1.2rem; /* Padding for the submit button */
+    border: none;
+    border-radius: 0.25rem;
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    font-size: 1rem;
+    cursor: pointer; /* Cursor changes to pointer when hovering */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+
+/* Fix potential scrolling issues */
+html, body {
+    overflow-x: hidden; /* Prevents horizontal scroll */
+}

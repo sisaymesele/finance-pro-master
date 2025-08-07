@@ -1,0 +1,172 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+
+<div class="container-fluid">
+    <div>
+        <!-- Display Form Messages -->
+        {% for message in messages %}
+        <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+        <!--            form message-->
+    </div>
+    <div>
+        <div class="card m-2">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                <a
+                        class="btn btn-primary"
+                        href="{% url 'create_severance_pay' %}"
+                        hx-get="{% url 'create_severance_pay' %}"
+                        hx-trigger="click"
+                        hx-target="#full-page-container"
+                        hx-swap="innerHTML"
+                        hx-push-url="true"
+                >
+                    Create Severance Pay
+                </a>
+                <h2 class="mb-2">Severance Pay List</h2>
+                <!-- Export button -->
+                <a href="{% url 'export_severance_pay_to_excel' %}" class="btn btn-success mb-2">Export to Excel</a>
+                <!--search-->
+                <form
+                        method="get"
+                        action="{% url 'severance-pay-list' %}"
+                        class="d-flex mb-3"
+                        hx-get="{% url 'severance-pay-list' %}"
+                        hx-target="#full-page-container"
+                        hx-trigger="keyup changed delay:800ms from:input[name='search']"
+                >
+                    <input
+                            type="text"
+                            name="search"
+                            class="form-control me-2"
+                            placeholder="Search severance pay..."
+                            value="{{ search_query|default_if_none:'' }}"
+                    >
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
+            <!--search-->
+
+            <div class="m-4">
+                <div style="max-height: 70vh; overflow-y: auto;">
+                    <div class="table-responsive col-md-12" style="overflow-x: auto; max-width: 100%;">
+                        <table class="table table-bordered table-striped table-sm">
+                            <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Month</th>
+                                <th>Severance Type</th>
+                                <th>Personnel ID</th>
+                                <th>First Name</th>
+                                <th>Father Name</th>
+                                <th>Last Name</th>
+                                <th>Last Week Daily Wages</th>
+                                <th>Job Start Date</th>
+                                <th>Job End Date</th>
+                                <th>Service Years</th>
+                                <th>Service Days</th>
+                                <th>Severance for Years</th>
+                                <th>Severance for Days</th>
+                                <th>Gross Severance</th>
+                                <th>Basic Salary</th>
+                                <th>Prorate Salary</th>
+                                <th>Employment Income Tax (Basic Salary)</th>
+                                <th>Total Employment Income Tax (Basic Salary)</th>
+                                <th>Employment Income Tax (Prorate Salary)</th>
+                                <th>Employment Income Tax from Severance Pay</th>
+                                <th>Net Severance Pay</th>
+                                <th>Update</th>
+                                <th>Delete</th>
+                                <th>Print Detail</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for sp in page_obj %}
+                            <tr>
+                                <td>{{ sp.year }}</td>
+                                <td>{{ sp.month }}</td>
+                                <td>{{ sp.get_severance_type_display }}</td>
+                                <td>
+                                    <a
+                                            href="{% url 'update_severance_pay' sp.pk %}"
+                                            hx-get="{% url 'update_severance_pay' sp.pk %}"
+                                            hx-trigger="click"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+
+                                    >
+                                        {{ sp.personnel_full_name.personnel_id }}
+                                    </a>
+                                </td>
+                                <td>{{ sp.personnel_full_name.first_name }}</td>
+                                <td>{{ sp.personnel_full_name.father_name }}</td>
+                                <td>{{ sp.personnel_full_name.last_name }}</td>
+                                <td>{{ sp.last_week_daily_wages }}</td>
+                                <td class="text-nowrap">{{ sp.start_date }}</td>
+                                <td class="text-nowrap">{{ sp.end_date }}</td>
+                                <td>{{ sp.service_years }}</td>
+                                <td>{{ sp.service_days }}</td>
+                                <td>{{ sp.severance_for_years|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.severance_for_days|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.gross_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.basic_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.prorate_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.employment_income_tax_from_basic_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.total_employment_income_tax_from_basic_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.employment_income_tax_from_prorate_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.employment_income_tax_from_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>{{ sp.net_severance_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                                <td>
+                                    <a
+                                            class="btn btn-warning"
+                                            href="{% url 'update_severance_pay' sp.pk %}"
+                                            hx-get="{% url 'update_severance_pay' sp.pk %}"
+                                            hx-trigger="click"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+                                    >
+                                        Update
+                                    </a>
+                                </td>
+                                <td>
+                                    <a
+                                            class="btn btn-danger"
+                                            href="{% url 'delete_severance_pay' sp.pk %}"
+                                            hx-get="{% url 'delete_severance_pay' sp.pk %}"
+                                            hx-trigger="click"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+                                    >
+                                        Delete
+                                    </a>
+                                </td>
+                                <td>
+                                    <a
+                                            href="{% url 'severance_pay_detail' sp.pk %}"
+                                            hx-get="{% url 'severance_pay_detail' sp.pk %}"
+                                            hx-target="#full-page-container"
+                                            hx-swap="innerHTML"
+                                            hx-push-url="true"
+                                    >
+                                        Print Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="pagination">
+                        {% include 'pagination.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

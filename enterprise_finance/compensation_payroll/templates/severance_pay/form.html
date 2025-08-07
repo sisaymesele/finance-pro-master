@@ -1,0 +1,104 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+
+<!-- Back Button -->
+<div class="mb-3">
+    <a href="{% url 'severance-pay-list' %}"
+       class="btn btn-secondary"
+       hx-get="{% url 'severance-pay-list' %}"
+       hx-target="#full-page-container"
+       hx-swap="innerHTML"
+       hx-push-url="true">
+        ← Back to Severance Pay List
+    </a>
+</div>
+
+<div class="container" style="width: 80%;">
+    <div class="card">
+        <div class="card-body m-4">
+            <div class="p-3 border rounded shadow-lg" id="form-container">
+                <h4>Severance Pay Form</h4>
+                <h4>{{ form_title }}</h4>
+
+                {% if form_description %}
+                <p>{{ form_description }}</p>
+                {% endif %}
+
+                <!-- Error Messages -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Form -->
+                <form method="POST"
+                      {% if form.instance.pk %}
+                      hx-post="{% url 'update_severance_pay' form.instance.pk %}"
+                      {% else %}
+                      hx-post="{% url 'create_severance_pay' %}"
+                      {% endif %}
+                      hx-target="#full-page-container"
+                      hx-swap="innerHTML"
+                      hx-push-url="true">
+
+                    {% csrf_token %}
+
+                    <!-- Custom personnel field with add button -->
+                    <div class="row mb-3 align-items-end">
+                        <div class="col-md-9">
+                            {% for field in form %}
+                            {% if field.name == 'personnel_full_name' %}
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'create_personnel' %}?next={{ current_url }}"
+                               class="btn btn-primary w-100"
+                               hx-get="{% url 'create_personnel' %}?next={{ current_url }}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-push-url="true">
+                                + Add New Personnel
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Render all other fields as paragraphs -->
+                    <div class="form-fields">
+                        {% for field in form %}
+                        {% if field.name != 'personnel_full_name' %}
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.help_text %}
+                            <p class="form-text text-muted">{{ field.help_text|striptags }}</p>
+                            {% endif %}
+
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-dark mt-3">
+                        {{ submit_button_text|default:"Submit" }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Payroll Personnel Report</h2>
+
+    {% if plot_html_section %}
+    <div class="mb-4">
+        <h3>Total Payroll Personnel by Section Type</h3>
+        <div class="card">
+            {{ plot_html_section|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if plot_html_bar %}
+    <div class="mb-4">
+        <h3>Total Payroll Personnel by Employment Type</h3>
+        <div class="card p-3">
+            {{ plot_html_bar|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if plot_html_pie %}
+    <div class="mb-4">
+        <h3>Total Payroll Personnel Percentage by Employment Type</h3>
+        <div class="card p-3">
+            {{ plot_html_pie|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if plot_html_gender %}
+    <div class="mb-4">
+        <h3>Personnels by Gender</h3>
+        <div class="card p-3">
+            {{ plot_html_gender|safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not plot_html_bar and not plot_html_pie and not plot_html_gender %}
+    <div class="alert alert-warning" role="alert">
+        No valid employment data available.
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

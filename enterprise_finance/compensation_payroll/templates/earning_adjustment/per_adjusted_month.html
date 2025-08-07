@@ -1,0 +1,106 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+<div class="container-fluid mt-3">
+    <!-- Header Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+
+        <h5 class="mb-3">Adjusted Payroll Month Earnings</h5>
+
+        <a href="{% url 'export_earning_per_adjusted_month_to_excel' %}" class="btn btn-success btn-sm py-1 px-2">
+            Export to Excel
+        </a>
+
+        <form
+                method="get"
+                action="{% url 'earning_per_adjusted_month' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'earning_per_adjusted_month' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search earning per adjusted month..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm table-striped text-end">
+            <thead class="table-light text-center">
+            <tr>
+                <th>#</th>
+                <th>Record Month</th>
+                <th>Adjusted Payroll Month</th>
+                <th>Personnel Id</th>
+                <th>First Name</th>
+                <th>Father Name</th>
+                <th>Last Name</th>
+                <th>Original Payroll (Gross/Tax)</th>
+                <th>Gross Taxable Pay Per Adjusted Payroll Month</th>
+                <th>Gross Non Taxable Pay Per Adjusted Payroll Month</th>
+                <th>Gross Pay Per Adjusted Payroll Month</th>
+                <th>Total Taxable Pay Per Adjusted Payroll Month</th>
+                <th>Employment Income Tax Total Per Adjusted Payroll Month</th>
+                <th>Employment Income Tax Per Adjusted Payroll Month</th>
+
+                <!-- Pension Fields Per Adjusted Payroll Month -->
+                <th>Employee Pension Contribution Per Adjusted Payroll Month</th>
+                <th>Employer Pension Contribution Per Adjusted Payroll Month</th>
+                <th>Total Pension Per Adjusted Payroll Month</th>
+                <!--                    net and expense-->
+                <th>Adjusted Deduction Per Adjusted Payroll Month</th>
+                <th>Adjusted Expense Per Adjusted Payroll Month</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for adjustment in earning_per_adjusted_month %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ adjustment.record_month__payroll_month__payroll_month }}</td>
+                <td>{{ adjustment.payroll_needing_adjustment__payroll_month__payroll_month }}</td>
+                <td>{{ adjustment.record_month__personnel_full_name__personnel_id }}</td>
+                <td class="text-start">{{ adjustment.record_month__personnel_full_name__first_name }}</td>
+                <td class="text-start">{{ adjustment.record_month__personnel_full_name__father_name }}</td>
+                <td class="text-start">{{ adjustment.record_month__personnel_full_name__last_name }}</td>
+                <td>
+                        <span class="badge bg-warning text-dark">
+                            Gross Taxable: {{ adjustment.payroll_needing_adjustment__regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}
+                        </span>
+                    <span class="badge bg-warning text-dark">
+                            Regular Employment Income Tax: {{ adjustment.payroll_needing_adjustment__regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}
+                        </span>
+                </td>
+                <td>{{ adjustment.adjusted_month_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ adjustment.adjusted_month_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ adjustment.adjusted_month_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ adjustment.adjusted_month_total_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ adjustment.adjusted_month_employment_income_tax_total|default:"0.00"|floatformat:2|intcomma }}
+                </td>
+                <td>{{ adjustment.adjusted_month_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                <!--                    pension-->
+                <td>{{ adjustment.adjusted_month_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}
+                </td>
+                <td>{{ adjustment.adjusted_month_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}
+                </td>
+                <td>{{ adjustment.adjusted_month_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                <!--                    net and expense-->
+                <td>{{ adjustment.adjusted_month_total_earning_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ adjustment.adjusted_month_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="18" class="text-center">No adjustments found.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

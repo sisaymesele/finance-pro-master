@@ -1,0 +1,25 @@
+
+#wrapper {
+    display: flex;
+    min-height: 100vh; /* Ensures the layout spans the full viewport height */
+    overflow: hidden; /* Prevents content overflow */
+}
+
+#sidebar {
+    width: 250px; /* Fixed width for the sidebar */
+    min-width: 250px; /* Prevents shrinking */
+    height: 150vh; /* Full-height sidebar */
+    overflow-y: auto; /* Allows vertical scrolling in the sidebar */
+}
+
+#page-content-wrapper {
+    flex-grow: 1; /* Allows the main content to fill the remaining space */
+    overflow-x: auto; /* Enables horizontal scrolling for large tables */
+    padding: 20px;
+}
+
+/* Adjustments for tables in the content */
+table {
+    width: 100%; /* Ensures the table spans its container */
+    overflow-x: auto; /* Adds horizontal scrolling for large tables */
+}

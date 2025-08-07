@@ -1,0 +1,409 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap mb-3 gap-2">    <!-- Back Button -->
+    <a class="btn btn-danger"
+       href="{% url 'payroll_month_list' %}"
+       hx-get="{% url 'payroll_month_list' %}"
+       hx-target="#full-page-container"
+       hx-swap="innerHTML"
+       hx-push-url="true"
+    >
+        ← Back to Payroll Month Selection
+    </a>
+
+    <!-- Export Button -->
+    <a href="{% url 'export_regular_payroll_to_excel' payroll_month.slug %}"
+       class="btn btn-success">
+        <i class="bi bi-file-earmark-excel"></i> Export Regular Payroll for {{ payroll_month }}
+    </a>
+</div>
+
+
+<div class="container-fluid m-4">
+    <h3>
+        {% for message in messages %}
+        <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    </h3>
+
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+        <a
+                href="{% url 'create_regular_payroll' payroll_month.slug %}"
+                class="btn btn-primary"
+                hx-get="{% url 'create_regular_payroll' payroll_month.slug %}"
+                hx-trigger="click"
+                hx-target="#full-page-container"
+                hx-swap="innerHTML"
+                hx-push-url="true"
+        >
+            Create Regular Payroll
+        </a>
+        <!-- Left: Title -->
+        <h2 class="mb-0">Regular Payroll Records for {{ payroll_month.payroll_month }}</h2>
+
+        <!-- Right: Search Form -->
+        <form method="get"
+              action="{% url 'regular_payroll_list' payroll_month.slug %}"
+              class="d-flex"
+              hx-get="{% url 'regular_payroll_list' payroll_month.slug %}"
+              hx-target="#full-page-container"
+              hx-trigger="keyup changed delay:800ms from:input[name='search']">
+
+            <input type="text"
+                   name="search"
+                   class="form-control me-2"
+                   placeholder="Search payrolls..."
+                   value="{{ search_query|default_if_none:'' }}">
+
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </form>
+    </div>
+
+    <div class="card">
+        <div class="row">
+            <div id="payroll-container" class="table-responsive col-md-12">
+                <table class="table table-bordered table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Personnel ID</th>
+                        <th>First Name</th>
+                        <th>Father Name</th>
+                        <th>Last Name</th>
+                        <th>Employment Type</th>
+                        <th>Phone Number</th>
+                        <th>City</th>
+                        <th>Position Name</th>
+                        <th>Working Area</th>
+                        <th>Pension Number</th>
+                        <th>Personnel TIN</th>
+                        <th>Working Environment</th>
+                        <!--                            fully taxable-->
+                        {% if payroll_month.use_basic_salary %}
+                        <th>Basic Salary</th>
+                        {% endif %}
+                        {% if payroll_month.use_overtime %}
+                        <th>Overtime</th>
+                        {% endif %}
+                        {% if payroll_month.use_housing_allowance %}
+                        <th>Housing Allowance</th>
+                        {% endif %}
+                        {% if payroll_month.use_position_allowance %}
+                        <th>Position Allowance</th>
+                        {% endif %}
+                        {% if payroll_month.use_commission %}
+                        <th>Commission</th>
+                        {% endif %}
+                        {% if payroll_month.use_telephone_allowance %}
+                        <th>Telephone Allowance</th>
+                        {% endif %}
+                        {% if payroll_month.use_one_time_bonus %}
+                        <th>One-Time Bonus</th>
+                        {% endif %}
+                        {% if payroll_month.use_causal_labor_wage %}
+                        <th>Causal Labor Wage</th>
+                        {% endif %}
+                        <!--                            partiall taxable-->
+                        {% if payroll_month.use_transport_home_to_office %}
+                        <th>Transport (Home to Office) Taxable</th>
+                        <th>Transport (Home to Office) Non-Taxable</th>
+                        {% endif %}
+                        {% if payroll_month.use_fuel_home_to_office %}
+                        <th>Fuel (Home to Office) Taxable</th>
+                        <th>Fuel (Home to Office) Non-taxable</th>
+                        {% endif %}
+                        {% if payroll_month.use_transport_for_work %}
+                        <th>Transport for Work Taxable</th>
+                        <th>Transport for Work Non-Taxable</th>
+                        {% endif %}
+                        {% if payroll_month.use_fuel_for_work %}
+                        <th>Fuel for Work Taxable</th>
+                        <th>Fuel for Work Non-Taxable</th>
+                        {% endif %}
+                        {% if payroll_month.use_per_diem %}
+                        <th>Per Diem Taxable</th>
+                        <th>Per Diem Non-Taxable</th>
+                        {% endif %}
+                        {% if payroll_month.use_hardship_allowance %}
+                        <th>Hardship Allowance Taxable</th>
+                        <th>Hardship Allowance Non-Taxable</th>
+                        {% endif %}
+                        <!--                            fully non taxable-->
+                        {% if payroll_month.use_public_cash_award %}
+                        <th>Public Cash Award</th>
+                        {% endif %}
+                        {% if payroll_month.use_incidental_operation_allowance %}
+                        <th>Incidental Operation Allowance</th>
+                        {% endif %}
+                        {% if payroll_month.use_medical_allowance %}
+                        <th>Medical Allowance</th>
+                        {% endif %}
+                        {% if payroll_month.use_cash_gift %}
+                        <th>Cash Gift</th>
+                        {% endif %}
+                        {% if payroll_month.use_tuition_fees %}
+                        <th>Tuition Fees</th>
+                        {% endif %}
+                        {% if payroll_month.use_personal_injury %}
+                        <th>Personal Injury</th>
+                        {% endif %}
+                        {% if payroll_month.use_child_support_payment %}
+                        <th>Child Support Payment</th>
+                        {% endif %}
+                        <!--                            deductions-->
+                        {% if payroll_month.use_charitable_donation %}
+                        <th>Charitable Donation</th>
+                        {% endif %}
+                        {% if payroll_month.use_saving_plan %}
+                        <th>Saving Plan</th>
+                        {% endif %}
+                        {% if payroll_month.use_loan_payment %}
+                        <th>Loan Payment</th>
+                        {% endif %}
+                        {% if payroll_month.use_court_order %}
+                        <th>Court Order</th>
+                        {% endif %}
+                        {% if payroll_month.use_workers_association %}
+                        <th>Workers Association</th>
+                        {% endif %}
+                        {% if payroll_month.use_personnel_insurance_saving %}
+                        <th>Personnel Insurance Saving</th>
+                        {% endif %}
+                        {% if payroll_month.use_university_cost_share_pay %}
+                        <th>University Cost Share Pay</th>
+                        {% endif %}
+                        {% if payroll_month.use_red_cross %}
+                        <th>Red Cross</th>
+                        {% endif %}
+                        {% if payroll_month.use_party_contribution %}
+                        <th>Party Contribution</th>
+                        {% endif %}
+                        {% if payroll_month.use_other_deduction %}
+                        <th>Other Deduction</th>
+                        {% endif %}
+                        <!--                            auto deduction-->
+                        <th>Regular Employment Income Tax</th>
+                        <th>Regular Employee Pension Contribution</th>
+                        <th>Regular Employer Pension Contribution</th>
+                        <th>Regular Total Pension</th>
+                        <!--                            summary-->
+                        <th>Regular Gross Taxable Pay</th>
+                        <th>Regular Gross Non-Taxable Pay</th>
+                        <th>Regular Gross Pay</th>
+                        <th>Regular Total Payroll Deduction</th>
+                        <th>Regular Net Pay</th>
+                        <th>Regular Payroll Expense</th>
+                        <!--                        -->
+                        <!--                        -->
+                        <th>Bank Name</th>
+                        <th>Bank Account ID</th>
+                        <th>Bank Account Type</th>
+                        <th>Processing Date</th>
+                        <th>Update</th>
+                        <th>Delete</th>
+                        <th>Detail</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for mp in page_obj %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            <a
+                                    hx-get="{% url 'update_regular_payroll' payroll_month.slug mp.pk %}"
+                                    hx-trigger="click"
+                                    hx-target="#full-page-container"
+                                    hx-swap="innerHTML"
+                                    href="{% url 'update_regular_payroll' payroll_month.slug mp.pk %}"
+                                    hx-push-url="true"
+                            >
+                                {{ mp.personnel_full_name.personnel_id }}
+                            </a>
+                        </td>
+                        <td>{{ mp.personnel_full_name.first_name }}</td>
+                        <td>{{ mp.personnel_full_name.father_name }}</td>
+                        <td>{{ mp.personnel_full_name.last_name }}</td>
+                        <td>{{ mp.personnel_full_name.get_employment_type_display }}</td>
+                        <td>{{ mp.personnel_full_name.phone_number }}</td>
+                        <td>{{ mp.personnel_full_name.city }}</td>
+                        <td>{{ mp.personnel_full_name.position_name }}</td>
+                        <td>{{ mp.personnel_full_name.get_working_area_display }}</td>
+                        <td>{{ mp.personnel_full_name.pension_number }}</td>
+                        <td>{{ mp.personnel_full_name.personnel_tin }}</td>
+                        <td>{{ mp.personnel_full_name.get_working_environment_display }}</td>
+                        <!--                            fully taxable-->
+                        {% if payroll_month.use_basic_salary %}
+                        <td>{{ mp.basic_salary|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_overtime %}
+                        <td>{{ mp.overtime|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_housing_allowance %}
+                        <td>{{ mp.housing_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_position_allowance %}
+                        <td>{{ mp.position_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_commission %}
+                        <td>{{ mp.commission|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_telephone_allowance %}
+                        <td>{{ mp.telephone_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_one_time_bonus %}
+                        <td>{{ mp.one_time_bonus|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_causal_labor_wage %}
+                        <td>{{ mp.causal_labor_wage|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        <!--                            partiall taxable-->
+                        {% if payroll_month.use_transport_home_to_office %}
+                        <td>{{ mp.transport_home_to_office_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.transport_home_to_office_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_fuel_home_to_office %}
+                        <td>{{ mp.fuel_home_to_office_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.fuel_home_to_office_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_transport_for_work %}
+                        <td>{{ mp.transport_for_work_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.transport_for_work_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_fuel_for_work %}
+                        <td>{{ mp.fuel_for_work_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.fuel_for_work_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_per_diem %}
+                        <td>{{ mp.per_diem_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.per_diem_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_hardship_allowance %}
+                        <td>{{ mp.hardship_allowance_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.hardship_allowance_non_taxable|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        <!--fully non taxable-->
+                        {% if payroll_month.use_public_cash_award %}
+                        <td>{{ mp.public_cash_award|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_incidental_operation_allowance %}
+                        <td>{{ mp.incidental_operation_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_medical_allowance %}
+                        <td>{{ mp.medical_allowance|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_cash_gift %}
+                        <td>{{ mp.cash_gift|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_tuition_fees %}
+                        <td>{{ mp.tuition_fees|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_personal_injury %}
+                        <td>{{ mp.personal_injury|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_child_support_payment %}
+                        <td>{{ mp.child_support_payment|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        <!--                            deductions-->
+                        {% if payroll_month.use_charitable_donation %}
+                        <td>{{ mp.charitable_donation|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_saving_plan %}
+                        <td>{{ mp.saving_plan|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_loan_payment %}
+                        <td>{{ mp.loan_payment|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_court_order %}
+                        <td>{{ mp.court_order|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_workers_association %}
+                        <td>{{ mp.workers_association|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_personnel_insurance_saving %}
+                        <td>{{ mp.personnel_insurance_saving|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_university_cost_share_pay %}
+                        <td>{{ mp.university_cost_share_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_red_cross %}
+                        <td>{{ mp.red_cross|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_party_contribution %}
+                        <td>{{ mp.party_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        {% if payroll_month.use_other_deduction %}
+                        <td>{{ mp.other_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        {% endif %}
+                        <!--                            auto deduction-->
+                        <td>{{ mp.regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <!--                            summary-->
+                        <td>{{ mp.regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <!--                            other infor-->
+                        <!--                        -->
+                        <td>{{ mp.personnel_full_name.bank_name }}</td>
+                        <td>{{ mp.personnel_full_name.bank_account_id }}</td>
+                        <td>{{ mp.personnel_full_name.get_bank_account_type_display }}</td>
+                        <td>{{ mp.processing_date }}</td>
+
+                        <td>
+                            <a
+                                    class="btn btn-warning"
+                                    href="{% url 'update_regular_payroll' payroll_month.slug mp.pk %}"
+                                    hx-get="{% url 'update_regular_payroll' payroll_month.slug mp.pk %}"
+                                    hx-trigger="click"
+                                    hx-target="#full-page-container"
+                                    hx-swap="innerHTML"
+                                    hx-push-url="true"
+                            >
+                                Update
+                            </a>
+                        </td>
+                        <td>
+                            <a
+                                    class="btn btn-danger"
+                                    href="{% url 'delete_regular_payroll' payroll_month_slug=payroll_month.slug pk=mp.pk %}"
+                                    hx-get="{% url 'delete_regular_payroll' payroll_month.slug mp.pk %}"
+                                    hx-trigger="click"
+                                    hx-target="#full-page-container"
+                                    hx-swap="innerHTML"
+                                    hx-push-url="true"
+                            >
+                                Delete
+                            </a>
+                        </td>
+                        <td>
+                            <a
+                                    hx-get="{% url 'regular_payroll_detail' payroll_month_slug=payroll_month.slug regular_payroll_pk=mp.pk %}"
+                                    hx-target="#full-page-container"
+                                    hx-swap="innerHTML"
+                                    class=""
+                                    href="{% url 'regular_payroll_detail' payroll_month_slug=payroll_month.slug regular_payroll_pk=mp.pk %}"
+                            >
+                                Print Payslip
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div id="pagination">
+                    {% include 'pagination.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

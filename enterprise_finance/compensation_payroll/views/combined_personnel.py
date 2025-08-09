@@ -11,6 +11,10 @@ from io import BytesIO
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from compensation_payroll.services.excel_export import ExportUtilityService
 
+
+
+
+
 @login_required
 def combined_personnel_detail(request):
     context = get_combined_personnel_payroll_context(request)
@@ -54,16 +58,10 @@ def combined_employee_pension(request):
     return render(request, 'combined_payroll/personnel/pension_list.html', context)
 
 
-@login_required
-def combined_personnel_detail(request):
-    context = get_combined_personnel_payroll_context(request)
-    return render(request, 'combined_payroll/personnel/detail.html', context)
 
 
 
 #common export header
-
-
 
 #detail
 def export_combined_personnel_detail(request):
@@ -131,7 +129,7 @@ def export_combined_personnel_detail(request):
 
             # Earning Adjustment Headers
             headers = ["Component", "Total", "Taxable", "Non-Taxable",
-                       "Employee Pension", "Employer Pension", "Total Pension"]
+                       "Employee Pension", "Employer Pension", "Total Pension Contribution"]
             for col_num, header in enumerate(headers, 1):
                 cell = ws.cell(row=row_num, column=col_num, value=header)
                 cell.font = header_font
@@ -155,6 +153,23 @@ def export_combined_personnel_detail(request):
                     row_num += 1
 
             row_num += 1
+
+            # Individual Adjustment Summary (like in HTML)
+            ws.cell(row=row_num, column=1, value="Earning Adjustment Income tax").font = Font(bold=True, color="7030A0")
+            row_num += 1
+
+            adjustment_summary = [
+                ("Employment Income Tax", item['earning_adjustment_item']['employment_income_tax']),
+            ]
+
+            for label, value in adjustment_summary:
+                ws.cell(row=row_num, column=1, value=label)
+                cell = ws.cell(row=row_num, column=2, value=float(value))
+                cell.number_format = money_format
+                row_num += 1
+
+            row_num += 1
+
 
         # Deduction Adjustment Section (if exists)
         if item['show_deduction']:
@@ -203,7 +218,7 @@ def export_combined_personnel_detail(request):
             ("Total Pensionable", item['totals']['pensionable']),
             ("Employee Pension", item['totals']['employee_pension']),
             ("Employer Pension", item['totals']['employer_pension']),
-            ("Total Pension", item['totals']['total_pension']),
+            ("Total Pension Contribution", item['totals']['total_pension']),
             ("Income Tax", item['totals']['employment_income_tax']),
             ("Total Deduction", item['totals']['deduction']),
             ("Total Expense", item['totals']['expense']),
@@ -250,144 +265,163 @@ def export_combined_personnel_detail(request):
 
 
 
+
 @login_required
 def export_combined_personnel_list(request):
-    context = get_combined_personnel_payroll_context(request)
-    payroll_data = context.get('payroll_data', [])
+    payroll_data = get_combined_personnel_payroll_context(request)['payroll_data']
 
     wb = Workbook()
     ws = wb.active
-    ws.title = "Combined Payroll List Report"
+    ws.title = "Combined Personnel Payroll"
 
-    # Title row (1st)
-    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=12)
-    title_cell = ws.cell(row=1, column=1)
-    title_cell.value = "Combined Personnel Payroll List"
+    # Styles
+    header_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid")
+    total_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    bold_font = Font(bold=True)
+    currency_format = '#,##0.00'
+
+    # Title row (merged across all columns)
+    ws.merge_cells('A1:P1')
+    title_cell = ws['A1']
+    title_cell.value = "Combined Personnel Payroll Summary"
     title_cell.font = Font(size=14, bold=True)
-    title_cell.alignment = Alignment(horizontal='center', vertical='center')
+    title_cell.alignment = center_align
 
-    # Title row (2nd)
-    ws.merge_cells(start_row=2, start_column=2, end_row=2, end_column=10)
-    title_cell = ws.cell(row=2, column=2)
-    title_cell.value = "Regular, Adjustment and Totals Personnel Payroll List"
-    title_cell.font = Font(size=14, bold=True)
-    title_cell.alignment = Alignment(horizontal='center', vertical='center')
-
+    # Headers
     headers = [
-        'Payroll Month', 'Personnel ID', 'First Name', 'Father Name', 'Last Name',
-        'Category',
-        'Taxable Gross', 'Non-Taxable Gross', 'Gross Pay', 'Pensionable',
-        'Employee Pension', 'Employer Pension', 'Total Pension',
-        'Income Tax', 'Deductions', 'Net Pay', 'Expense'
+        "Personnel ID", "First Name", "Father Name", "Last Name", "Type",
+        "Taxable Gross", "Non-Taxable Gross", "Total Gross", "Pensionable",
+        "Employee Pension", "Employer Pension", "Total Pension Contribution",
+        "Employment Income Tax", "Total Deduction", "Net Pay", "Total Expense"
     ]
 
-    # call header
-    # call from service header decorate
+    # --- Use your ExportUtilityService to transform headers ---
     export_util = ExportUtilityService()
-    # Transform headers with line splitting
-    ws.append([export_util.split_header_to_lines(h) for h in headers])
-
-    # Header styling
-
-    header_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid")  # Orange
-    header_font = Font(bold=True)
-    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    decorated_headers = [export_util.split_header_to_lines(h) for h in headers]
 
 
-    for cell in ws[3]:
+    # Write header row at row 2, styled
+    for col_num, header in enumerate(decorated_headers, 1):
+        cell = ws.cell(row=2, column=col_num, value=header)
         cell.fill = header_fill
-        cell.font = header_font
-        cell.alignment = header_alignment
+        cell.font = bold_font
+        cell.alignment = center_align
 
-    total_fill = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+    current_row = 3
 
-    def to_dec(value):
-        if value is None:
+    def fmt_dec(val):
+        if val is None:
             return Decimal('0.00')
-        if isinstance(value, Decimal):
-            return value
-        try:
-            return Decimal(value)
-        except Exception:
-            return Decimal('0.00')
+        return val
 
-    def write_row(personnel, payroll_month, category_name, data, show_personnel_info=False):
-        row_data = [
-            payroll_month if show_personnel_info else "",
-            personnel.personnel_id if show_personnel_info else "",
-            personnel.first_name if show_personnel_info else "",
-            personnel.father_name if show_personnel_info else "",
-            personnel.last_name if show_personnel_info else "",
-            category_name,
-            to_dec(data.get('taxable_gross')),
-            to_dec(data.get('non_taxable_gross')),
-            to_dec(data.get('gross_pay')),
-            to_dec(data.get('pensionable', data.get('adjusted_pensionable'))),
-            to_dec(data.get('employee_pension')),
-            to_dec(data.get('employer_pension')),
-            to_dec(data.get('total_pension')),
-            to_dec(data.get('employment_income_tax')),
-            to_dec(data.get('deduction', data.get('total_adjustment_deduction'))),
-            to_dec(data.get('net_pay', data.get('net_monthly_adjustment', data.get('final_net_pay')))),
-            to_dec(data.get('expense')),
+    for row in payroll_data:
+        p = row['payroll'].personnel_full_name
+        r = row['regular_totals']
+        a = row['earning_adjustment_item']
+        c = row['combined_adjustment']
+        t = row['totals']
+
+        # Merge personnel info columns vertically across 3 rows (Regular, Adjustment, Total)
+        for col in range(1, 5):
+            ws.merge_cells(start_row=current_row, start_column=col, end_row=current_row + 2, end_column=col)
+
+        ws.cell(row=current_row, column=1, value=p.personnel_id).alignment = center_align
+        ws.cell(row=current_row, column=2, value=p.first_name).alignment = center_align
+        ws.cell(row=current_row, column=3, value=p.father_name).alignment = center_align
+        ws.cell(row=current_row, column=4, value=p.last_name).alignment = center_align
+
+        # Row 1: Regular
+        values_regular = [
+            "Regular",
+            fmt_dec(r.get('taxable_gross')),
+            fmt_dec(r.get('non_taxable_gross')),
+            fmt_dec(r.get('gross_pay')),
+            fmt_dec(r.get('pensionable')),
+            fmt_dec(r.get('employee_pension')),
+            fmt_dec(r.get('employer_pension')),
+            fmt_dec(r.get('total_pension')),
+            fmt_dec(r.get('employment_income_tax')),
+            fmt_dec(r.get('deduction')),
+            fmt_dec(r.get('net_pay')),
+            fmt_dec(r.get('expense')),
         ]
-        ws.append(row_data)
-        if category_name.lower() == "total":
-            for col_num in range(1, len(row_data) + 1):
-                ws.cell(row=ws.max_row, column=col_num).fill = total_fill
+        for col_offset, val in enumerate(values_regular, 5):
+            cell = ws.cell(row=current_row, column=col_offset, value=val)
+            cell.number_format = currency_format
 
-    for item in payroll_data:
-        payroll = item.get('payroll')
-        personnel = getattr(payroll, 'personnel_full_name', None)
-        payroll_month = getattr(payroll, 'payroll_month', None)
-        earning = item.get('earning_adjustment_item', {})
-        regular = item.get('regular_totals', {})
-        totals = item.get('totals', {})
+        # Row 2: Adjustment
+        values_adjustment = [
+            "Adjustment",
+            fmt_dec(a.get('taxable_gross')),
+            fmt_dec(a.get('non_taxable_gross')),
+            fmt_dec(a.get('gross_pay')),
+            fmt_dec(a.get('adjusted_pensionable')),
+            fmt_dec(a.get('employee_pension')),
+            fmt_dec(a.get('employer_pension')),
+            fmt_dec(a.get('total_pension')),
+            fmt_dec(a.get('employment_income_tax')),
+            fmt_dec(c.get('total_adjustment_deduction')),
+            fmt_dec(c.get('net_monthly_adjustment')),
+            fmt_dec(a.get('expense')),
+        ]
+        for col_offset, val in enumerate(values_adjustment, 5):
+            cell = ws.cell(row=current_row + 1, column=col_offset, value=val)
+            cell.number_format = currency_format
 
-        if not personnel or not payroll_month:
-            continue
+        # Row 3: Total (highlighted)
+        values_total = [
+            "Total",
+            fmt_dec(t.get('taxable_gross')),
+            fmt_dec(t.get('non_taxable_gross')),
+            fmt_dec(t.get('gross_pay')),
+            fmt_dec(t.get('pensionable')),
+            fmt_dec(t.get('employee_pension')),
+            fmt_dec(t.get('employer_pension')),
+            fmt_dec(t.get('total_pension')),
+            fmt_dec(t.get('employment_income_tax')),
+            fmt_dec(t.get('deduction')),
+            fmt_dec(t.get('final_net_pay')),
+            fmt_dec(t.get('expense')),
+        ]
+        for col_offset, val in enumerate(values_total, 5):
+            cell = ws.cell(row=current_row + 2, column=col_offset, value=val)
+            cell.number_format = currency_format
+            cell.fill = total_fill
+            cell.font = Font(bold=True)
 
-        payroll_month_str = getattr(payroll_month, 'payroll_month', '')
+        # Highlight "Type" column in total row
+        type_cell = ws.cell(row=current_row + 2, column=5)
+        type_cell.fill = total_fill
+        type_cell.font = Font(bold=True)
 
-        first_row = True
+        current_row += 3
 
-        if to_dec(regular.get('gross_pay')) > 0:
-            write_row(personnel, payroll_month_str, "Regular", regular, show_personnel_info=first_row)
-            first_row = False
+    # Set column widths for personnel info
+    column_widths = {
+        1: 15,  # Personnel ID
+        2: 15,  # First Name
+        3: 15,  # Father Name
+        4: 15,  # Last Name
+    }
+    for col, width in column_widths.items():
+        ws.column_dimensions[ws.cell(row=2, column=col).column_letter].width = width
 
-        if to_dec(earning.get('gross_pay')) > 0:
-            write_row(personnel, payroll_month_str, "Adjustment", earning, show_personnel_info=first_row)
-            first_row = False
+    # Set column widths for financial columns approx
+    for col in range(5, 17):
+        ws.column_dimensions[ws.cell(row=2, column=col).column_letter].width = 18
 
-        write_row(personnel, payroll_month_str, "Total", totals, show_personnel_info=first_row)
-
-    # Adjust column widths dynamically
-    MIN_WIDTH = 12
-    MAX_WIDTH = 15
-    for i, col_cells in enumerate(ws.columns, 1):
-        max_length = 0
-        for cell in col_cells:
-            try:
-                if cell.value:
-                    length = len(str(cell.value))
-                    if length > max_length:
-                        max_length = length
-            except Exception:
-                pass
-        adjusted_width = max(MIN_WIDTH, min(MAX_WIDTH, max_length + 2))
-        ws.column_dimensions[get_column_letter(i)].width = adjusted_width
-
-    output = BytesIO()
-    wb.save(output)
-    output.seek(0)
-
+    # Prepare response
     response = HttpResponse(
-        output.read(),
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-    response['Content-Disposition'] = 'attachment; filename=combined_payroll_list_report.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=combined_personnel_payroll.xlsx'
+    wb.save(response)
     return response
 
+
+    #
+from io import BytesIO
 
 @login_required
 def export_personnel_total_adjustment(request):
@@ -413,20 +447,16 @@ def export_personnel_total_adjustment(request):
     subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
 
     headers = [
-        "#", "Payroll Month", "Personnel ID", "First Name", "Father Name", "Last Name",
+        "Payroll Month", "Personnel ID", "First Name", "Father Name", "Last Name",
         "Adjustment Taxable Gross", "Adjustment Non-Taxable Gross", "Adjustment Gross Pay",
-        "Adjusted Pensionable", "Employee Pension", "Employer Pension", "Total Pension",
+        "Adjusted Pensionable", "Employee Pension", "Employer Pension", "Total Pension Contribution",
         "Employment Income Tax", "Earning Adjustment Deduction", "Other Adjustment Deduction",
         "Total Adjustment Deduction", "Net Adjustment Pay", "Adjustment Expense"
     ]
 
-    #call from service header decorate
     export_util = ExportUtilityService()
-    # Transform headers with line splitting
     ws.append([export_util.split_header_to_lines(h) for h in headers])
 
-
-    # Style header
     header_fill = PatternFill(start_color="70AD47", end_color="70AD47", fill_type="solid")
     header_font = Font(bold=True, color="FFFFFFFF")
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -436,22 +466,31 @@ def export_personnel_total_adjustment(request):
         cell.font = header_font
         cell.alignment = header_alignment
 
-    for i, item in enumerate(data, 1):
+    # Helper for safe nested getattr
+    def safe_getattr(obj, attr, default=None):
+        try:
+            return getattr(obj, attr, default)
+        except Exception:
+            return default
+
+    for item in data:
         payroll = item.get('payroll')
         earning = item.get('earning_adjustment_item', {})
         combined_adj = item.get('combined_adjustment', {})
         deduction_adj = item.get('deduction_adjustment')
 
-        personnel = getattr(payroll, 'personnel_full_name', None)
-        payroll_month = getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')
+        personnel = safe_getattr(payroll, 'personnel_full_name', None)
+        payroll_month = safe_getattr(safe_getattr(payroll, 'payroll_month', None), 'payroll_month', '')
+
+        # Corrected attribute name, please verify this with your model
+        deduction_total = safe_getattr(deduction_adj, 'recorded_month_total_deduction', Decimal('0.00'))
 
         row = [
-            i,
             payroll_month,
-            getattr(personnel, 'personnel_id', '') if personnel else '',
-            getattr(personnel, 'first_name', '') if personnel else '',
-            getattr(personnel, 'father_name', '') if personnel else '',
-            getattr(personnel, 'last_name', '') if personnel else '',
+            safe_getattr(personnel, 'personnel_id', ''),
+            safe_getattr(personnel, 'first_name', ''),
+            safe_getattr(personnel, 'father_name', ''),
+            safe_getattr(personnel, 'last_name', ''),
             earning.get('taxable_gross', Decimal('0.00')),
             earning.get('non_taxable_gross', Decimal('0.00')),
             earning.get('gross_pay', Decimal('0.00')),
@@ -461,17 +500,16 @@ def export_personnel_total_adjustment(request):
             earning.get('total_pension', Decimal('0.00')),
             earning.get('employment_income_tax', Decimal('0.00')),
             earning.get('earning_adjustment_deduction', Decimal('0.00')),
-            getattr(deduction_adj, 'monthly_adjusted_deduction', Decimal('0.00')),
+            deduction_total,
             combined_adj.get('total_adjustment_deduction', Decimal('0.00')),
             combined_adj.get('net_monthly_adjustment', Decimal('0.00')),
             earning.get('expense', Decimal('0.00')),
         ]
         ws.append(row)
 
-    # Adjust column widths with limits
     MIN_WIDTH = 10
     MAX_WIDTH = 25
-    for i, col_cells in enumerate(ws.columns, 1):
+    for idx, col_cells in enumerate(ws.columns, 1):
         max_length = 0
         for cell in col_cells:
             try:
@@ -480,7 +518,7 @@ def export_personnel_total_adjustment(request):
             except Exception:
                 pass
         adjusted_width = max(MIN_WIDTH, min(MAX_WIDTH, max_length + 2))
-        ws.column_dimensions[get_column_letter(i)].width = adjusted_width
+        ws.column_dimensions[get_column_letter(idx)].width = adjusted_width
 
     output = BytesIO()
     wb.save(output)
@@ -492,8 +530,6 @@ def export_personnel_total_adjustment(request):
     )
     response["Content-Disposition"] = "attachment; filename=personnel_total_adjustment.xlsx"
     return response
-
-
 
 
 @login_required
@@ -516,7 +552,7 @@ def export_combined_personnel_total(request):
     headers = [
         "Month", "Personnel ID", "First Name", "Father Name", "Last Name",
         "Taxable Gross", "Non-Taxable Gross", "Total Gross Pay", "Total Pensionable",
-        "Employee Pension", "Employer Pension", "Total Pension",
+        "Employee Pension", "Employer Pension", "Total Pension Contribution",
         "Employment Income Tax", "Total Deduction", "Final Net Pay", "Total Expense"
     ]
     #call header
@@ -670,6 +706,9 @@ def export_combined_personnel_expense(request):
     )
     response["Content-Disposition"] = "attachment; filename=combined_payroll_expense_summary.xlsx"
     return response
+
+
+
 
 @login_required
 def export_combined_personnel_net_income(request):
@@ -842,7 +881,7 @@ def export_combined_personnel_employment_tax(request):
 @login_required
 def export_combined_personnel_pension(request):
     """
-    Export Combined Total Pension Summary (Per Employee Per Month) as Excel.
+    Export Combined Total Pension Contribution Summary (Per Employee Per Month) as Excel.
     """
     context = get_combined_personnel_payroll_context(request)
     payroll_data = context.get('payroll_data', [])
@@ -861,7 +900,7 @@ def export_combined_personnel_pension(request):
     headers = [
         'Payroll Month', 'Personnel ID', 'First Name', 'Father Name', 'Last Name',
         'Total Pensionable', 'Total Employee Pension',
-        'Total Employer Pension', 'Total Pension'
+        'Total Employer Pension', 'Total Pension Contribution'
     ]
 
     # call from service header decorate

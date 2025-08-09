@@ -94,7 +94,7 @@ class EarningAdjustmentBusinessService:
         from compensation_payroll.models import EarningAdjustment
 
         # ✅ Prevent AttributeError
-        if not self.instance or not self.instance.record_month or not self.instance.payroll_needing_adjustment:
+        if not self.instance or not self.instance.original_payroll_record or not self.instance.payroll_needing_adjustment:
             return
 
         # Calculate pension only if component is pensionable
@@ -108,14 +108,14 @@ class EarningAdjustmentBusinessService:
         self.instance.employer_pension_contribution = employer_pension
         self.instance.total_pension = total_pension
 
-        record_month = self.instance.record_month
+        original_payroll_record = self.instance.original_payroll_record
         payroll_needing_adjustment = self.instance.payroll_needing_adjustment
 
         adjustments = EarningAdjustment.objects.filter(
-            record_month=record_month,
+            original_payroll_record=original_payroll_record,
             payroll_needing_adjustment=payroll_needing_adjustment
         ).select_related(
-            'record_month',
+            'original_payroll_record',
             'payroll_needing_adjustment',
         )
 
@@ -137,15 +137,15 @@ class EarningAdjustmentBusinessService:
         total_pension_total_per_adjusting = totals['total_pension_sum'] or Decimal('0.00')
 
         # Safely get previous values
-        previous_gross_taxable = payroll_needing_adjustment.regular_gross_taxable_pay or Decimal('0.00')
-        previous_regular_employment_income_tax = payroll_needing_adjustment.regular_employment_income_tax or Decimal('0.00')
+        previous_gross_taxable = payroll_needing_adjustment.gross_taxable_pay or Decimal('0.00')
+        previous_employment_income_tax = payroll_needing_adjustment.employment_income_tax or Decimal('0.00')
 
 
         adjusted_month_total_taxable_pay = previous_gross_taxable + gross_taxable
         adjusted_month_employment_income_tax_total = EmploymentIncomeTaxService(
             adjusted_month_total_taxable_pay).calculate()
 
-        adjusted_month_employment_income_tax = adjusted_month_employment_income_tax_total - previous_regular_employment_income_tax
+        adjusted_month_employment_income_tax = adjusted_month_employment_income_tax_total - previous_employment_income_tax
         #total deduction
         earning_adjustment_deduction_total_per_adjusting = (adjusted_month_employment_income_tax + employee_pension_total_per_adjusting)
 
@@ -174,13 +174,13 @@ class EarningAdjustmentBusinessService:
         from compensation_payroll.models import EarningAdjustment
 
         # ✅ Prevent AttributeError
-        if not self.instance or not self.instance.record_month or not self.instance.payroll_needing_adjustment:
+        if not self.instance or not self.instance.original_payroll_record or not self.instance.payroll_needing_adjustment:
             return
 
-        record_month = self.instance.record_month
+        original_payroll_record = self.instance.original_payroll_record
 
         adjustments = EarningAdjustment.objects.filter(
-            record_month=record_month
+            original_payroll_record=original_payroll_record
         ).select_related('payroll_needing_adjustment')
 
         # Ensure one entry per adjusted month
@@ -196,8 +196,8 @@ class EarningAdjustmentBusinessService:
         total_non_taxable = Decimal('0.00')
         total_gross = Decimal('0.00')
         total_taxable_combined = Decimal('0.00')
-        total_regular_employment_income_tax = Decimal('0.00')
-        total_regular_employment_income_tax_adjustment = Decimal('0.00')
+        total_employment_income_tax = Decimal('0.00')
+        total_employment_income_tax_adjustment = Decimal('0.00')
         total_net_adjustment = Decimal('0.00')
         total_adjusted_expense = Decimal('0.00')
 
@@ -213,8 +213,8 @@ class EarningAdjustmentBusinessService:
             total_non_taxable += adj.adjusted_month_gross_non_taxable_pay or Decimal('0.00')
             total_gross += adj.adjusted_month_gross_pay or Decimal('0.00')
             total_taxable_combined += adj.adjusted_month_total_taxable_pay or Decimal('0.00')
-            total_regular_employment_income_tax += adj.adjusted_month_employment_income_tax_total or Decimal('0.00')
-            total_regular_employment_income_tax_adjustment += adj.adjusted_month_employment_income_tax or Decimal('0.00')
+            total_employment_income_tax += adj.adjusted_month_employment_income_tax_total or Decimal('0.00')
+            total_employment_income_tax_adjustment += adj.adjusted_month_employment_income_tax or Decimal('0.00')
             #
             total_employee_pension += adj.adjusted_month_employee_pension_contribution or Decimal('0.00')
             total_employer_pension += adj.adjusted_month_employer_pension_contribution or Decimal('0.00')
@@ -225,19 +225,19 @@ class EarningAdjustmentBusinessService:
             total_adjusted_expense += adj.adjusted_month_expense or Decimal('0.00')
 
         adjustments.update(
-            recorded_month_adjusted_taxable_gross_pay=total_taxable,
-            recorded_month_adjusted_non_taxable_gross_pay=total_non_taxable,
-            recorded_month_adjusted_gross_pay=total_gross,
+            recorded_month_taxable_gross_pay=total_taxable,
+            recorded_month_non_taxable_gross_pay=total_non_taxable,
+            recorded_month_gross_pay=total_gross,
             recorded_month_total_taxable_pay=total_taxable_combined,
-            recorded_month_employment_income_tax_total=total_regular_employment_income_tax,
-            recorded_month_employment_income_tax_on_adjustment=total_regular_employment_income_tax_adjustment,
+            recorded_month_employment_income_tax_total=total_employment_income_tax,
+            recorded_month_employment_income_tax=total_employment_income_tax_adjustment,
             #
-            recorded_month_adjusted_employee_pension_contribution=total_employee_pension,
-            recorded_month_adjusted_employer_pension_contribution=total_employer_pension,
-            recorded_month_adjusted_total_pension=total_combined_pension,
+            recorded_month_employee_pension_contribution=total_employee_pension,
+            recorded_month_employer_pension_contribution=total_employer_pension,
+            recorded_month_total_pension_contribution=total_combined_pension,
             #
-            recorded_month_earning_adjustment_deduction_total=total_earning_adjustment_deduction,
-            recorded_month_adjusted_expense=total_adjusted_expense,
+            recorded_month_total_earning_deduction=total_earning_adjustment_deduction,
+            recorded_month_expense=total_adjusted_expense,
 
         )
 

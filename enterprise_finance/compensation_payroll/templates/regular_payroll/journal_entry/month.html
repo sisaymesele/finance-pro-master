@@ -340,58 +340,58 @@
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employment_income_tax %}
+                    {% if entry.aggregate_employment_income_tax %}
                     <tr>
-                        <td>Regular Employment Income Tax Payable</td>
+                        <td>Employment Income Tax Payable</td>
                         <td></td>
-                        <td>{{ entry.aggregate_regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employee_pension_contribution %}
+                    {% if entry.aggregate_employee_pension_contribution %}
                     <tr>
-                        <td>Regular Employee Pension Contribution Payable</td>
+                        <td>Employee Pension Contribution Payable</td>
                         <td></td>
-                        <td>{{ entry.aggregate_regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_net_pay %}
+                    {% if entry.aggregate_net_pay %}
                     <tr>
-                        <td>Regular Net Payable</td>
+                        <td>Net Payable</td>
                         <td></td>
-                        <td>{{ entry.aggregate_regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employer_pension_contribution %}
+                    {% if entry.aggregate_employer_pension_contribution %}
                     <tr>
-                        <td>Regular Employer Pension Contribution(Expense)</td>
-                        <td>{{ entry.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>Employer Pension Contribution(Expense)</td>
+                        <td>{{ entry.aggregate_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                         <td></td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employer_pension_contribution %}
+                    {% if entry.aggregate_employer_pension_contribution %}
                     <tr>
-                        <td>Regular Employer Pension Contribution Payable</td>
+                        <td>Employer Pension Contribution Payable</td>
                         <td></td>
-                        <td>{{ entry.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
 
-                     {% if entry.aggregate_regular_expense %}
+                     {% if entry.aggregate_expense %}
                     <tr>
                         <td>Total Debit</td>
-                        <td>{{ entry.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_expense|default:"0.00"|floatformat:2|intcomma }}</td>
                         <td></td>
                     </tr>
                     {% endif %}
-                     {% if entry.aggregate_regular_expense %}
+                     {% if entry.aggregate_expense %}
                     <tr>
                         <td>Total Credit</td>
                         <td></td>
-                        <td>{{ entry.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_expense|default:"0.00"|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
 
@@ -431,10 +431,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% if entry.aggregate_regular_net_pay %}
+                    {% if entry.aggregate_net_pay %}
                     <tr>
-                        <td>Regular Net Payable</td>
-                        <td>{{ entry.aggregate_regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>Net Payable</td>
+                        <td>{{ entry.aggregate_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                         <td></td>
                     </tr>
                     {% endif %}
@@ -520,35 +520,35 @@
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employment_income_tax %}
+                    {% if entry.aggregate_employment_income_tax %}
                     <tr>
-                        <td>Regular Employment Income Tax Payable</td>
-                        <td>{{ entry.aggregate_regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>Employment Income Tax Payable</td>
+                        <td>{{ entry.aggregate_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
                         <td></td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employee_pension_contribution %}
+                    {% if entry.aggregate_employee_pension_contribution %}
                     <tr>
-                        <td>Regular Employee Pension Contribution Payable</td>
-                        <td>{{ entry.aggregate_regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>Employee Pension Contribution Payable</td>
+                        <td>{{ entry.aggregate_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                         <td></td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_employer_pension_contribution %}
+                    {% if entry.aggregate_employer_pension_contribution %}
                     <tr>
-                        <td>Regular Employer Pension Contribution Payable</td>
-                        <td>{{ entry.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>Employer Pension Contribution Payable</td>
+                        <td>{{ entry.aggregate_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                         <td></td>
                     </tr>
                     {% endif %}
 
-                    {% if entry.aggregate_regular_expense %}
+                    {% if entry.aggregate_expense %}
                     <tr>
                         <td>Cash</td>
                         <td></td>
-                        <td>{{ entry.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ entry.aggregate_expense|default:"0.00"|floatformat:2|intcomma }}</td>
                     </tr>
                     {% endif %}
 

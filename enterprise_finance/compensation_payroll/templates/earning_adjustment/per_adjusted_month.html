@@ -5,7 +5,7 @@
     <!-- Header Actions -->
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
 
-        <h5 class="mb-3">Adjusted Payroll Month Earnings</h5>
+        <h5 class="mb-3">Adjusted Month Earnings</h5>
 
         <a href="{% url 'export_earning_per_adjusted_month_to_excel' %}" class="btn btn-success btn-sm py-1 px-2">
             Export to Excel
@@ -37,44 +37,44 @@
             <tr>
                 <th>#</th>
                 <th>Record Month</th>
-                <th>Adjusted Payroll Month</th>
+                <th>Adjusted Month</th>
                 <th>Personnel Id</th>
                 <th>First Name</th>
                 <th>Father Name</th>
                 <th>Last Name</th>
                 <th>Original Payroll (Gross/Tax)</th>
-                <th>Gross Taxable Pay Per Adjusted Payroll Month</th>
-                <th>Gross Non Taxable Pay Per Adjusted Payroll Month</th>
-                <th>Gross Pay Per Adjusted Payroll Month</th>
-                <th>Total Taxable Pay Per Adjusted Payroll Month</th>
-                <th>Employment Income Tax Total Per Adjusted Payroll Month</th>
-                <th>Employment Income Tax Per Adjusted Payroll Month</th>
+                <th>Gross Taxable Pay</th>
+                <th>Gross Non Taxable Pay</th>
+                <th>Gross Pay</th>
+                <th>Total Taxable Pay</th>
+                <th>Employment Income Tax Total</th>
+                <th>Employment Income Tax</th>
 
-                <!-- Pension Fields Per Adjusted Payroll Month -->
-                <th>Employee Pension Contribution Per Adjusted Payroll Month</th>
-                <th>Employer Pension Contribution Per Adjusted Payroll Month</th>
-                <th>Total Pension Per Adjusted Payroll Month</th>
+                <!-- Pension Fields -->
+                <th>Employee Pension Contribution</th>
+                <th>Employer Pension Contribution</th>
+                <th>Total Pension Contribution</th>
                 <!--                    net and expense-->
-                <th>Adjusted Deduction Per Adjusted Payroll Month</th>
-                <th>Adjusted Expense Per Adjusted Payroll Month</th>
+                <th>Total Deduction</th>
+                <th>Total Expense</th>
             </tr>
             </thead>
             <tbody>
             {% for adjustment in earning_per_adjusted_month %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ adjustment.record_month__payroll_month__payroll_month }}</td>
+                <td>{{ adjustment.original_payroll_record__payroll_month__payroll_month }}</td>
                 <td>{{ adjustment.payroll_needing_adjustment__payroll_month__payroll_month }}</td>
-                <td>{{ adjustment.record_month__personnel_full_name__personnel_id }}</td>
-                <td class="text-start">{{ adjustment.record_month__personnel_full_name__first_name }}</td>
-                <td class="text-start">{{ adjustment.record_month__personnel_full_name__father_name }}</td>
-                <td class="text-start">{{ adjustment.record_month__personnel_full_name__last_name }}</td>
+                <td>{{ adjustment.original_payroll_record__personnel_full_name__personnel_id }}</td>
+                <td class="text-start">{{ adjustment.original_payroll_record__personnel_full_name__first_name }}</td>
+                <td class="text-start">{{ adjustment.original_payroll_record__personnel_full_name__father_name }}</td>
+                <td class="text-start">{{ adjustment.original_payroll_record__personnel_full_name__last_name }}</td>
                 <td>
                         <span class="badge bg-warning text-dark">
-                            Gross Taxable: {{ adjustment.payroll_needing_adjustment__regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}
+                            Gross Taxable: {{ adjustment.payroll_needing_adjustment__gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}
                         </span>
                     <span class="badge bg-warning text-dark">
-                            Regular Employment Income Tax: {{ adjustment.payroll_needing_adjustment__regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}
+                            Employment Income Tax: {{ adjustment.payroll_needing_adjustment__employment_income_tax|default:"0.00"|floatformat:2|intcomma }}
                         </span>
                 </td>
                 <td>{{ adjustment.adjusted_month_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>

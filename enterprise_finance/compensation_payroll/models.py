@@ -355,18 +355,18 @@ class RegularPayroll(models.Model):
     # summary
     # auto deduction
     # tax
-    regular_employment_income_tax = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    employment_income_tax = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     # pension
-    regular_employee_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    regular_employer_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    regular_total_pension = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    employee_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    employer_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    total_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     # gross
-    regular_gross_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    regular_gross_non_taxable_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    regular_gross_taxable_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    regular_total_payroll_deduction = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    regular_net_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    regular_expense = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
+    gross_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    gross_non_taxable_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    gross_taxable_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    total_payroll_deduction = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    net_pay = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    expense = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
     # bank information
     bank_name = models.CharField(max_length=70, blank=True, null=True)
@@ -374,18 +374,6 @@ class RegularPayroll(models.Model):
     bank_account_type = models.CharField(max_length=70, blank=True, null=True)
     processing_date = models.DateField(null=True, blank=True, default=datetime.date.today)
 
-    # def __str__(self):
-    #     if self.payroll_month_id:
-    #         payroll = str(self.payroll_month)
-    #     else:
-    #         payroll = "No Payroll Month"
-    #
-    #     if self.personnel_full_name_id:
-    #         personnel = str(self.personnel_full_name)
-    #     else:
-    #         personnel = "No Personnel"
-    #
-    #     return f"{payroll} - {personnel}"
 
     def __str__(self):
         try:
@@ -565,7 +553,7 @@ class EarningAdjustment(models.Model):
     # Model fields as described
     organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     #
-    record_month = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='earning_adjustments')
+    original_payroll_record = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='earning_adjustments')
     payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE)
     case = models.CharField(max_length=90, choices=ADJUSTMENT_CASES_CHOICES)
 
@@ -607,23 +595,23 @@ class EarningAdjustment(models.Model):
 
     # monthly
     # pension
-    recorded_month_adjusted_employee_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    recorded_month_adjusted_employer_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
-    recorded_month_adjusted_total_pension = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    recorded_month_employee_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    recorded_month_employer_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
+    recorded_month_total_pension_contribution = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     #
-    recorded_month_adjusted_taxable_gross_pay = models.DecimalField(max_digits=12, decimal_places=2,
+    recorded_month_taxable_gross_pay = models.DecimalField(max_digits=12, decimal_places=2,
                                                                    default=Decimal('0.00'))
-    recorded_month_adjusted_non_taxable_gross_pay = models.DecimalField(max_digits=12, decimal_places=2,
+    recorded_month_non_taxable_gross_pay = models.DecimalField(max_digits=12, decimal_places=2,
                                                                        default=Decimal('0.00'))
-    recorded_month_adjusted_gross_pay = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    recorded_month_gross_pay = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
     recorded_month_total_taxable_pay = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     recorded_month_employment_income_tax_total = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
 
-    recorded_month_employment_income_tax_on_adjustment = models.DecimalField(max_digits=12, decimal_places=2,
+    recorded_month_employment_income_tax = models.DecimalField(max_digits=12, decimal_places=2,
                                                                       default=Decimal('0.00'))
-    recorded_month_earning_adjustment_deduction_total = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
-    recorded_month_adjusted_expense = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    recorded_month_total_earning_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    recorded_month_expense = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
     #
     period_start = models.DateField(default=datetime.date.today)
     period_end = models.DateField(default=datetime.date.today)
@@ -635,16 +623,16 @@ class EarningAdjustment(models.Model):
 
     def clean(self):
         # First, ensure both ForeignKeys are set
-        if not self.payroll_needing_adjustment_id or not self.record_month_id:
+        if not self.payroll_needing_adjustment_id or not self.original_payroll_record_id:
             raise ValidationError("Both 'payroll needing adjustment' and 'record month' must be set.")
 
         # Safely get related objects
         payroll_adj = getattr(self, 'payroll_needing_adjustment', None)
-        record_month_obj = getattr(self, 'record_month', None)
+        original_payroll_record_obj = getattr(self, 'original_payroll_record', None)
 
-        if record_month_obj:
-            personnel = getattr(record_month_obj, 'personnel_full_name', None)
-            payroll_month = getattr(record_month_obj, 'payroll_month', None)
+        if original_payroll_record_obj:
+            personnel = getattr(original_payroll_record_obj, 'personnel_full_name', None)
+            payroll_month = getattr(original_payroll_record_obj, 'payroll_month', None)
 
             # Example check using personnel
             if self.earning_amount and self.component == 'per_diem':
@@ -708,7 +696,7 @@ class DeductionAdjustment(models.Model):
     # Model fields as described
     organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     #
-    record_month = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='deduction_adjustments')
+    original_payroll_record = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='deduction_adjustments')
     payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE)
     case = models.CharField(max_length=90, choices=ADJUSTMENT_CASES_CHOICES)
 
@@ -717,12 +705,12 @@ class DeductionAdjustment(models.Model):
                                            validators=[MinValueValidator(Decimal('0.00'))]
                                            )
 
-    adjusted_deduction_per_adjusted_month = models.DecimalField(max_digits=12, decimal_places=2,
+    adjusted_month_total_deduction = models.DecimalField(max_digits=12, decimal_places=2,
                                                                 validators=[MinValueValidator(Decimal('0.00'))],
                                                                 default=Decimal('0.00')
                                                                 )
 
-    monthly_adjusted_deduction = models.DecimalField(max_digits=12, decimal_places=2,
+    recorded_month_total_deduction = models.DecimalField(max_digits=12, decimal_places=2,
                                                            validators=[MinValueValidator(Decimal('0.00'))],
                                                            default=Decimal('0.00')
                                                            )
@@ -734,7 +722,7 @@ class DeductionAdjustment(models.Model):
     updated_at = models.DateField(default=datetime.date.today, help_text="Date when this record was last updated")
 
     def clean(self):
-        if not self.payroll_needing_adjustment or not self.record_month:
+        if not self.payroll_needing_adjustment or not self.original_payroll_record:
             raise ValidationError("Both 'Payroll Needing Adjustment' and 'Record Month' must be set.")
 
     def save(self, *args, **kwargs):

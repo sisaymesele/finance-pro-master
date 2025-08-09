@@ -96,15 +96,15 @@ def calculate_pension_contributions(instance):
 #     Calculates personnel, employer, and total pension contributions
 #     for both RegularPayroll and EarningAdjustment instances.
 #     """
-#     employee_pension = employer_pension = regular_total_pension = Decimal('0.00')
+#     employee_pension = employer_pension = total_pension_contribution = Decimal('0.00')
 #
 #     # Try to get personnel and organization info from either direct fields or nested objects
 #     personnel = getattr(instance, 'personnel_full_name', None)
 #     organization = getattr(instance, 'organization_name', None)
 #
-#     # If not directly on the instance, try through record_month (used by EarningAdjustment)
+#     # If not directly on the instance, try through original_payroll_record (used by EarningAdjustment)
 #     if not personnel or not organization:
-#         payroll_record = getattr(instance, 'record_month', None)
+#         payroll_record = getattr(instance, 'original_payroll_record', None)
 #         if payroll_record:
 #             personnel = getattr(payroll_record, 'personnel_full_name', None)
 #             organization = getattr(payroll_record, 'organization_name', organization)
@@ -119,9 +119,9 @@ def calculate_pension_contributions(instance):
 #
 #         employee_pension = salary * config['personnel_rate']
 #         employer_pension = salary * config['employer_rate']
-#         regular_total_pension = employee_pension + employer_pension
+#         total_pension_contribution = employee_pension + employer_pension
 #
-#     return employee_pension, employer_pension, regular_total_pension
+#     return employee_pension, employer_pension, total_pension_contribution
 #
 #
 # #

@@ -265,16 +265,16 @@ def get_regular_payroll_by_month_report(request, payroll_month_slug):
         aggregate_red_cross=Sum('red_cross'),
         aggregate_party_contribution=Sum('party_contribution'),
         aggregate_other_deduction=Sum('other_deduction'),
-        aggregate_regular_employment_income_tax=Sum('regular_employment_income_tax'),
-        aggregate_regular_employee_pension_contribution=Sum('regular_employee_pension_contribution'),
-        aggregate_regular_employer_pension_contribution=Sum('regular_employer_pension_contribution'),
-        aggregate_regular_total_pension=Sum('regular_total_pension'),
-        aggregate_regular_gross_pay=Sum('regular_gross_pay'),
-        aggregate_regular_gross_non_taxable_pay=Sum('regular_gross_non_taxable_pay'),
-        aggregate_regular_gross_taxable_pay=Sum('regular_gross_taxable_pay'),
-        aggregate_regular_total_payroll_deduction=Sum('regular_total_payroll_deduction'),
-        aggregate_regular_net_pay=Sum('regular_net_pay'),
-        aggregate_regular_expense=Sum('regular_expense')
+        aggregate_employment_income_tax=Sum('employment_income_tax'),
+        aggregate_employee_pension_contribution=Sum('employee_pension_contribution'),
+        aggregate_employer_pension_contribution=Sum('employer_pension_contribution'),
+        aggregate_total_pension_contribution=Sum('total_pension_contribution'),
+        aggregate_gross_pay=Sum('gross_pay'),
+        aggregate_gross_non_taxable_pay=Sum('gross_non_taxable_pay'),
+        aggregate_gross_taxable_pay=Sum('gross_taxable_pay'),
+        aggregate_total_payroll_deduction=Sum('total_payroll_deduction'),
+        aggregate_net_pay=Sum('net_pay'),
+        aggregate_expense=Sum('expense')
     ).order_by('-payroll_month__year', '-payroll_month__month')
 
     return {
@@ -342,16 +342,16 @@ def payroll_by_year_summary_report(request):
         aggregate_red_cross=Sum('red_cross'),
         aggregate_party_contribution=Sum('party_contribution'),
         aggregate_other_deduction=Sum('other_deduction'),
-        aggregate_regular_employment_income_tax=Sum('regular_employment_income_tax'),
-        aggregate_regular_employee_pension_contribution=Sum('regular_employee_pension_contribution'),
-        aggregate_regular_employer_pension_contribution=Sum('regular_employer_pension_contribution'),
-        aggregate_regular_total_pension=Sum('regular_total_pension'),
-        aggregate_regular_gross_pay=Sum('regular_gross_pay'),
-        aggregate_regular_gross_non_taxable_pay=Sum('regular_gross_non_taxable_pay'),
-        aggregate_regular_gross_taxable_pay=Sum('regular_gross_taxable_pay'),
-        aggregate_regular_total_payroll_deduction=Sum('regular_total_payroll_deduction'),
-        aggregate_regular_net_pay=Sum('regular_net_pay'),
-        aggregate_regular_expense=Sum('regular_expense')
+        aggregate_employment_income_tax=Sum('employment_income_tax'),
+        aggregate_employee_pension_contribution=Sum('employee_pension_contribution'),
+        aggregate_employer_pension_contribution=Sum('employer_pension_contribution'),
+        aggregate_total_pension_contribution=Sum('total_pension_contribution'),
+        aggregate_gross_pay=Sum('gross_pay'),
+        aggregate_gross_non_taxable_pay=Sum('gross_non_taxable_pay'),
+        aggregate_gross_taxable_pay=Sum('gross_taxable_pay'),
+        aggregate_total_payroll_deduction=Sum('total_payroll_deduction'),
+        aggregate_net_pay=Sum('net_pay'),
+        aggregate_expense=Sum('expense')
     ).order_by('-payroll_month__year')
 
     return render(
@@ -370,16 +370,16 @@ def payroll_processing_graphs(request):
     month_labels = [payroll_month.payroll_month for payroll_month in payroll_months]
 
     # Lists to store values for each field (for all months)
-    regular_employment_income_tax_values = []
-    regular_employee_pension_contribution_values = []
-    regular_employer_pension_contribution_values = []
-    regular_total_pension_values = []
-    regular_gross_pay_values = []
-    regular_gross_non_taxable_pay_values = []
-    regular_gross_taxable_pay_values = []
-    regular_total_payroll_deduction_values = []
-    regular_net_pay_values = []
-    regular_expense_values = []
+    employment_income_tax_values = []
+    employee_pension_contribution_values = []
+    employer_pension_contribution_values = []
+    total_pension_contribution_values = []
+    gross_pay_values = []
+    gross_non_taxable_pay_values = []
+    gross_taxable_pay_values = []
+    total_payroll_deduction_values = []
+    net_pay_values = []
+    expense_values = []
 
     # Aggregate data for each month
     for payroll_month in payroll_months:
@@ -389,16 +389,16 @@ def payroll_processing_graphs(request):
 
         # Aggregations for each payroll month
         aggregates = {
-            'monthly_regular_employment_income_tax': Sum('regular_employment_income_tax'),
-            'monthly_regular_employee_pension_contribution': Sum('regular_employee_pension_contribution'),
-            'monthly_regular_employer_pension_contribution': Sum('regular_employer_pension_contribution'),
-            'monthly_regular_total_pension': Sum('regular_total_pension'),
-            'monthly_regular_gross_pay': Sum('regular_gross_pay'),
-            'monthly_regular_gross_non_taxable_pay': Sum('regular_gross_non_taxable_pay'),
-            'monthly_regular_gross_taxable_pay': Sum('regular_gross_taxable_pay'),
-            'monthly_regular_total_payroll_deduction': Sum('regular_total_payroll_deduction'),
-            'monthly_regular_net_pay': Sum('regular_net_pay'),
-            'monthly_regular_expense': Sum('regular_expense'),
+            'monthly_employment_income_tax': Sum('employment_income_tax'),
+            'monthly_employee_pension_contribution': Sum('employee_pension_contribution'),
+            'monthly_employer_pension_contribution': Sum('employer_pension_contribution'),
+            'monthly_total_pension_contribution': Sum('total_pension_contribution'),
+            'monthly_gross_pay': Sum('gross_pay'),
+            'monthly_gross_non_taxable_pay': Sum('gross_non_taxable_pay'),
+            'monthly_gross_taxable_pay': Sum('gross_taxable_pay'),
+            'monthly_total_payroll_deduction': Sum('total_payroll_deduction'),
+            'monthly_net_pay': Sum('net_pay'),
+            'monthly_expense': Sum('expense'),
         }
 
         # Perform the aggregation and round the values
@@ -406,86 +406,86 @@ def payroll_processing_graphs(request):
         aggregate_data = {key: round(value or 0, 2) for key, value in aggregate_data.items()}
 
         # Append the aggregated values for each field
-        regular_employment_income_tax_values.append(aggregate_data['monthly_regular_employment_income_tax'])
-        regular_employee_pension_contribution_values.append(
-            aggregate_data['monthly_regular_employee_pension_contribution'])
-        regular_employer_pension_contribution_values.append(
-            aggregate_data['monthly_regular_employer_pension_contribution'])
-        regular_total_pension_values.append(aggregate_data['monthly_regular_total_pension'])
-        regular_gross_pay_values.append(aggregate_data['monthly_regular_gross_pay'])
-        regular_gross_non_taxable_pay_values.append(aggregate_data['monthly_regular_gross_non_taxable_pay'])
-        regular_gross_taxable_pay_values.append(aggregate_data['monthly_regular_gross_taxable_pay'])
-        regular_total_payroll_deduction_values.append(aggregate_data['monthly_regular_total_payroll_deduction'])
-        regular_net_pay_values.append(aggregate_data['monthly_regular_net_pay'])
-        regular_expense_values.append(aggregate_data['monthly_regular_expense'])
+        employment_income_tax_values.append(aggregate_data['monthly_employment_income_tax'])
+        employee_pension_contribution_values.append(
+            aggregate_data['monthly_employee_pension_contribution'])
+        employer_pension_contribution_values.append(
+            aggregate_data['monthly_employer_pension_contribution'])
+        total_pension_contribution_values.append(aggregate_data['monthly_total_pension_contribution'])
+        gross_pay_values.append(aggregate_data['monthly_gross_pay'])
+        gross_non_taxable_pay_values.append(aggregate_data['monthly_gross_non_taxable_pay'])
+        gross_taxable_pay_values.append(aggregate_data['monthly_gross_taxable_pay'])
+        total_payroll_deduction_values.append(aggregate_data['monthly_total_payroll_deduction'])
+        net_pay_values.append(aggregate_data['monthly_net_pay'])
+        expense_values.append(aggregate_data['monthly_expense'])
 
     # Create line graph traces for each component
-    trace_regular_employment_income_tax = go.Scatter(
+    trace_employment_income_tax = go.Scatter(
         x=month_labels,
-        y=regular_employment_income_tax_values,
+        y=employment_income_tax_values,
         mode='lines+markers',  # Line graph with markers
-        name='Regular Employment Income Tax'
+        name='Employment Income Tax'
     )
 
-    trace_regular_employee_pension_contribution = go.Scatter(
+    trace_employee_pension_contribution = go.Scatter(
         x=month_labels,
-        y=regular_employee_pension_contribution_values,
+        y=employee_pension_contribution_values,
         mode='lines+markers',
-        name='Regular Employee Pension Contribution'
+        name='Employee Pension Contribution'
     )
 
-    trace_regular_employer_pension_contribution = go.Scatter(
+    trace_employer_pension_contribution = go.Scatter(
         x=month_labels,
-        y=regular_employer_pension_contribution_values,
+        y=employer_pension_contribution_values,
         mode='lines+markers',
-        name='Regular Employer Pension Contribution'
+        name='Employer Pension Contribution'
     )
 
-    trace_regular_total_pension = go.Scatter(
+    trace_total_pension_contribution = go.Scatter(
         x=month_labels,
-        y=regular_total_pension_values,
+        y=total_pension_contribution_values,
         mode='lines+markers',
-        name='Regular Total Pension'
+        name='Total Pension Contribution'
     )
 
-    trace_regular_gross_pay = go.Scatter(
+    trace_gross_pay = go.Scatter(
         x=month_labels,
-        y=regular_gross_pay_values,
+        y=gross_pay_values,
         mode='lines+markers',
-        name='Regular Gross Pay'
+        name='Gross Pay'
     )
 
-    trace_regular_gross_non_taxable_pay = go.Scatter(
+    trace_gross_non_taxable_pay = go.Scatter(
         x=month_labels,
-        y=regular_gross_non_taxable_pay_values,
+        y=gross_non_taxable_pay_values,
         mode='lines+markers',
-        name='Regular Gross Non-Taxable Pay'
+        name='Gross Non-Taxable Pay'
     )
 
-    trace_regular_gross_taxable_pay = go.Scatter(
+    trace_gross_taxable_pay = go.Scatter(
         x=month_labels,
-        y=regular_gross_taxable_pay_values,
+        y=gross_taxable_pay_values,
         mode='lines+markers',
-        name='Regular Gross Taxable Pay'
+        name='Gross Taxable Pay'
     )
 
-    trace_regular_total_payroll_deduction = go.Scatter(
+    trace_total_payroll_deduction = go.Scatter(
         x=month_labels,
-        y=regular_total_payroll_deduction_values,
+        y=total_payroll_deduction_values,
         mode='lines+markers',
-        name='Regular Total Payroll Deduction'
+        name='Total Payroll Deduction'
     )
 
-    trace_regular_net_pay = go.Scatter(
+    trace_net_pay = go.Scatter(
         x=month_labels,
-        y=regular_net_pay_values,
+        y=net_pay_values,
         mode='lines+markers',
-        name='Regular Net Pay'
+        name='Net Pay'
     )
 
-    trace_regular_expense = go.Scatter(
+    trace_expense = go.Scatter(
         x=month_labels,
-        y=regular_expense_values,
+        y=expense_values,
         mode='lines+markers',
         name='Regular Personnel Regular Payroll Cost'
     )
@@ -500,11 +500,11 @@ def payroll_processing_graphs(request):
 
     # Create the figure with all traces
     figure = go.Figure(data=[
-        trace_regular_employment_income_tax, trace_regular_employee_pension_contribution,
-        trace_regular_employer_pension_contribution, trace_regular_total_pension,
-        trace_regular_gross_pay, trace_regular_gross_non_taxable_pay,
-        trace_regular_gross_taxable_pay, trace_regular_total_payroll_deduction,
-        trace_regular_net_pay, trace_regular_expense
+        trace_employment_income_tax, trace_employee_pension_contribution,
+        trace_employer_pension_contribution, trace_total_pension_contribution,
+        trace_gross_pay, trace_gross_non_taxable_pay,
+        trace_gross_taxable_pay, trace_total_payroll_deduction,
+        trace_net_pay, trace_expense
     ], layout=layout)
 
     # Convert the figure to HTML
@@ -647,16 +647,16 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
 
     # Always include summary fields
     summary_fields = [
-        'Regular Employment Income Tax',
-        'Regular Employee Pension Contribution',
-        'Regular Employer Pension Contribution',
-        'Regular Total Pension',
-        'Regular Gross Pay',
-        'Regular Gross Taxable Pay',
-        'Regular Gross Non-Taxable Pay',
-        'Regular Total Payroll Deduction',
-        'Regular Net Pay',
-        'Regular Expense'
+        'Employment Income Tax',
+        'Employee Pension Contribution',
+        'Employer Pension Contribution',
+        'Total Pension Contribution',
+        'Gross Pay',
+        'Gross Taxable Pay',
+        'Gross Non-Taxable Pay',
+        'Total Payroll Deduction',
+        'Net Pay',
+        'Expense'
     ]
     header.extend(summary_fields)
 
@@ -779,16 +779,16 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
 
         # Summary fields
         row.extend([
-            payroll.regular_employment_income_tax,
-            payroll.regular_employee_pension_contribution,
-            payroll.regular_employer_pension_contribution,
-            payroll.regular_total_pension,
-            payroll.regular_gross_pay,
-            payroll.regular_gross_taxable_pay,
-            payroll.regular_gross_non_taxable_pay,
-            payroll.regular_total_payroll_deduction,
-            payroll.regular_net_pay,
-            payroll.regular_expense
+            payroll.employment_income_tax,
+            payroll.employee_pension_contribution,
+            payroll.employer_pension_contribution,
+            payroll.total_pension_contribution,
+            payroll.gross_pay,
+            payroll.gross_taxable_pay,
+            payroll.gross_non_taxable_pay,
+            payroll.total_payroll_deduction,
+            payroll.net_pay,
+            payroll.expense
         ])
 
         sheet.append(row)

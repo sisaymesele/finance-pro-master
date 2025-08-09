@@ -43,18 +43,18 @@
                 <th>First Name</th>
                 <th>Father Name</th>
                 <th>Last Name</th>
-                <th>Monthly Adjusted Deduction</th>
+                <th>Total Deduction</th>
             </tr>
             </thead>
             <tbody>
             {% for item in monthly_deduction_adjustment %}
             <tr>
-                <td>{{ item.record_month__payroll_month__payroll_month }}</td>
-                <td>{{ item.record_month__personnel_full_name__personnel_id }}</td>
-                <td>{{ item.record_month__personnel_full_name__first_name }}</td>
-                <td>{{ item.record_month__personnel_full_name__father_name }}</td>
-                <td>{{ item.record_month__personnel_full_name__last_name }}</td>
-                <td>{{ item.monthly_adjusted_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ item.original_payroll_record__payroll_month__payroll_month }}</td>
+                <td>{{ item.original_payroll_record__personnel_full_name__personnel_id }}</td>
+                <td>{{ item.original_payroll_record__personnel_full_name__first_name }}</td>
+                <td>{{ item.original_payroll_record__personnel_full_name__father_name }}</td>
+                <td>{{ item.original_payroll_record__personnel_full_name__last_name }}</td>
+                <td>{{ item.recorded_month_total_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
             </tr>
             {% empty %}
             <tr>

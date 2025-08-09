@@ -147,13 +147,13 @@ class RegularPayrollForm(forms.ModelForm):
             'transport_for_work_taxable', 'transport_for_work_non_taxable', 'fuel_for_work_taxable',
             'fuel_for_work_non_taxable',
             'per_diem_taxable', 'per_diem_non_taxable',
-            'hardship_allowance_taxable', 'hardship_allowance_non_taxable', 'regular_employee_pension_contribution',
-            'regular_employer_pension_contribution', 'regular_total_pension', 'regular_employment_income_tax',
+            'hardship_allowance_taxable', 'hardship_allowance_non_taxable', 'employee_pension_contribution',
+            'employer_pension_contribution', 'total_pension_contribution', 'employment_income_tax',
             #cost share
             'university_cost_share_pay',
             # Totals
-            'regular_total_payroll_deduction', 'regular_gross_pay', 'regular_gross_taxable_pay', 'regular_gross_non_taxable_pay', 'regular_net_pay',
-            'regular_total_payroll_deduction', 'regular_expense',
+            'total_payroll_deduction', 'gross_pay', 'gross_taxable_pay', 'gross_non_taxable_pay', 'net_pay',
+            'total_payroll_deduction', 'expense',
             #
 
             'bank_name', 'bank_account_id', 'bank_account_type'
@@ -389,7 +389,7 @@ class RegularPayrollForm(forms.ModelForm):
 #earning adjustment
 class EarningAdjustmentForm(forms.ModelForm):
 
-    record_month = forms.ModelChoiceField(
+    original_payroll_record = forms.ModelChoiceField(
         queryset=RegularPayroll.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})  # Add Bootstrap class here
@@ -403,35 +403,13 @@ class EarningAdjustmentForm(forms.ModelForm):
 
         model = EarningAdjustment
 
-        exclude = [
-            'organization_name', 'taxable', 'non_taxable', 'adjusted_month_gross_taxable_pay',
-            'adjusted_month_gross_non_taxable_pay', 'adjusted_month_gross_pay',
-            'adjusted_month_total_taxable_pay', 'adjusted_month_employment_income_tax_total',
-            'adjusted_month_employment_income_tax', 'adjusted_month_total_earning_deduction',
-            #
-            'employee_pension_contribution',
-            'employer_pension_contribution',
-            'total_pension',
-            #
-            'adjusted_month_employee_pension_contribution',
-            'adjusted_month_employer_pension_contribution',
-            'adjusted_month_total_pension',
-            #
-            'adjusted_month_expense', 'created_at', 'updated_at',
-            'recorded_month_adjusted_taxable_gross_pay', 'recorded_month_adjusted_non_taxable_gross_pay',
-            # Monthly pension summary fields
-            'recorded_month_adjusted_employee_pension_contribution',
-            'recorded_month_adjusted_employer_pension_contribution',
-            'recorded_month_adjusted_total_pension',
-            #
-            'recorded_month_adjusted_gross_pay', 'recorded_month_total_taxable_pay',
-            'recorded_month_employment_income_tax_total', 'recorded_month_employment_income_tax_on_adjustment',
-            'recorded_month_earning_adjustment_deduction_total', 'recorded_month_adjusted_expense',
-
+        fields = [
+            'original_payroll_record', 'payroll_needing_adjustment', 'case', 'component', 'earning_amount',
+            'period_start', 'period_end', 'months_covered',
         ]
 
         widgets = {
-            'record_month': forms.Select(attrs={'class': 'form-control'}),
+            'original_payroll_record': forms.Select(attrs={'class': 'form-control'}),
             'payroll_needing_adjustment': forms.Select(attrs={'class': 'form-control', 'Placeholder': 'Processing Month'}),
             'case': forms.Select(attrs={'class': 'form-control'}),
             'component': forms.Select(attrs={'class': 'form-control'}),
@@ -445,11 +423,11 @@ class EarningAdjustmentForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        # Help texts
-        self.fields['record_month'].help_text = "The current payroll month where you're recording the adjustment."
+        self.fields['original_payroll_record'].help_text = "The current payroll month where you're recording the adjustment."
         self.fields[
-            'payroll_needing_adjustment'].help_text = "Select the past payroll month with a missed payment, error, or need for additional pay."
-
+            'payroll_needing_adjustment'].help_text = "The past payroll month that had an issue, missed pay, or error."
+        #
+        # Check if the request exists, the user is authenticated, and the user has an organization assigned
 
         if (
                 self.request
@@ -458,40 +436,22 @@ class EarningAdjustmentForm(forms.ModelForm):
                 and self.request.user.organization_name
         ):
             org = self.request.user.organization_name
-
-            # Base queryset filtered by org
-            base_qs = RegularPayroll.objects.filter(organization_name=org).order_by('payroll_month_id', 'id')
-
-            # 1. Get unique payroll months by picking one payroll record per month
-            seen_months = set()
-            unique_payroll_ids = []
-            for payroll in base_qs:
-                if payroll.payroll_month_id not in seen_months:
-                    unique_payroll_ids.append(payroll.id)
-                    seen_months.add(payroll.payroll_month_id)
-
-            # Set record_month queryset with unique payroll months
-            self.fields['record_month'].queryset = RegularPayroll.objects.filter(id__in=unique_payroll_ids)
-
-            # Override label to show only month for record_month dropdown
-            self.fields['record_month'].label_from_instance = lambda obj: str(obj.payroll_month)
-
-            # 2. Set payroll_needing_adjustment queryset normally (all payrolls filtered by org)
-            self.fields['payroll_needing_adjustment'].queryset = base_qs
-
-            # Its label will use the __str__ method of RegularPayroll (month + personnel)
-            # You can keep default label_from_instance or override if you want custom display here
-
+            self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.filter(
+                organization_name=org
+            )
+            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.filter(
+                organization_name=org
+            )
         else:
-            # No org or user, empty querysets
-            self.fields['record_month'].queryset = RegularPayroll.objects.none()
             self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.none()
+            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.none()
+
 
 
 #deduction adjustment
 
 class DeductionAdjustmentForm(forms.ModelForm):
-    record_month = forms.ModelChoiceField(
+    original_payroll_record = forms.ModelChoiceField(
         queryset=RegularPayroll.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})  # Add Bootstrap class here
@@ -506,13 +466,13 @@ class DeductionAdjustmentForm(forms.ModelForm):
         model = DeductionAdjustment
 
         fields = [
-            'record_month', 'payroll_needing_adjustment',
+            'original_payroll_record', 'payroll_needing_adjustment',
             'case', 'component', 'deduction_amount', 'period_start',
             'period_end', 'months_covered', 'created_at', 'updated_at',
         ]
 
         widgets = {
-            'record_month': forms.Select(attrs={'class': 'form-select'}),
+            'original_payroll_record': forms.Select(attrs={'class': 'form-select'}),
             'payroll_needing_adjustment': forms.Select(attrs={'class': 'form-select'}),
             'case': forms.Select(attrs={'class': 'form-select'}),
             'component': forms.Select(attrs={'class': 'form-select'}),
@@ -528,10 +488,11 @@ class DeductionAdjustmentForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        # Help texts
-        self.fields['record_month'].help_text = "The current payroll month where you're recording the adjustment."
-        self.fields['payroll_needing_adjustment'].help_text = "Select the past payroll month with a missed payment, error, or need for additional deduction."
-
+        self.fields['original_payroll_record'].help_text = "The current payroll month where you're recording the adjustment."
+        self.fields[
+            'payroll_needing_adjustment'].help_text = "The past payroll month that had an issue, missed pay, or error."
+        #
+        # Check if the request exists, the user is authenticated, and the user has an organization assigned
 
         if (
                 self.request
@@ -540,37 +501,15 @@ class DeductionAdjustmentForm(forms.ModelForm):
                 and self.request.user.organization_name
         ):
             org = self.request.user.organization_name
-            # 1. Get PayrollMonth used in RegularPayroll for that org
-            # Get all payrolls for the user's organization, ordered by month and ID
-
-
-            # Base queryset filtered by org
-            base_qs = RegularPayroll.objects.filter(organization_name=org).order_by('payroll_month_id', 'id')
-
-            # 1. Get unique payroll months by picking one payroll record per month
-            seen_months = set()
-            unique_payroll_ids = []
-            for payroll in base_qs:
-                if payroll.payroll_month_id not in seen_months:
-                    unique_payroll_ids.append(payroll.id)
-                    seen_months.add(payroll.payroll_month_id)
-
-            # Set record_month queryset with unique payroll months
-            self.fields['record_month'].queryset = RegularPayroll.objects.filter(id__in=unique_payroll_ids)
-
-            # Override label to show only month for record_month dropdown
-            self.fields['record_month'].label_from_instance = lambda obj: str(obj.payroll_month)
-
-            # 2. Set payroll_needing_adjustment queryset normally (all payrolls filtered by org)
-            self.fields['payroll_needing_adjustment'].queryset = base_qs
-
-            # Its label will use the __str__ method of RegularPayroll (month + personnel)
-            # You can keep default label_from_instance or override if you want custom display here
-
+            self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.filter(
+                organization_name=org
+            )
+            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.filter(
+                organization_name=org
+            )
         else:
-            # No org or user, empty querysets
-            self.fields['record_month'].queryset = RegularPayroll.objects.none()
             self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.none()
+            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.none()
 
 
 #severance pay

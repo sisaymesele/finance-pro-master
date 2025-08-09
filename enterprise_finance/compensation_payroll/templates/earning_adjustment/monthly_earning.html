@@ -43,20 +43,20 @@
                 <th>First Name</th>
                 <th>Father Name</th>
                 <th>Last Name</th>
-                <th>Adjusted Taxable Gross Pay Per Recorded Month</th>
-                <th>Adjusted Non Taxable Gross Pay Per Recorded Month</th>
-                <th>Adjusted Gross Pay Per Recorded Month</th>
-                <th>Total Taxable Pay Per Recorded Month</th>
-                <th>Employment Income Tax Total Per Recorded Month</th>
-                <th>Employment Income Tax On Adjustment Per Recorded Month</th>
+                <th>Taxable Gross Pay</th>
+                <th>Non Taxable Gross Pay</th>
+                <th>Gross Pay</th>
+                <th>Total Taxable Pay</th>
+                <th>Employment Income Tax Total</th>
+                <th>Employment Income Tax</th>
 
                 <!-- Recorded Month Pension Fields -->
-                <th>Employee Pension Contribution Per Recorded Month</th>
-                <th>Employer Pension Contribution Per Recorded Month</th>
-                <th>Total Pension Per Recorded Month</th>
+                <th>Employee Pension Contribution</th>
+                <th>Employer Pension Contribution</th>
+                <th>Total Pension Contribution</th>
                 <!--                    net and expense-->
-                <th>Adjusted Deduction Per Recorded Month</th>
-                <th>Adjusted Expense Per Recorded Month</th>
+                <th>Total Deduction</th>
+                <th>Total Expense</th>
 
             </tr>
             </thead>
@@ -64,34 +64,34 @@
             {% for row in monthly_earning_adjustment %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ row.record_month__payroll_month__payroll_month }}</td>
-                <td>{{ row.record_month__personnel_full_name__personnel_id }}</td>
+                <td>{{ row.original_payroll_record__payroll_month__payroll_month }}</td>
+                <td>{{ row.original_payroll_record__personnel_full_name__personnel_id }}</td>
                 <td class="text-start">
-                    {{ row.record_month__personnel_full_name__first_name }}
+                    {{ row.original_payroll_record__personnel_full_name__first_name }}
                 </td>
                 <td class="text-start">
-                    {{ row.record_month__personnel_full_name__father_name }}
+                    {{ row.original_payroll_record__personnel_full_name__father_name }}
                 </td>
                 <td class="text-start">
-                    {{ row.record_month__personnel_full_name__last_name }}
+                    {{ row.original_payroll_record__personnel_full_name__last_name }}
                 </td>
-                <td>{{ row.recorded_month_adjusted_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
-                <td>{{ row.recorded_month_adjusted_non_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
-                <td>{{ row.recorded_month_adjusted_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ row.recorded_month_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ row.recorded_month_non_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ row.recorded_month_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                 <td>{{ row.recorded_month_total_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                 <td>{{ row.recorded_month_employment_income_tax_total|default:"0.00"|floatformat:2|intcomma }}</td>
-                <td>{{ row.recorded_month_employment_income_tax_on_adjustment|default:"0.00"|floatformat:2|intcomma }}
+                <td>{{ row.recorded_month_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}
                 </td>
                 <!--                    pension-->
-                <td>{{ row.recorded_month_adjusted_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}
+                <td>{{ row.recorded_month_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}
                 </td>
-                <td>{{ row.recorded_month_adjusted_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}
+                <td>{{ row.recorded_month_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}
                 </td>
-                <td>{{ row.recorded_month_adjusted_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ row.recorded_month_total_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                 <!--                    net and expense-->
-                <td>{{ row.recorded_month_earning_adjustment_deduction_total|default:"0.00"|floatformat:2|intcomma }}
+                <td>{{ row.recorded_month_total_earning_deduction|default:"0.00"|floatformat:2|intcomma }}
                 </td>
-                <td>{{ row.recorded_month_adjusted_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                <td>{{ row.recorded_month_expense|default:"0.00"|floatformat:2|intcomma }}</td>
             </tr>
             {% empty %}
             <tr>

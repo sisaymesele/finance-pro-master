@@ -2,7 +2,7 @@
 {% load humanize %}
 
 {% block content %}
-<div class="container my-4 d-flex flex-column align-items-center">
+<div class="container-fluid my-4 d-flex flex-column align-items-center">
 
     <!-- Header Row -->
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-3 w-100">
@@ -38,9 +38,10 @@
 
                 <div class="row gx-4">
 
-                    <!-- Left Side: Payroll Details -->
-                    <div class="col-md-8 pe-md-4 border-end">
+                    <!-- Left side: Payroll details + deduction stacked -->
+                    <div class="col-lg-9">
 
+                        <!-- Regular Payroll Details -->
                         {% if month.regular_item_by_component and month.regular_item_by_component.values|length > 0 %}
                         <h6 class="mb-3 text-primary fw-semibold">Regular Payroll Details</h6>
                         <div class="table-responsive mb-4">
@@ -77,9 +78,11 @@
                         </div>
                         {% endif %}
 
+                        <!-- Earning Adjustments -->
                         {% if month.show_earning %}
-                        <h6 class="mb-3 text-success fw-semibold">Earning Adjustments</h6>
-                        <div class="table-responsive mb-4">
+                        <div class="row">
+                        <h6 class="mb-2 text-success fw-semibold">Earning Adjustments</h6>
+                        <div class="table-responsive mb-0">
                             <table class="table table-sm table-bordered table-hover align-middle">
                                 <thead class="table-success">
                                     <tr>
@@ -109,8 +112,21 @@
                                 </tbody>
                             </table>
                         </div>
+
+                            <div class="container mb-4">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                      <tr>
+                                        <td>Employment Income Tax:</td>
+                                        <td>{{ month.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                         {% endif %}
 
+                        <!-- Deduction Adjustments (below others on left) -->
                         {% if month.show_deduction %}
                         <h6 class="mb-3 text-danger fw-semibold">Deduction Adjustments</h6>
                         <div class="table-responsive mb-4">
@@ -135,6 +151,7 @@
                         </div>
                         {% endif %}
 
+                        <!-- Severance Pay -->
                         {% with s=month.severance %}
                         {% if s.taxable_gross or s.gross or s.employment_income_tax or s.total_severance_deduction or s.net or s.expense %}
                         <h6 class="mb-3 text-info fw-semibold">Severance Pay</h6>
@@ -176,10 +193,11 @@
                         </div>
                         {% endif %}
                         {% endwith %}
+
                     </div>
 
-                    <!-- Right Side: Total Summary -->
-                    <div class="col-md-4 ps-md-4 sticky-md-top" style="top: 80px;">
+                    <!-- Right side: Total Summary always fixed -->
+                    <div class="col-lg-3">
                         <h6 class="mb-3 fw-semibold">Total Summary</h6>
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered align-middle">
@@ -247,6 +265,7 @@
                         <i class="bi bi-printer"></i> Save or Print
                     </button>
                 </div>
+
             </div>
         </div>
 
@@ -259,5 +278,6 @@
     <div class="d-flex justify-content-center mt-4 w-100">
         {% include "pagination.html" %}
     </div>
+
 </div>
 {% endblock %}

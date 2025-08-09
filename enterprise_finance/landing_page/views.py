@@ -24,10 +24,6 @@ def video_list(request):
 def qa_list(request):
     return render(request, 'partial/qa.html')
 
-
-def about_list(request):
-    return render(request, 'partial/about.html')
-
 def why_choose(request):
     return render(request, 'partial/why_choose.html')
 
@@ -74,10 +70,14 @@ def documentation_detail(request, slug):
     })
 
 
-def privacy_and_terms(request):
+def privacy_list(request):
     settings = SiteSettings.objects.all()
-    return render(request, 'privacy_and_terms.html', {'settings': settings})
+    return render(request, 'privacy_list.html', {'settings': settings})
 
-def contact(request):
+def terms_list(request):
     settings = SiteSettings.objects.all()
-    return render(request, 'contact.html', {'settings': settings})
+    return render(request, 'terms_list.html', {'settings': settings})
+
+def contact_list(request):
+    settings = SiteSettings.objects.all()
+    return render(request, 'contact_list.html', {'settings': settings})

@@ -4,10 +4,10 @@
 {% block content %}
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h5 class="mb-3">Deductions Per Adjusted Payroll Month</h5>
+    <h5 class="mb-3">Detailed Deduction By Adjusted Month</h5>
 
     <a href="{% url 'export_deduction_per_adjusted_month_to_excel' %}" class="btn btn-success btn-sm py-1 px-2">
-        Export Deduction Adjustment Per Adjusted Payroll Month to Excel
+        Export Deduction Adjustment to Excel
     </a>
 
 
@@ -35,26 +35,26 @@
         <thead class="table-light">
         <tr>
             <th>Record Month</th>
-            <th>Adjusted Payroll Month</th>
+            <th>Adjusted Month</th>
             <th>Personnel ID</th>
             <th>First Name</th>
             <th>Father Name</th>
             <th>Last Name</th>
-            <th>Adjusted Deduction Per Adjusted Payroll Month</th>
+            <th>Total Deduction</th>
         </tr>
         </thead>
         <tbody>
         {% for item in deduction_per_adjusted_month %}
         <tr>
-            <td>{{ item.record_month__payroll_month__payroll_month }}</td>
+            <td>{{ item.original_payroll_record__payroll_month__payroll_month }}</td>
             <td>{{ item.payroll_needing_adjustment__payroll_month__payroll_month }}</td>
 
-            <td>{{ item.record_month__personnel_full_name__personnel_id }}</td>
-            <td>{{ item.record_month__personnel_full_name__first_name }}</td>
-            <td>{{ item.record_month__personnel_full_name__father_name }}</td>
-            <td>{{ item.record_month__personnel_full_name__last_name }}</td>
+            <td>{{ item.original_payroll_record__personnel_full_name__personnel_id }}</td>
+            <td>{{ item.original_payroll_record__personnel_full_name__first_name }}</td>
+            <td>{{ item.original_payroll_record__personnel_full_name__father_name }}</td>
+            <td>{{ item.original_payroll_record__personnel_full_name__last_name }}</td>
 
-            <td>{{ item.adjusted_deduction_per_adjusted_month|default:"0.00"|floatformat:2|intcomma }}</td>
+            <td>{{ item.adjusted_month_total_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
         </tr>
         {% empty %}
         <tr>

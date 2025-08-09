@@ -80,9 +80,9 @@ class Documentation(models.Model):
 
 class SiteSettings(models.Model):
     site_name = models.CharField(max_length=255, default='My Website')
-    privacy = models.TextField(max_length=500, null=True, blank=True)
-    copy_right = models.TextField(max_length=500, null=True, blank=True)
-    terms = models.TextField(max_length=500, null=True, blank=True)
+    privacy = HTMLField(max_length=2000, null=True, blank=True)
+    copy_right = HTMLField(max_length=2000, null=True, blank=True)
+    terms = HTMLField(max_length=2000, null=True, blank=True)
     address = models.TextField()
     phone = models.CharField(max_length=30)
     email = models.EmailField()

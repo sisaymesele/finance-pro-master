@@ -11,25 +11,25 @@ def get_earning_adjustment_context(request):
     earning_adjustments = EarningAdjustment.objects.filter(
         organization_name=request.user.organization_name
     ).select_related(
-        'record_month__personnel_full_name',
+        'original_payroll_record__personnel_full_name',
         'payroll_needing_adjustment__personnel_full_name',
-        'record_month__payroll_month',
+        'original_payroll_record__payroll_month',
         'payroll_needing_adjustment__payroll_month',
     )
 
     search_query = request.GET.get('search', '')
     if search_query:
         earning_adjustments = earning_adjustments.filter(
-            Q(record_month__payroll_month__payroll_month__icontains=search_query) |
-            Q(record_month__personnel_full_name__personnel_id__icontains=search_query) |
-            Q(record_month__personnel_full_name__first_name__icontains=search_query) |
-            Q(record_month__personnel_full_name__father_name__icontains=search_query) |
-            Q(record_month__personnel_full_name__last_name__icontains=search_query)
+            Q(original_payroll_record__payroll_month__payroll_month__icontains=search_query) |
+            Q(original_payroll_record__personnel_full_name__personnel_id__icontains=search_query) |
+            Q(original_payroll_record__personnel_full_name__first_name__icontains=search_query) |
+            Q(original_payroll_record__personnel_full_name__father_name__icontains=search_query) |
+            Q(original_payroll_record__personnel_full_name__last_name__icontains=search_query)
         )
 
     earning_adjustments = earning_adjustments.order_by(
-        '-record_month__payroll_month__year',
-        '-record_month__payroll_month__month'
+        '-original_payroll_record__payroll_month__year',
+        '-original_payroll_record__payroll_month__month'
     )
 
     paginator = Paginator(earning_adjustments, 10)
@@ -39,11 +39,11 @@ def get_earning_adjustment_context(request):
     earning_per_adjusted_month = (
         earning_adjustments
         .values(
-            'record_month__payroll_month__payroll_month',
-            'record_month__personnel_full_name__personnel_id',
-            'record_month__personnel_full_name__first_name',
-            'record_month__personnel_full_name__father_name',
-            'record_month__personnel_full_name__last_name',
+            'original_payroll_record__payroll_month__payroll_month',
+            'original_payroll_record__personnel_full_name__personnel_id',
+            'original_payroll_record__personnel_full_name__first_name',
+            'original_payroll_record__personnel_full_name__father_name',
+            'original_payroll_record__personnel_full_name__last_name',
 
             'payroll_needing_adjustment__payroll_month__payroll_month',
             'payroll_needing_adjustment__personnel_full_name__personnel_id',
@@ -51,8 +51,8 @@ def get_earning_adjustment_context(request):
             'payroll_needing_adjustment__personnel_full_name__father_name',
             'payroll_needing_adjustment__personnel_full_name__last_name',
 
-            'payroll_needing_adjustment__regular_gross_taxable_pay',
-            'payroll_needing_adjustment__regular_employment_income_tax',
+            'payroll_needing_adjustment__gross_taxable_pay',
+            'payroll_needing_adjustment__employment_income_tax',
             'adjusted_month_gross_taxable_pay',
             'adjusted_month_gross_non_taxable_pay',
             'adjusted_month_gross_pay',
@@ -68,37 +68,37 @@ def get_earning_adjustment_context(request):
         )
         .annotate(record_count=Count('id'))
         .order_by(
-            '-record_month__payroll_month__year',
-        '-record_month__payroll_month__month'
+            '-original_payroll_record__payroll_month__year',
+        '-original_payroll_record__payroll_month__month'
         )
     )
 
     monthly_earning_adjustment = (
         earning_adjustments
         .values(
-            'record_month__payroll_month__payroll_month',
-            'record_month__personnel_full_name__personnel_id',
-            'record_month__personnel_full_name__first_name',
-            'record_month__personnel_full_name__father_name',
-            'record_month__personnel_full_name__last_name',
+            'original_payroll_record__payroll_month__payroll_month',
+            'original_payroll_record__personnel_full_name__personnel_id',
+            'original_payroll_record__personnel_full_name__first_name',
+            'original_payroll_record__personnel_full_name__father_name',
+            'original_payroll_record__personnel_full_name__last_name',
 
-            'recorded_month_adjusted_taxable_gross_pay',
-            'recorded_month_adjusted_non_taxable_gross_pay',
-            'recorded_month_adjusted_gross_pay',
+            'recorded_month_taxable_gross_pay',
+            'recorded_month_non_taxable_gross_pay',
+            'recorded_month_gross_pay',
             'recorded_month_total_taxable_pay',
             'recorded_month_employment_income_tax_total',
-            'recorded_month_employment_income_tax_on_adjustment',
-            'recorded_month_earning_adjustment_deduction_total',
-            'recorded_month_adjusted_expense',
+            'recorded_month_employment_income_tax',
+            'recorded_month_total_earning_deduction',
+            'recorded_month_expense',
 
-            'recorded_month_adjusted_employee_pension_contribution',
-            'recorded_month_adjusted_employer_pension_contribution',
-            'recorded_month_adjusted_total_pension',
+            'recorded_month_employee_pension_contribution',
+            'recorded_month_employer_pension_contribution',
+            'recorded_month_total_pension_contribution',
         )
         .annotate(record_count=Count('id'))
         .order_by(
-            '-record_month__payroll_month__year',
-        '-record_month__payroll_month__month'
+            '-original_payroll_record__payroll_month__year',
+        '-original_payroll_record__payroll_month__month'
         )
     )
     # Sort data keys by year and month ascending
@@ -111,5 +111,4 @@ def get_earning_adjustment_context(request):
         'monthly_earning_adjustment': monthly_earning_adjustment,
     }
 
-#export
 

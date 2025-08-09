@@ -98,7 +98,7 @@ def delete_deduction_adjustment(request, pk):
     if request.method == "POST":
         deduction_adjustment.delete()
         messages.success(request, "Deduction Adjustment deleted successfully!")
-        return redirect('deduction_adjustment_detail')
+        return redirect('deduction_adjustment_list')
 
     context = {'deduction_adjustment': deduction_adjustment}
 
@@ -116,7 +116,7 @@ def export_deduction_adjustment_list_to_excel(request):
     ws.title = "Deduction Adjustments"
 
     headers = [
-        "#", "Record Month", "Adjusted Payroll Month",
+        "Record Month", "Adjusted Month",
         "First Name", "Father Name", "Last Name",
         "Case", "Component", "Deduction Amount",
         "Period Start", "Period End", "Months Covered",
@@ -128,7 +128,7 @@ def export_deduction_adjustment_list_to_excel(request):
     # Title row (1st)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_columns)
     title_cell = ws.cell(row=1, column=1)
-    title_cell.value = "Deduction Adjustment Report"
+    title_cell.value = "Detailed Deduction Adjustment"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[1].height = 30
@@ -136,7 +136,7 @@ def export_deduction_adjustment_list_to_excel(request):
     # Subtitle row (2nd)
     ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_columns)
     subtitle_cell = ws.cell(row=2, column=1)
-    subtitle_cell.value = "Detailed personnel deduction adjustments"
+    subtitle_cell.value = "Detailed personnel deduction adjustments for each component"
     subtitle_cell.font = Font(size=10, italic=True)
     subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[2].height = 20
@@ -156,14 +156,13 @@ def export_deduction_adjustment_list_to_excel(request):
         cell.alignment = header_alignment
 
     # Add data rows starting at row 4
-    for i, d in enumerate(deductions, start=1):
+    for d in deductions:
         ws.append([
-            i,
-            getattr(d.record_month.payroll_month, "payroll_month", ""),
+            getattr(d.original_payroll_record.payroll_month, "payroll_month", ""),
             getattr(d.payroll_needing_adjustment.payroll_month, "payroll_month", ""),
-            getattr(d.record_month.personnel_full_name, "first_name", ""),
-            getattr(d.record_month.personnel_full_name, "father_name", ""),
-            getattr(d.record_month.personnel_full_name, "last_name", ""),
+            getattr(d.original_payroll_record.personnel_full_name, "first_name", ""),
+            getattr(d.original_payroll_record.personnel_full_name, "father_name", ""),
+            getattr(d.original_payroll_record.personnel_full_name, "last_name", ""),
             d.get_case_display(),
             d.get_component_display(),
             float(d.deduction_amount or 0),
@@ -177,7 +176,7 @@ def export_deduction_adjustment_list_to_excel(request):
     # Adjust column widths
     MIN_WIDTH = 10
     MAX_WIDTH = 25
-    for i, column_cells in enumerate(ws.columns, 1):
+    for idx, column_cells in enumerate(ws.columns, 1):
         max_length = 0
         for cell in column_cells:
             try:
@@ -186,7 +185,7 @@ def export_deduction_adjustment_list_to_excel(request):
             except Exception:
                 continue
         adjusted_width = min(max(max_length + 2, MIN_WIDTH), MAX_WIDTH)
-        ws.column_dimensions[get_column_letter(i)].width = adjusted_width
+        ws.column_dimensions[get_column_letter(idx)].width = adjusted_width
 
     # Output to HttpResponse
     output = BytesIO()
@@ -209,16 +208,16 @@ def export_deduction_per_adjusted_month_to_excel(request):
 
     wb = Workbook()
     ws = wb.active
-    ws.title = "Deduction Per Adjusted Payroll Month"
+    ws.title = "Total Deduction By Adjusted Month"
 
     headers = [
         "Record Month",
-        "Adjusted Payroll Month",
+        "Adjusted Month",
         "Personnel ID",
         "First Name",
         "Father Name",
         "Last Name",
-        "Adjusted Deduction Per Adjusted Payroll Month"
+        "Total Deduction"
     ]
 
     total_columns = len(headers)
@@ -226,18 +225,10 @@ def export_deduction_per_adjusted_month_to_excel(request):
     # Title row (1st)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_columns)
     title_cell = ws.cell(row=1, column=1)
-    title_cell.value = "Deduction Per Adjusted Payroll Month Report"
+    title_cell.value = "Deduction Adjustment By Adjusted Month"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[1].height = 30
-
-    # Subtitle row (2nd)
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_columns)
-    subtitle_cell = ws.cell(row=2, column=1)
-    subtitle_cell.value = "Detailed personnel deduction adjustments per payroll month"
-    subtitle_cell.font = Font(size=10, italic=True)
-    subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
-    ws.row_dimensions[2].height = 20
 
     # Use ExportUtilityService to split header lines
     export_util = ExportUtilityService()
@@ -248,7 +239,7 @@ def export_deduction_per_adjusted_month_to_excel(request):
     header_font = Font(bold=True, color="FFFFFFFF")  # White font
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    for cell in ws[3]:
+    for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
@@ -256,18 +247,18 @@ def export_deduction_per_adjusted_month_to_excel(request):
     # Append data rows starting from row 4
     for item in data:
         ws.append([
-            item.get("record_month__payroll_month__payroll_month", ""),
+            item.get("original_payroll_record__payroll_month__payroll_month", ""),
             item.get("payroll_needing_adjustment__payroll_month__payroll_month", ""),
-            item.get("record_month__personnel_full_name__personnel_id", ""),
-            item.get("record_month__personnel_full_name__first_name", ""),
-            item.get("record_month__personnel_full_name__father_name", ""),
-            item.get("record_month__personnel_full_name__last_name", ""),
-            float(item.get("adjusted_deduction_per_adjusted_month", 0) or 0),
+            item.get("original_payroll_record__personnel_full_name__personnel_id", ""),
+            item.get("original_payroll_record__personnel_full_name__first_name", ""),
+            item.get("original_payroll_record__personnel_full_name__father_name", ""),
+            item.get("original_payroll_record__personnel_full_name__last_name", ""),
+            float(item.get("adjusted_month_total_deduction", 0) or 0),
         ])
 
     # Auto-adjust column widths
     MIN_WIDTH = 12
-    MAX_WIDTH = 40
+    MAX_WIDTH = 15
     for col_idx, col_cells in enumerate(ws.columns, 1):
         max_length = 0
         for cell in col_cells:
@@ -305,7 +296,7 @@ def export_monthly_deduction_adjustment_to_excel(request):
         "First Name",
         "Father Name",
         "Last Name",
-        "Monthly Adjusted Deduction",
+        "Total Deduction",
     ]
 
     total_columns = len(headers)
@@ -313,18 +304,10 @@ def export_monthly_deduction_adjustment_to_excel(request):
     # Title row (1st)
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_columns)
     title_cell = ws.cell(row=1, column=1)
-    title_cell.value = "Monthly Deduction Adjustment Report"
+    title_cell.value = "Monthly Deduction Adjustment"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[1].height = 30
-
-    # Subtitle row (2nd)
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_columns)
-    subtitle_cell = ws.cell(row=2, column=1)
-    subtitle_cell.value = "Details of personnel monthly deduction adjustments"
-    subtitle_cell.font = Font(size=10, italic=True)
-    subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
-    ws.row_dimensions[2].height = 20
 
     # Use ExportUtilityService to split header lines
     export_util = ExportUtilityService()
@@ -335,7 +318,7 @@ def export_monthly_deduction_adjustment_to_excel(request):
     header_font = Font(bold=True, color="FFFFFFFF")  # White font
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    for cell in ws[3]:
+    for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
@@ -343,17 +326,17 @@ def export_monthly_deduction_adjustment_to_excel(request):
     # Append data rows
     for item in data:
         ws.append([
-            item.get("record_month__payroll_month__payroll_month", ""),
-            item.get("record_month__personnel_full_name__personnel_id", ""),
-            item.get("record_month__personnel_full_name__first_name", ""),
-            item.get("record_month__personnel_full_name__father_name", ""),
-            item.get("record_month__personnel_full_name__last_name", ""),
-            float(item.get("monthly_adjusted_deduction", 0) or 0),
+            item.get("original_payroll_record__payroll_month__payroll_month", ""),
+            item.get("original_payroll_record__personnel_full_name__personnel_id", ""),
+            item.get("original_payroll_record__personnel_full_name__first_name", ""),
+            item.get("original_payroll_record__personnel_full_name__father_name", ""),
+            item.get("original_payroll_record__personnel_full_name__last_name", ""),
+            float(item.get("recorded_month_total_deduction", 0) or 0),
         ])
 
     # Adjust column widths
     MIN_WIDTH = 12
-    MAX_WIDTH = 40
+    MAX_WIDTH = 15
     for i, col_cells in enumerate(ws.columns, 1):
         max_length = 0
         for cell in col_cells:

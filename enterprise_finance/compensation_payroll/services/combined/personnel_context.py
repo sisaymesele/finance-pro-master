@@ -55,16 +55,16 @@ def get_combined_personnel_payroll_context(request):
         #regular
         regular = {
             'pensionable': safe_dec(payroll.basic_salary),
-            'taxable_gross': safe_dec(payroll.regular_gross_taxable_pay),
-            'non_taxable_gross': safe_dec(payroll.regular_gross_non_taxable_pay),
-            'gross_pay': safe_dec(payroll.regular_gross_pay),
-            'employee_pension': safe_dec(payroll.regular_employee_pension_contribution),
-            'employer_pension': safe_dec(payroll.regular_employer_pension_contribution),
-            'total_pension': safe_dec(payroll.regular_total_pension),
-            'employment_income_tax': safe_dec(payroll.regular_employment_income_tax),
-            'deduction': safe_dec(payroll.regular_total_payroll_deduction),
-            'net_pay': safe_dec(payroll.regular_net_pay),
-            'expense': safe_dec(payroll.regular_expense),
+            'taxable_gross': safe_dec(payroll.gross_taxable_pay),
+            'non_taxable_gross': safe_dec(payroll.gross_non_taxable_pay),
+            'gross_pay': safe_dec(payroll.gross_pay),
+            'employee_pension': safe_dec(payroll.employee_pension_contribution),
+            'employer_pension': safe_dec(payroll.employer_pension_contribution),
+            'total_pension': safe_dec(payroll.total_pension_contribution),
+            'employment_income_tax': safe_dec(payroll.employment_income_tax),
+            'deduction': safe_dec(payroll.total_payroll_deduction),
+            'net_pay': safe_dec(payroll.net_pay),
+            'expense': safe_dec(payroll.expense),
         }
 
         regular_item_by_component = {
@@ -118,30 +118,31 @@ def get_combined_personnel_payroll_context(request):
             'other_deduction': safe_dec(payroll.other_deduction),
         }
         #adjustment
-        earning_adj = payroll.earning_adjustments.order_by(
-            '-record_month__payroll_month__year', '-record_month__payroll_month__month').first() or type('Empty', (), {})()
+        earning_adj = (payroll.earning_adjustments.order_by(
+            '-original_payroll_record__payroll_month__year', '-original_payroll_record__payroll_month__month')).first() or type('Empty', (), {})()
+
         deduction_adj = payroll.deduction_adjustments.order_by(
-            '-record_month__payroll_month__year', '-record_month__payroll_month__month').first() or type('Empty', (), {})()
+            '-original_payroll_record__payroll_month__year', '-original_payroll_record__payroll_month__month').first() or type('Empty', (), {})()
 
         pensionable_sum = payroll.earning_adjustments.filter(
             component='basic_salary',
         ).aggregate(total=Sum('earning_amount'))['total'] or Decimal('0.00')
 
         adjusted_pensionable = safe_dec(pensionable_sum)
-        adjusted_deduction = safe_dec(getattr(deduction_adj, 'monthly_adjusted_deduction', 0))
+        adjusted_deduction = safe_dec(getattr(deduction_adj, 'recorded_month_total_deduction', 0))
 
         earning_adjustment = {
-            'taxable_gross': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_taxable_gross_pay', 0)),
-            'non_taxable_gross': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_non_taxable_gross_pay', 0)),
-            'gross_pay': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_gross_pay', 0)),
+            'taxable_gross': safe_dec(getattr(earning_adj, 'recorded_month_taxable_gross_pay', 0)),
+            'non_taxable_gross': safe_dec(getattr(earning_adj, 'recorded_month_non_taxable_gross_pay', 0)),
+            'gross_pay': safe_dec(getattr(earning_adj, 'recorded_month_gross_pay', 0)),
             'adjusted_pensionable': adjusted_pensionable,
-            'employee_pension': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_employee_pension_contribution', 0)),
-            'employer_pension': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_employer_pension_contribution', 0)),
-            'total_pension': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_total_pension', 0)),
-            'employment_income_tax': safe_dec(getattr(earning_adj, 'recorded_month_employment_income_tax_on_adjustment', 0)),
-            'earning_adjustment_deduction': safe_dec(getattr(earning_adj, 'recorded_month_earning_adjustment_deduction_total', 0)),
+            'employee_pension': safe_dec(getattr(earning_adj, 'recorded_month_employee_pension_contribution', 0)),
+            'employer_pension': safe_dec(getattr(earning_adj, 'recorded_month_employer_pension_contribution', 0)),
+            'total_pension': safe_dec(getattr(earning_adj, 'recorded_month_total_pension_contribution', 0)),
+            'employment_income_tax': safe_dec(getattr(earning_adj, 'recorded_month_employment_income_tax', 0)),
+            'earning_adjustment_deduction': safe_dec(getattr(earning_adj, 'recorded_month_total_earning_deduction', 0)),
             'adjusted_deduction': adjusted_deduction,
-            'expense': safe_dec(getattr(earning_adj, 'recorded_month_adjusted_expense', 0)),
+            'expense': safe_dec(getattr(earning_adj, 'recorded_month_expense', 0)),
         }
 
         combined_adjustment = {
@@ -236,9 +237,10 @@ def get_combined_personnel_payroll_context(request):
             'show_deduction': show_deduction,
         })
 
-
     return {
         'page_obj': page_obj,
         'search_query': search_query,
         'payroll_data': payroll_data,
     }
+#
+# #

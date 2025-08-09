@@ -86,9 +86,9 @@ class RegularPayrollService:
         self.calculate_hardship_allowance()
         self.calculate_per_diem()
         self.calculate_university_cost_share()
-        self.calculate_regular_gross_pay()
-        self.calculate_regular_gross_taxable_pay()
-        self.calculate_regular_gross_non_taxable_pay()
+        self.calculate_gross_pay()
+        self.calculate_gross_taxable_pay()
+        self.calculate_gross_non_taxable_pay()
         self.calculate_final_save_calculation()
 
 
@@ -321,7 +321,7 @@ class RegularPayrollService:
         return salary * (percent / Decimal('100'))
 
 
-    def calculate_regular_gross_pay(self):
+    def calculate_gross_pay(self):
         fields = [
             'basic_salary', 'overtime', 'transport_home_to_office', 'fuel_home_to_office',
             'transport_for_work', 'fuel_for_work', 'per_diem', 'hardship_allowance',
@@ -336,7 +336,7 @@ class RegularPayrollService:
         return sum(getattr(self.instance, field) for field in fields)
 
 
-    def calculate_regular_gross_taxable_pay(self):
+    def calculate_gross_taxable_pay(self):
         taxable_fields = [
             'basic_salary', 'overtime', 'transport_home_to_office_taxable',
             'fuel_home_to_office_taxable', 'transport_for_work_taxable', 'fuel_for_work_taxable',
@@ -351,7 +351,7 @@ class RegularPayrollService:
         return sum(getattr(self.instance, field) for field in taxable_fields)
 
 
-    def calculate_regular_gross_non_taxable_pay(self):
+    def calculate_gross_non_taxable_pay(self):
         non_taxable_fields = [
             'transport_home_to_office_non_taxable', 'fuel_home_to_office_non_taxable',
             'transport_for_work_non_taxable', 'fuel_for_work_non_taxable',
@@ -382,21 +382,21 @@ class RegularPayrollService:
         i.university_cost_share = self.calculate_university_cost_share()
 
         (
-            i.regular_employee_pension_contribution,
-            i.regular_employer_pension_contribution,
-            i.regular_total_pension
+            i.employee_pension_contribution,
+            i.employer_pension_contribution,
+            i.total_pension_contribution
         ) = calculate_pension_contributions(i)
 
 
-        i.regular_gross_pay = self.calculate_regular_gross_pay()
-        i.regular_gross_taxable_pay = self.calculate_regular_gross_taxable_pay()
-        i.regular_gross_non_taxable_pay = self.calculate_regular_gross_non_taxable_pay()
+        i.gross_pay = self.calculate_gross_pay()
+        i.gross_taxable_pay = self.calculate_gross_taxable_pay()
+        i.gross_non_taxable_pay = self.calculate_gross_non_taxable_pay()
 
-        i.regular_employment_income_tax = EmploymentIncomeTaxService(i.regular_gross_taxable_pay).calculate()
+        i.employment_income_tax = EmploymentIncomeTaxService(i.gross_taxable_pay).calculate()
 
         # Sanitize deduction fields
         deduction_fields = [
-            'regular_employment_income_tax', 'regular_employee_pension_contribution', 'charitable_donation',
+            'employment_income_tax', 'employee_pension_contribution', 'charitable_donation',
             'saving_plan', 'loan_payment', 'court_order', 'workers_association',
             'personnel_insurance_saving', 'university_cost_share_pay', 'red_cross',
             'party_contribution', 'other_deduction'
@@ -404,9 +404,9 @@ class RegularPayrollService:
         for field in deduction_fields:
             setattr(i, field, Decimal(getattr(i, field) or '0.00'))
 
-        i.regular_total_payroll_deduction = sum([getattr(i, field) for field in deduction_fields])
-        i.regular_net_pay = round(i.regular_gross_pay - i.regular_total_payroll_deduction, 2)
-        i.regular_expense = i.regular_gross_pay + i.regular_employer_pension_contribution
+        i.total_payroll_deduction = sum([getattr(i, field) for field in deduction_fields])
+        i.net_pay = round(i.gross_pay - i.total_payroll_deduction, 2)
+        i.expense = i.gross_pay + i.employer_pension_contribution
 
 
 

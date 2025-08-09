@@ -37,7 +37,7 @@
 
                 <div class="row gy-4">
                     <!-- Left Column: Payroll Components -->
-                    <div class="col-lg-8">
+                    <div class="col-lg-9">
                         {% if year.regular_item_by_component %}
                         <div class="mb-4 table-responsive">
                             <h6 class="fw-bold text-primary">Regular Payroll</h6>
@@ -75,7 +75,8 @@
                         {% endif %}
 
                         {% if year.show_earning %}
-                        <div class="mb-4 table-responsive">
+                        <div class="row">
+                        <div class="mb-0 table-responsive">
                             <h6 class="fw-bold text-primary">Earning Adjustments</h6>
                             <table class="table table-sm table-bordered">
                                 <thead class="table-light">
@@ -86,7 +87,7 @@
                                     <th class="text-end">Non-Taxable</th>
                                     <th class="text-end">Employee Pension</th>
                                     <th class="text-end">Employer Pension</th>
-                                    <th class="text-end">Total Pension</th>
+                                    <th class="text-end">Total Pension Contribution</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -105,6 +106,17 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+                            <div class="container mb-4">
+                                <table class="table table-bordered">
+                                    <tbody>
+                                      <tr>
+                                        <td>Employment Income Tax:</td>
+                                        <td>{{ year.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
+                                      </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                         {% endif %}
 
@@ -129,6 +141,7 @@
                                 {% endfor %}
                                 </tbody>
                             </table>
+
                         </div>
                         {% endif %}
 
@@ -176,7 +189,7 @@
                     </div>
 
                     <!-- Right Column: Summary -->
-                    <div class="col-lg-4 table-responsive">
+                    <div class="col-lg-3 table-responsive">
                         <h6 class="fw-bold text-primary">Total Summary</h6>
                         <table class="table table-sm table-bordered">
                             <thead class="table-light">
@@ -211,7 +224,7 @@
                                 <td class="text-end">{{ year.totals.employer_pension|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>
-                                <td>Total Pension</td>
+                                <td>Total Pension Contribution</td>
                                 <td class="text-end">{{ year.totals.total_pension|floatformat:2|intcomma }}</td>
                             </tr>
                             <tr>

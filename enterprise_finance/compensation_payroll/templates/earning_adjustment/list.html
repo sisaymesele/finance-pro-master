@@ -53,7 +53,7 @@
             <tr>
                 <th>#</th>
                 <th>Record Month</th>
-                <th>Adjusted Payroll Month</th>
+                <th>Adjusted Month</th>
                 <th>First Name</th>
                 <th>Father Name</th>
                 <th>Last Name</th>
@@ -64,7 +64,7 @@
                 <th>Non-Taxable</th>
                 <th>Employee Pension</th>
                 <th>Employer Pension</th>
-                <th>Total Pension</th>
+                <th>Total Pension Contribution</th>
 
                 <th>Period Start</th>
                 <th>Period End</th>
@@ -79,11 +79,11 @@
             {% for ea in page_obj %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ ea.record_month.payroll_month }}</td>
+                <td>{{ ea.original_payroll_record.payroll_month }}</td>
                 <td>{{ ea.payroll_needing_adjustment.payroll_month }}</td>
-                <td>{{ ea.record_month.personnel_full_name.first_name }}</td>
-                <td>{{ ea.record_month.personnel_full_name.father_name }}</td>
-                <td>{{ ea.record_month.personnel_full_name.last_name }}</td>
+                <td>{{ ea.original_payroll_record.personnel_full_name.first_name }}</td>
+                <td>{{ ea.original_payroll_record.personnel_full_name.father_name }}</td>
+                <td>{{ ea.original_payroll_record.personnel_full_name.last_name }}</td>
                 <td>{{ ea.get_case_display }}</td>
                 <td>{{ ea.get_component_display }}</td>
                 <td>{{ ea.earning_amount|default:"0.00"|floatformat:2|intcomma }}</td>

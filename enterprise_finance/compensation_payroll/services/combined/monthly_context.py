@@ -97,17 +97,17 @@ def get_combined_monthly_detail(request):
 
         month_data = monthly_summary[key]
 
-        month_data['regular']['taxable_gross'] += safe_dec(payroll.regular_gross_taxable_pay)
-        month_data['regular']['non_taxable_gross'] += safe_dec(payroll.regular_gross_non_taxable_pay)
-        month_data['regular']['gross'] += safe_dec(payroll.regular_gross_pay)
+        month_data['regular']['taxable_gross'] += safe_dec(payroll.gross_taxable_pay)
+        month_data['regular']['non_taxable_gross'] += safe_dec(payroll.gross_non_taxable_pay)
+        month_data['regular']['gross'] += safe_dec(payroll.gross_pay)
         month_data['regular']['pensionable'] += safe_dec(payroll.basic_salary)
-        month_data['regular']['employee_pension'] += safe_dec(payroll.regular_employee_pension_contribution)
-        month_data['regular']['employer_pension'] += safe_dec(payroll.regular_employer_pension_contribution)
-        month_data['regular']['total_pension'] += safe_dec(payroll.regular_total_pension)
-        month_data['regular']['employment_income_tax'] += safe_dec(payroll.regular_employment_income_tax)
-        month_data['regular']['total_regular_deduction'] += safe_dec(payroll.regular_total_payroll_deduction)
-        month_data['regular']['net_pay'] += safe_dec(payroll.regular_net_pay)
-        month_data['regular']['expense'] += safe_dec(payroll.regular_expense)
+        month_data['regular']['employee_pension'] += safe_dec(payroll.employee_pension_contribution)
+        month_data['regular']['employer_pension'] += safe_dec(payroll.employer_pension_contribution)
+        month_data['regular']['total_pension'] += safe_dec(payroll.total_pension_contribution)
+        month_data['regular']['employment_income_tax'] += safe_dec(payroll.employment_income_tax)
+        month_data['regular']['total_regular_deduction'] += safe_dec(payroll.total_payroll_deduction)
+        month_data['regular']['net_pay'] += safe_dec(payroll.net_pay)
+        month_data['regular']['expense'] += safe_dec(payroll.expense)
 
         # Sum regular components
         regular_components = {
@@ -190,26 +190,27 @@ def get_combined_monthly_detail(request):
 
         # Aggregate overall adjustment totals
         earning_adj_first = payroll.earning_adjustments.first() or type('Empty', (), {})()
+
         month_data['adjustment']['taxable_gross'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_taxable_gross_pay', 0))
+            getattr(earning_adj_first, 'recorded_month_taxable_gross_pay', 0))
         month_data['adjustment']['non_taxable_gross'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_non_taxable_gross_pay', 0))
+            getattr(earning_adj_first, 'recorded_month_non_taxable_gross_pay', 0))
         month_data['adjustment']['gross'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_gross_pay', 0))
+            getattr(earning_adj_first, 'recorded_month_gross_pay', 0))
         month_data['adjustment']['adjusted_pensionable'] += safe_dec(
             getattr(earning_adj_first, 'recorded_month_adjusted_pensionable', 0))
         month_data['adjustment']['employee_pension'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_employee_pension_contribution', 0))
+            getattr(earning_adj_first, 'recorded_month_employee_pension_contribution', 0))
         month_data['adjustment']['employer_pension'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_employer_pension_contribution', 0))
+            getattr(earning_adj_first, 'recorded_month_employer_pension_contribution', 0))
         month_data['adjustment']['total_pension'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_total_pension', 0))
+            getattr(earning_adj_first, 'recorded_month_total_pension_contribution', 0))
         month_data['adjustment']['employment_income_tax'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_employment_income_tax_on_adjustment', 0))
+            getattr(earning_adj_first, 'recorded_month_employment_income_tax', 0))
         month_data['adjustment']['total_adjustment_deduction'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_earning_adjustment_deduction_total', 0))
+            getattr(earning_adj_first, 'recorded_month_total_earning_deduction', 0))
         month_data['adjustment']['expense'] += safe_dec(
-            getattr(earning_adj_first, 'recorded_month_adjusted_expense', 0))
+            getattr(earning_adj_first, 'recorded_month_expense', 0))
 
     severances = SeverancePay.objects.filter(organization_name=request.user.organization_name)
     for sev in severances:

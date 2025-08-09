@@ -186,17 +186,17 @@
                         <th>Other Deduction</th>
                         {% endif %}
                         <!--                            auto deduction-->
-                        <th>Regular Employment Income Tax</th>
-                        <th>Regular Employee Pension Contribution</th>
-                        <th>Regular Employer Pension Contribution</th>
-                        <th>Regular Total Pension</th>
+                        <th>Employment Income Tax</th>
+                        <th>Employee Pension Contribution</th>
+                        <th>Employer Pension Contribution</th>
+                        <th>Total Pension Contribution</th>
                         <!--                            summary-->
-                        <th>Regular Gross Taxable Pay</th>
-                        <th>Regular Gross Non-Taxable Pay</th>
-                        <th>Regular Gross Pay</th>
-                        <th>Regular Total Payroll Deduction</th>
-                        <th>Regular Net Pay</th>
-                        <th>Regular Payroll Expense</th>
+                        <th>Gross Taxable Pay</th>
+                        <th>Gross Non-Taxable Pay</th>
+                        <th>Gross Pay</th>
+                        <th>Total Payroll Deduction</th>
+                        <th>Net Pay</th>
+                        <th>Expense</th>
                         <!--                        -->
                         <!--                        -->
                         <th>Bank Name</th>
@@ -339,17 +339,17 @@
                         <td>{{ mp.other_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
                         {% endif %}
                         <!--                            auto deduction-->
-                        <td>{{ mp.regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.total_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                         <!--                            summary-->
-                        <td>{{ mp.regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
-                        <td>{{ mp.regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                        <td>{{ mp.expense|default:"0.00"|floatformat:2|intcomma }}</td>
                         <!--                            other infor-->
                         <!--                        -->
                         <td>{{ mp.personnel_full_name.bank_name }}</td>

@@ -14,19 +14,19 @@ class DeductionAdjustmentBusinessService:
         self.calculate_monthly_deduction_adjustment()
 
     def calculate_deduction_adjustment_per_adjusted_month(self):
-        if not self.instance or not self.instance.record_month:
+        if not self.instance or not self.instance.original_payroll_record:
             return
 
         from compensation_payroll.models import DeductionAdjustment
-        record_month = self.instance.record_month
+        original_payroll_record = self.instance.original_payroll_record
         payroll_needing_adjustment = self.instance.payroll_needing_adjustment
 
         # Get all deduction adjustments for same month and person
         deductions = DeductionAdjustment.objects.filter(
-            record_month=record_month,
+            original_payroll_record=original_payroll_record,
             payroll_needing_adjustment=payroll_needing_adjustment
         ).select_related(
-            'record_month',
+            'original_payroll_record',
             'payroll_needing_adjustment'
         )
 
@@ -37,21 +37,21 @@ class DeductionAdjustmentBusinessService:
 
         # Update adjusted_deduction for all matching deductions
         deductions.update(
-            adjusted_deduction_per_adjusted_month=total_deduction
+            adjusted_month_total_deduction=total_deduction
         )
 
     def calculate_monthly_deduction_adjustment(self):
-        if not self.instance or not self.instance.record_month:
+        if not self.instance or not self.instance.original_payroll_record:
             return
 
         from decimal import Decimal
         from compensation_payroll.models import DeductionAdjustment
 
-        record_month = self.instance.record_month
+        original_payroll_record = self.instance.original_payroll_record
 
-        # Get all deductions for the current record_month and personnel
+        # Get all deductions for the current original_payroll_record and personnel
         deductions = DeductionAdjustment.objects.filter(
-            record_month=record_month
+            original_payroll_record=original_payroll_record
         ).select_related('payroll_needing_adjustment')
 
         # Use payroll_needing_adjustment.payroll_month to ensure one per adjusted month
@@ -67,11 +67,11 @@ class DeductionAdjustmentBusinessService:
         total_adjusted_deduction = Decimal('0.00')
 
         for deduction in unique_deductions_by_month.values():
-            total_adjusted_deduction += deduction.adjusted_deduction_per_adjusted_month or Decimal('0.00')
+            total_adjusted_deduction += deduction.adjusted_month_total_deduction or Decimal('0.00')
 
         # Update all deductions with the monthly total
         deductions.update(
-            monthly_adjusted_deduction=total_adjusted_deduction
+            recorded_month_total_deduction=total_adjusted_deduction
         )
 
 

@@ -155,8 +155,8 @@
                     {% if payroll_month.use_red_cross %}<tr><td>Red Cross</td><td>{{ regular_payroll.red_cross|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
                     {% if payroll_month.use_party_contribution %}<tr><td>Party Contribution</td><td>{{ regular_payroll.party_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
                     {% if payroll_month.use_other_deduction %}<tr><td>Other Deduction</td><td>{{ regular_payroll.other_deduction|default:"0.00"|floatformat:2|intcomma }}</td></tr>{% endif %}
-                    <tr><td>Regular Employment Income Tax</td><td>{{ regular_payroll.regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td></tr>
-                    <tr><td>Regular Employee Pension Contribution</td><td>{{ regular_payroll.regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Employment Income Tax</td><td>{{ regular_payroll.employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Employee Pension Contribution</td><td>{{ regular_payroll.employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>
                 </tbody>
             </table>
         </div>
@@ -170,11 +170,11 @@
                     <tr><th colspan="2" class="text-center bg-secondary text-white">Gross and Net Pay</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Regular Gross Taxable Pay</td><td>{{ regular_payroll.regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
-                    <tr><td>Regular Gross Non-Taxable Pay</td><td>{{ regular_payroll.regular_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
-                    <tr><td>Regular Gross Pay</td><td>{{ regular_payroll.regular_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
-                    <tr><td>Regular Total Payroll Deduction</td><td>{{ regular_payroll.regular_total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td></tr>
-                    <tr><td>Regular Net Pay</td><td>{{ regular_payroll.regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Gross Taxable Pay</td><td>{{ regular_payroll.gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Gross Non-Taxable Pay</td><td>{{ regular_payroll.gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Gross Pay</td><td>{{ regular_payroll.gross_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Total Payroll Deduction</td><td>{{ regular_payroll.total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Net Pay</td><td>{{ regular_payroll.net_pay|default:"0.00"|floatformat:2|intcomma }}</td></tr>
                 </tbody>
             </table>
         </div>
@@ -185,8 +185,8 @@
                     <tr><th colspan="2" class="text-center bg-secondary text-white">Employer Contribution and Expense</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td>Regular Employer Pension Contribution</td><td>{{ regular_payroll.regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>
-                    <tr><td>Regular Payroll Expense</td><td>{{ regular_payroll.regular_expense|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Employer Pension Contribution</td><td>{{ regular_payroll.employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td></tr>
+                    <tr><td>Expense</td><td>{{ regular_payroll.expense|default:"0.00"|floatformat:2|intcomma }}</td></tr>
                 </tbody>
             </table>
         </div>

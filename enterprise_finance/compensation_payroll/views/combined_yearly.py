@@ -81,7 +81,7 @@ def export_combined_yearly_detail_to_excel(request):
             row_num += 1
 
             earning_headers = ["Component", "Total", "Taxable", "Non-Taxable",
-                               "Employee Pension", "Employer Pension", "Total Pension"]
+                               "Employee Pension", "Employer Pension", "Total Pension Contribution"]
             for col_num, header in enumerate(earning_headers, 1):
                 cell = ws.cell(row=row_num, column=col_num, value=header)
                 cell.font = header_font
@@ -144,7 +144,7 @@ def export_combined_yearly_detail_to_excel(request):
             ("Total Pensionable", item['totals']['pensionable']),
             ("Employee Pension", item['totals']['employee_pension']),
             ("Employer Pension", item['totals']['employer_pension']),
-            ("Total Pension", item['totals']['total_pension']),
+            ("Total Pension Contribution", item['totals']['total_pension']),
             ("Income Tax", item['totals']['employment_income_tax']),
             ("Total Deduction", item['totals']['total_deduction']),
             ("Total Expense", item['totals']['expense']),
@@ -202,7 +202,7 @@ def export_combined_yearly_summary_to_excel(request):
             'pensionable': 'Pensionable',
             'employee_pension': 'Employee Pension',
             'employer_pension': 'Employer Pension',
-            'total_pension': 'Total Pension',
+            'total_pension': 'Total Pension Contribution',
             'employment_income_tax': 'Income Tax',
             'total_regular_deduction': 'Total Deductions',
             'net_pay': 'Net Pay',
@@ -215,7 +215,7 @@ def export_combined_yearly_summary_to_excel(request):
             'adjusted_pensionable': 'Adjusted Pensionable',
             'employee_pension': 'Adjusted Employee Pension',
             'employer_pension': 'Adjusted Employer Pension',
-            'total_pension': 'Adjusted Total Pension',
+            'total_pension': 'Adjusted Total Pension Contribution',
             'employment_income_tax': 'Income Tax on Adjustment',
             'total_adjustment_deduction': 'Adjustment Deductions',
             'expense': 'Adjusted Expense',
@@ -235,7 +235,7 @@ def export_combined_yearly_summary_to_excel(request):
             'pensionable': 'Total Pensionable',
             'employee_pension': 'Total Employee Pension',
             'employer_pension': 'Total Employer Pension',
-            'total_pension': 'Total Pension',
+            'total_pension': 'Total Pension Contribution',
             'employment_income_tax': 'Total Income Tax',
             'total_deduction': 'Total Deductions',
             'expense': 'Total Expense',

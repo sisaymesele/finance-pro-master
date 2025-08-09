@@ -255,77 +255,77 @@
                 <!-- Statutory (Mandatory) Deductions -->
 
                 <tr>
-                    {% if summary.aggregate_regular_employment_income_tax %}
-                    <td>Regular Employment Income Tax</td>
-                    <td class="text-end">{{ summary.aggregate_regular_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
+                    {% if summary.aggregate_employment_income_tax %}
+                    <td>Employment Income Tax</td>
+                    <td class="text-end">{{ summary.aggregate_employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
 
                 <!-- Pension Section -->
                 <tr>
-                    {% if summary.aggregate_regular_employee_pension_contribution %}
-                    <td>Regular Employee Pension Contribution</td>
-                    <td class="text-end">{{ summary.aggregate_regular_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    {% if summary.aggregate_employee_pension_contribution %}
+                    <td>Employee Pension Contribution</td>
+                    <td class="text-end">{{ summary.aggregate_employee_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
                 <tr>
-                    {% if summary.aggregate_regular_employer_pension_contribution %}
-                    <td>Regular Employer Pension Contribution</td>
-                    <td class="text-end">{{ summary.aggregate_regular_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
+                    {% if summary.aggregate_employer_pension_contribution %}
+                    <td>Employer Pension Contribution</td>
+                    <td class="text-end">{{ summary.aggregate_employer_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
                 <tr>
-                    {% if summary.aggregate_regular_total_pension %}
-                    <td>Regular Total Pension</td>
-                    <td class="text-end">{{ summary.aggregate_regular_total_pension|default:"0.00"|floatformat:2|intcomma }}</td>
+                    {% if summary.aggregate_total_pension_contribution %}
+                    <td>Total Pension Contribution</td>
+                    <td class="text-end">{{ summary.aggregate_total_pension_contribution|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
 
-                <!-- Regular Gross Pay Section -->
+                <!-- Gross Pay Section -->
                 <tr>
                     <td rowspan="3" class="align-middle fw-bold">Regular Gross</td>
-                    {% if summary.aggregate_regular_gross_pay %}
-                    <td>Regular Gross Pay</td>
-                    <td class="text-end">{{ summary.aggregate_regular_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    {% if summary.aggregate_gross_pay %}
+                    <td>Gross Pay</td>
+                    <td class="text-end">{{ summary.aggregate_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
                 <tr>
-                    {% if summary.aggregate_regular_gross_non_taxable_pay %}
+                    {% if summary.aggregate_gross_non_taxable_pay %}
                     <td>Regular Non-Taxable Pay</td>
-                    <td class="text-end">{{ summary.aggregate_regular_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="text-end">{{ summary.aggregate_gross_non_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
                 <tr>
-                    {% if summary.aggregate_regular_gross_taxable_pay %}
+                    {% if summary.aggregate_gross_taxable_pay %}
                     <td>Regular Taxable Pay</td>
-                    <td class="text-end">{{ summary.aggregate_regular_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="text-end">{{ summary.aggregate_gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
 
-                <!-- Regular Total Payroll Deduction Section -->
+                <!-- Total Payroll Deduction Section -->
                 <tr>
-                    <td rowspan="1" class="align-middle fw-bold">Regular Total Payroll Deduction</td>
-                    {% if summary.aggregate_regular_total_payroll_deduction %}
-                    <td>Regular Total Payroll Deduction</td>
-                    <td class="text-end">{{ summary.aggregate_regular_total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td rowspan="1" class="align-middle fw-bold">Total Payroll Deduction</td>
+                    {% if summary.aggregate_total_payroll_deduction %}
+                    <td>Total Payroll Deduction</td>
+                    <td class="text-end">{{ summary.aggregate_total_payroll_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
 
-                <!-- Regular Net Pay Section -->
+                <!-- Net Pay Section -->
                 <tr>
-                    <td rowspan="1" class="align-middle fw-bold">Regular Net Pay</td>
-                    {% if summary.aggregate_regular_net_pay %}
-                    <td>Regular Net Pay</td>
-                    <td class="text-end">{{ summary.aggregate_regular_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td rowspan="1" class="align-middle fw-bold">Net Pay</td>
+                    {% if summary.aggregate_net_pay %}
+                    <td>Net Pay</td>
+                    <td class="text-end">{{ summary.aggregate_net_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
 
                 <!-- Total Payroll Cost Section -->
                 <tr>
                     <td rowspan="1" class="align-middle fw-bold">Regular Yearly Payroll Expense</td>
-                    {% if summary.aggregate_regular_expense %}
+                    {% if summary.aggregate_expense %}
                     <td>Regular Yearly Payroll Expense</td>
-                    <td class="text-end">{{ summary.aggregate_regular_expense|default:"0.00"|floatformat:2|intcomma }}</td>
+                    <td class="text-end">{{ summary.aggregate_expense|default:"0.00"|floatformat:2|intcomma }}</td>
                     {% endif %}
                 </tr>
                 </tbody>

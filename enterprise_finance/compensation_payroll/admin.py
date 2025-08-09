@@ -171,15 +171,13 @@ class RegularPayrollAdmin(admin.ModelAdmin):
         # conditional deduction
         'charitable_donation', 'saving_plan', 'loan_payment', 'court_order', 'workers_association',
         'personnel_insurance_saving', 'cost_share_percent_to_basic_salary', 'university_cost_share_pay',
-        'red_cross', 'party_contribution',
-        'other_deduction',
+        'red_cross', 'party_contribution', 'other_deduction',
         # auto deduction
-        'regular_employment_income_tax', 'regular_employee_pension_contribution',
-        'regular_employer_pension_contribution',
-        'regular_total_pension',
+        'employment_income_tax', 'employee_pension_contribution',
+        'employer_pension_contribution', 'total_pension_contribution',
         # summary
-        'regular_total_payroll_deduction', 'regular_gross_pay', 'regular_gross_taxable_pay',
-        'regular_gross_non_taxable_pay', 'regular_net_pay', 'regular_total_payroll_deduction', 'regular_expense',
+        'total_payroll_deduction', 'gross_pay', 'gross_taxable_pay',
+        'gross_non_taxable_pay', 'net_pay', 'expense',
     ]
     list_filter = ['payroll_month__month', 'payroll_month__year', 'organization_name']
 
@@ -239,20 +237,20 @@ class EarningAdjustmentAdmin(admin.ModelAdmin):
         'adjusted_month_employer_pension_contribution',
         'adjusted_month_total_pension',
         #
-        'recorded_month_adjusted_taxable_gross_pay', 'recorded_month_adjusted_non_taxable_gross_pay',
-        'recorded_month_adjusted_gross_pay', 'recorded_month_total_taxable_pay',
-        'recorded_month_employment_income_tax_total', 'recorded_month_employment_income_tax_on_adjustment',
+        'recorded_month_taxable_gross_pay', 'recorded_month_non_taxable_gross_pay',
+        'recorded_month_gross_pay', 'recorded_month_total_taxable_pay',
+        'recorded_month_employment_income_tax_total', 'recorded_month_employment_income_tax',
         #
-        'recorded_month_adjusted_employee_pension_contribution',
-        'recorded_month_adjusted_employer_pension_contribution',
-        'recorded_month_adjusted_total_pension',
+        'recorded_month_employee_pension_contribution',
+        'recorded_month_employer_pension_contribution',
+        'recorded_month_total_pension_contribution',
         #
-        'recorded_month_earning_adjustment_deduction_total', 'recorded_month_adjusted_expense'
+        'recorded_month_total_earning_deduction', 'recorded_month_expense'
 
     )
 
-    list_filter = ('component', 'record_month', 'payroll_needing_adjustment',)
-    search_fields = ('component', 'record_month', 'payroll_needing_adjustment',)
+    list_filter = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
+    search_fields = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
     ordering = ('-created_at',)
 
     readonly_fields = (
@@ -260,37 +258,37 @@ class EarningAdjustmentAdmin(admin.ModelAdmin):
         'adjusted_month_gross_non_taxable_pay', 'adjusted_month_gross_pay',
         'adjusted_month_total_taxable_pay', 'adjusted_month_employment_income_tax_total',
         'adjusted_month_employment_income_tax', 'adjusted_month_total_earning_deduction',
-        'adjusted_month_expense', 'recorded_month_adjusted_taxable_gross_pay',
-        'recorded_month_adjusted_non_taxable_gross_pay', 'recorded_month_adjusted_gross_pay',
+        'adjusted_month_expense', 'recorded_month_taxable_gross_pay',
+        'recorded_month_non_taxable_gross_pay', 'recorded_month_gross_pay',
         'recorded_month_total_taxable_pay', 'recorded_month_employment_income_tax_total',
-        'recorded_month_employment_income_tax_on_adjustment', 'recorded_month_earning_adjustment_deduction_total',
-        'recorded_month_adjusted_expense', 'created_at', 'updated_at',
+        'recorded_month_employment_income_tax', 'recorded_month_total_earning_deduction',
+        'recorded_month_expense', 'created_at', 'updated_at',
     )
 
     # Group fields into logical sections
 
-    @admin.display(ordering='record_month__personnel_full_name__personnel_id', description='Personnel ID')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__personnel_id', description='Personnel ID')
     def get_personnel_id(self, obj):
-        return obj.record_month.personnel_full_name.personnel_id
+        return obj.original_payroll_record.personnel_full_name.personnel_id
 
-    @admin.display(ordering='record_month__personnel_full_name__first_name', description='First Name')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__first_name', description='First Name')
     def get_first_name(self, obj):
-        return obj.record_month.personnel_full_name.first_name
+        return obj.original_payroll_record.personnel_full_name.first_name
 
-    @admin.display(ordering='record_month__personnel_full_name__father_name', description='Father Name')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__father_name', description='Father Name')
     def get_father_name(self, obj):
-        return obj.record_month.personnel_full_name.father_name
+        return obj.original_payroll_record.personnel_full_name.father_name
 
-    @admin.display(ordering='record_month__personnel_full_name__last_name', description='Last Name')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__last_name', description='Last Name')
     def get_last_name(self, obj):
-        return obj.record_month.personnel_full_name.last_name
+        return obj.original_payroll_record.personnel_full_name.last_name
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser and hasattr(request.user, 'organization_name'):
             org = request.user.organization_name
             if db_field.name == 'organization_name':
                 kwargs["queryset"] = OrganizationalProfile.objects.filter(organization_name=org)
-            if db_field.name == 'record_month':
+            if db_field.name == 'original_payroll_record':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)
             if db_field.name == 'payroll_needing_adjustment':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)
@@ -320,38 +318,38 @@ class EarningAdjustmentAdmin(admin.ModelAdmin):
 class DeductionAdjustmentAdmin(admin.ModelAdmin):
     list_display = (
         'organization_name', 'get_personnel_id', 'get_first_name', 'get_father_name', 'get_last_name',
-        'component', 'case', 'deduction_amount', 'adjusted_deduction_per_adjusted_month',
-        'monthly_adjusted_deduction', 'months_covered',
+        'component', 'case', 'deduction_amount', 'adjusted_month_total_deduction',
+        'recorded_month_total_deduction', 'months_covered',
         'period_start', 'period_end', 'created_at', 'updated_at',
     )
 
-    list_filter = ('component', 'record_month', 'payroll_needing_adjustment',)
-    search_fields = ('component', 'record_month', 'payroll_needing_adjustment',)
+    list_filter = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
+    search_fields = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
 
-    @admin.display(ordering='record_month__personnel_full_name__personnel_id', description='Personnel ID')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__personnel_id', description='Personnel ID')
     def get_personnel_id(self, obj):
-        return obj.record_month.personnel_full_name.personnel_id
+        return obj.original_payroll_record.personnel_full_name.personnel_id
 
-    @admin.display(ordering='record_month__personnel_full_name__first_name', description='First Name')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__first_name', description='First Name')
     def get_first_name(self, obj):
-        return obj.record_month.personnel_full_name.first_name
+        return obj.original_payroll_record.personnel_full_name.first_name
 
-    @admin.display(ordering='record_month__personnel_full_name__father_name', description='Father Name')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__father_name', description='Father Name')
     def get_father_name(self, obj):
-        return obj.record_month.personnel_full_name.father_name
+        return obj.original_payroll_record.personnel_full_name.father_name
 
-    @admin.display(ordering='record_month__personnel_full_name__last_name', description='Last Name')
+    @admin.display(ordering='original_payroll_record__personnel_full_name__last_name', description='Last Name')
     def get_last_name(self, obj):
-        return obj.record_month.personnel_full_name.last_name
+        return obj.original_payroll_record.personnel_full_name.last_name
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser and hasattr(request.user, 'organization_name'):
             org = request.user.organization_name
             if db_field.name == 'organization_name':
                 kwargs["queryset"] = OrganizationalProfile.objects.filter(organization_name=org)
-            if db_field.name == 'record_month':
+            if db_field.name == 'original_payroll_record':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)
             if db_field.name == 'payroll_needing_adjustment':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)

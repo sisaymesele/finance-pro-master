@@ -76,11 +76,12 @@ urlpatterns = [
     path('combined-total-payroll/export/', views.export_combined_personnel_total, name='export_combined_personnel_total'),
 
     #combined monthly and yearly
+    path('combined-monthly-detail/', views.monthly_combined_detail_view, name='combined_monthly_detail'),
     path('combined-monthly-summary/', views.monthly_combined_summary_view, name='combined_monthly_summary'),
+    #yearly
+    path('combined-yearly-detail/', views.yearly_combined_detail_view, name='combined_yearly_detail'),
     path('combined-yearly-summary/', views.yearly_combined_summary_view, name='combined_yearly_summary'),
 
-    path('combined-monthly-detail/', views.monthly_combined_detail_view, name='combined_monthly_detail'),
-    path('combined-yearly-detail/', views.yearly_combined_detail_view, name='combined_yearly_detail'),
     #export
     path('export-combined-monthly-detail/', views.export_combined_monthly_detail_to_excel, name='export_combined_monthly_detail_to_excel'),
     path('export-combined-monthly-summary/', views.export_combined_monthly_summary_to_excel, name='export_combined_monthly_summary_to_excel'),

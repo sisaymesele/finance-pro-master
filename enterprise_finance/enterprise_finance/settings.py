@@ -89,6 +89,8 @@ TEMPLATES = [
                 #social
                 'social_django.context_processors.backends',
                 'social_django.context_processors.login_redirect',
+                #footer
+                'landing_page.context_processors.footer_settings',  # add this line
 
             ],
         },

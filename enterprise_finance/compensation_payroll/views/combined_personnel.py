@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from openpyxl import Workbook
 from decimal import Decimal
-from compensation_payroll.models import RegularPayroll
 from compensation_payroll.services.combined.personnel_context import get_combined_personnel_payroll_context
 from openpyxl.utils import get_column_letter
 import openpyxl
@@ -56,9 +55,6 @@ def combined_personnel_employment_income_tax(request):
 def combined_employee_pension(request):
     context = get_combined_personnel_payroll_context(request)
     return render(request, 'combined_payroll/personnel/pension_list.html', context)
-
-
-
 
 
 #common export header
@@ -202,12 +198,15 @@ def export_combined_personnel_detail(request):
 
         # Summary Headers
         headers = ["Component", "Amount"]
+
+
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=row_num, column=col_num, value=header)
             cell.font = header_font
             cell.fill = header_fill
             cell.alignment = header_alignment
             cell.border = border
+
         row_num += 1
 
         # Summary Data
@@ -300,6 +299,7 @@ def export_combined_personnel_list(request):
     export_util = ExportUtilityService()
     decorated_headers = [export_util.split_header_to_lines(h) for h in headers]
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
 
     # Write header row at row 2, styled
     for col_num, header in enumerate(decorated_headers, 1):
@@ -307,6 +307,7 @@ def export_combined_personnel_list(request):
         cell.fill = header_fill
         cell.font = bold_font
         cell.alignment = center_align
+        cell.border = thin_border
 
     current_row = 3
 
@@ -421,7 +422,6 @@ def export_combined_personnel_list(request):
 
 
     #
-from io import BytesIO
 
 @login_required
 def export_personnel_total_adjustment(request):
@@ -461,10 +461,13 @@ def export_personnel_total_adjustment(request):
     header_font = Font(bold=True, color="FFFFFFFF")
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[3]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Helper for safe nested getattr
     def safe_getattr(obj, attr, default=None):
@@ -566,10 +569,13 @@ def export_combined_personnel_total(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Append data rows
     for item in payroll_data:
@@ -659,10 +665,13 @@ def export_combined_personnel_expense(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     for item in payroll_data:
         p = getattr(item.get('payroll'), 'personnel_full_name', None)
@@ -743,10 +752,13 @@ def export_combined_personnel_net_income(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     for item in payroll_data:
         payroll = item.get('payroll')
@@ -826,10 +838,13 @@ def export_combined_personnel_employment_tax(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     for item in payroll_data:
         payroll = item.get('payroll')
@@ -913,10 +928,13 @@ def export_combined_personnel_pension(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     def safe_float(value):
         if value is None:

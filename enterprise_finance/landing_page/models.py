@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import CharField
 from tinymce.models import HTMLField
 from django.utils.text import slugify
 
@@ -81,7 +82,7 @@ class Documentation(models.Model):
 class SiteSettings(models.Model):
     site_name = models.CharField(max_length=255, default='My Website')
     privacy = HTMLField(max_length=2000, null=True, blank=True)
-    copy_right = HTMLField(max_length=2000, null=True, blank=True)
+    copy_right = CharField(max_length=2000, null=True, blank=True)
     terms = HTMLField(max_length=2000, null=True, blank=True)
     address = models.TextField()
     phone = models.CharField(max_length=30)

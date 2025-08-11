@@ -4,15 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from openpyxl import Workbook
 from io import BytesIO
-from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from compensation_payroll.models import EarningAdjustment
 from compensation_payroll.forms import EarningAdjustmentForm
 from compensation_payroll.services.earning_adjustment.business import EarningAdjustmentBusinessService
 from compensation_payroll.services.earning_adjustment.context import get_earning_adjustment_context
 from compensation_payroll.services.excel_export import ExportUtilityService
-
-
 
 
 
@@ -104,9 +102,6 @@ def delete_earning_adjustment(request, pk):
 
 
 
-#export individual
-
-
 def export_earning_adjustment_list_to_excel(request):
     context = get_earning_adjustment_context(request)
     adjustments = context.get('earning_adjustments', [])
@@ -116,16 +111,16 @@ def export_earning_adjustment_list_to_excel(request):
     ws.title = "Earning Adjustment Individual"
 
     # Title row (1st)
-    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=19)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=18)
     title_cell = ws.cell(row=1, column=1)
-    title_cell.value = "Individual Earning Adjustment Report"
+    title_cell.value = "Individual Earning Adjustment"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
 
     # Subtitle row (2nd)
-    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=19)
+    ws.merge_cells(start_row=2, start_column=1, end_row=2, end_column=18)
     subtitle_cell = ws.cell(row=2, column=1)
-    subtitle_cell.value = "Details of personnel earning adjustments for each component"
+    subtitle_cell.value = "Details of earning adjustments"
     subtitle_cell.font = Font(size=10, italic=True)
     subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
 
@@ -143,15 +138,19 @@ def export_earning_adjustment_list_to_excel(request):
     export_util = ExportUtilityService()
     ws.append([export_util.split_header_to_lines(h) for h in headers])
 
+
     # Header style
     header_fill = PatternFill(start_color="FF0070C0", end_color="FF0070C0", fill_type="solid")  # Blue
     header_font = Font(bold=True, color="FFFFFFFF")  # White
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[3]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Data rows (start at row 4)
     def safe_getattr(obj, attr, default=""):
@@ -210,7 +209,6 @@ def export_earning_adjustment_list_to_excel(request):
     return response
 
 #
-from openpyxl.utils import get_column_letter
 
 #per adjusted month export
 @login_required
@@ -223,7 +221,7 @@ def export_earning_per_adjusted_month_to_excel(request):
     ws.title = "Earnings Adjustment By adjusted month"
 
     # Title row (merged)
-    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=19)
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=18)
     title_cell = ws.cell(row=1, column=1, value="Earnings Adjustment By Adjusted Month")
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
@@ -246,10 +244,13 @@ def export_earning_per_adjusted_month_to_excel(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Safe dict get helper
     def safe_get(d, key, default=0):
@@ -315,7 +316,7 @@ def export_monthly_earning_adjustment_to_excel(request):
     ws.title = "Monthly Earning Adjustment"
 
     # Title row (1st)
-    total_columns = 17  # Number of columns in headers
+    total_columns = 16  # Number of columns in headers
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_columns)
     title_cell = ws.cell(row=1, column=1)
     title_cell.value = "Monthly Earning Adjustment Report"
@@ -341,10 +342,14 @@ def export_monthly_earning_adjustment_to_excel(request):
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
+
 
     # Append data rows (no index variable since unused)
     for row in data:

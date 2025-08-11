@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from openpyxl import Workbook
 from io import BytesIO
 import openpyxl
-from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 from compensation_payroll.models import DeductionAdjustment
 from compensation_payroll.forms import DeductionAdjustmentForm
@@ -150,10 +150,13 @@ def export_deduction_adjustment_list_to_excel(request):
     header_font = Font(bold=True, color="FFFFFFFF")  # White font
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[3]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Add data rows starting at row 4
     for d in deductions:
@@ -239,10 +242,13 @@ def export_deduction_per_adjusted_month_to_excel(request):
     header_font = Font(bold=True, color="FFFFFFFF")  # White font
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Append data rows starting from row 4
     for item in data:
@@ -318,10 +324,13 @@ def export_monthly_deduction_adjustment_to_excel(request):
     header_font = Font(bold=True, color="FFFFFFFF")  # White font
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in ws[2]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Append data rows
     for item in data:

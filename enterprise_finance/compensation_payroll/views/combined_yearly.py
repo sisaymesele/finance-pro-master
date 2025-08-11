@@ -102,12 +102,31 @@ def export_combined_yearly_detail_to_excel(request):
                     row_num += 1
             row_num += 1
 
+        adjustment = item.get('adjustment', {})
+        adjustment_items = [
+            ("Employment Income Tax", adjustment.get('employment_income_tax', 0)),
+        ]
+
+        # Adjustment Income Tax Section (or Adjustment Summary)
+        ws.cell(row=row_num, column=1, value="Adjustment Income Tax").font = Font(bold=True, color="800080")
+        row_num += 1
+
+        for comp, amount in adjustment_items:
+            if amount != 0:
+                ws.cell(row=row_num, column=1, value=comp)
+                amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+                amt_cell.number_format = money_format
+                row_num += 1
+
+        row_num += 1  # spacing after section
+
         # Deduction Adjustment Section
         if item['show_deduction']:
             ws.cell(row=row_num, column=1, value="Deduction Adjustment").font = Font(bold=True, color="FF0000")
             row_num += 1
 
             deduction_headers = ["Component", "Amount"]
+            
             for col_num, header in enumerate(deduction_headers, 1):
                 cell = ws.cell(row=row_num, column=col_num, value=header)
                 cell.font = header_font

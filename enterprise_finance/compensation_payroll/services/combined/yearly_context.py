@@ -131,6 +131,8 @@ def get_combined_yearly_detail(request):
             c = da.component
             year_data['adjustment']['deduction_adj_by_component'][c] += safe_dec(getattr(da, 'deduction_amount', 0))
 
+
+
         ea_first = payroll.earning_adjustments.first() or type('Empty', (), {})()
         #
         year_data['adjustment']['taxable_gross'] += safe_dec(getattr(ea_first, 'recorded_month_taxable_gross_pay', 0))

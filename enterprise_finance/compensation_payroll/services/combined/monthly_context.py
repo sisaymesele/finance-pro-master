@@ -269,7 +269,6 @@ def get_combined_monthly_detail(request):
 
     # order by month for regular with severance based order
     def parse_key(key):
-        # example key: "July-2024"
         try:
             month_str, year_str = key.split('-')
             year = int(year_str)
@@ -277,10 +276,11 @@ def get_combined_monthly_detail(request):
                 'September': '01', 'October': '02', 'November': '03', 'December': '04', 'January': '05',
                 'February': '06', 'March': '07', 'April': '08', 'May': '09', 'June': '10', 'July': '11', 'August': '12'
             }
-            month_num = month_order_full.get(month_str.capitalize(), 0)
+            month_num_str = month_order_full.get(month_str.capitalize(), '0')
+            month_num = int(month_num_str)  # convert string month number to int
             return (year, month_num)
         except Exception:
-            return (0, 0)  # fallback for malformed keys
+            return (0, 0)
 
     final_monthly_list = []
 

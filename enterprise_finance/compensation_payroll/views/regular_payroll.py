@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from io import BytesIO
 import plotly.graph_objs as go
 from openpyxl import Workbook
-from openpyxl.styles import PatternFill, Alignment, Font
+from openpyxl.styles import PatternFill, Alignment, Font, Border, Side
 from openpyxl.utils import get_column_letter
 from compensation_payroll.models import PayrollMonthComponent, RegularPayroll
 from compensation_payroll.forms import RegularPayrollForm
@@ -665,7 +665,7 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
     total_cols = len(header)
     sheet.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
     title_cell = sheet.cell(row=1, column=1)
-    title_cell.value = f"Regular Payroll Process Report - {payroll_month.payroll_month}"
+    title_cell.value = f"Regular Payroll For - {payroll_month.payroll_month}"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
     sheet.row_dimensions[1].height = 30
@@ -673,7 +673,7 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
     # Add Subtitle (row 2)
     sheet.merge_cells(start_row=2, start_column=1, end_row=2, end_column=total_cols)
     subtitle_cell = sheet.cell(row=2, column=1)
-    subtitle_cell.value = "Detailed payroll information including earnings, allowances, deductions, and summary"
+    subtitle_cell.value = "Detail of earnings and deductions"
     subtitle_cell.font = Font(size=10, italic=True)
     subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
     sheet.row_dimensions[2].height = 20
@@ -686,10 +686,14 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
     header_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid")  # Amber
     header_font = Font(bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
     for cell in sheet[3]:
         cell.fill = header_fill
         cell.font = header_font
         cell.alignment = header_alignment
+        cell.border = thin_border
 
     # Append payroll data rows starting from row 4
     for payroll in regular_payrolls:

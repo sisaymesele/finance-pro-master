@@ -5,9 +5,7 @@ from .models import BlogPost, Documentation, VideoPost, SiteSettings
 # Create your views here.
 
 def landing_page(request):
-    settings = SiteSettings.objects.all()
-    return render(request, 'landing_page.html', {'settings': settings})
-
+    return render(request, 'landing_page.html')
 
 def feature_list(request):
     return render(request, 'partial/feature.html')
@@ -38,7 +36,7 @@ def blog_post_list(request):
     context = {
         'blog_posts': blog_posts
     }
-    return render(request, 'blog-post/detail.html', context)
+    return render(request, 'blog-post/list.html', context)
 
 def blog_post_detail(request, slug):
     blog_post = get_object_or_404(BlogPost, slug=slug)
@@ -55,11 +53,11 @@ def video_post_list(request):
     context = {
         'video_posts': video_posts
     }
-    return render(request, 'video-post/detail.html', context)
+    return render(request, 'video-post/list.html', context)
 
 def documentation_list(request):
     documents = Documentation.objects.all()
-    return render(request, 'documentation/detail.html', {'documents': documents})
+    return render(request, 'documentation/list.html', {'documents': documents})
 
 def documentation_detail(request, slug):
     document = get_object_or_404(Documentation, slug=slug)
@@ -81,3 +79,4 @@ def terms_list(request):
 def contact_list(request):
     settings = SiteSettings.objects.all()
     return render(request, 'contact_list.html', {'settings': settings})
+

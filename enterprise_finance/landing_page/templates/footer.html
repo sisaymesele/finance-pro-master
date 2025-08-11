@@ -1,0 +1,118 @@
+<footer class="bg-dark text-white py-5">
+    <div class="container">
+        <h2 class="text-center mb-5 fw-bold">
+            Empowering Payroll Excellence — Connect, Learn, Locate
+        </h2>
+
+        {% for s in footer_settings %}
+        <div class="row gy-4">
+            <!-- Column 1: Company Info -->
+            <div class="col-md-3">
+                <h4 class="fw-bold">{{ s.site_name }}</h4>
+                <p class="small text-white-50 mb-0">
+                    A complete solution for modern organizations seeking payroll precision, policy compliance,
+                    and workforce satisfaction. Transforming payroll into a strategic advantage by ensuring
+                    timely payments, legal compliance, and complete employee confidence.
+                </p>
+            </div>
+
+            <!-- Column 2: Contact Info -->
+            <div class="col-md-3">
+                <h5 class="fw-bold mb-3">📞 Contact Us</h5>
+                <ul class="list-unstyled small mb-3">
+                    <li><strong>🏢 Address:</strong> {{ s.address }}</li>
+                    <li><strong>📞 Phone:</strong> {{ s.phone }}</li>
+                    <li>
+                        <strong>✉️ Email:</strong>
+                        <a href="mailto:{{ s.email }}" class="text-white text-decoration-none">{{ s.email }}</a>
+                    </li>
+                    {% if s.website %}
+                    <li>
+                        <strong>🌐 Website:</strong>
+                        <a href="{{ s.website }}" class="text-white text-decoration-none" target="_blank" rel="noopener">{{ s.website }}</a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Social Media -->
+                <div class="d-flex flex-wrap gap-3">
+                    {% if s.facebook %}
+                    <a href="{{ s.facebook }}" target="_blank" aria-label="Facebook" rel="noopener">
+                        <i class="fab fa-facebook fa-lg" style="color:#3b5998;"></i>
+                    </a>
+                    {% endif %}
+                    {% if s.twitter %}
+                    <a href="{{ s.twitter }}" target="_blank" aria-label="Twitter" rel="noopener">
+                        <i class="fab fa-twitter fa-lg" style="color:#1da1f2;"></i>
+                    </a>
+                    {% endif %}
+                    {% if s.linkedin %}
+                    <a href="{{ s.linkedin }}" target="_blank" aria-label="LinkedIn" rel="noopener">
+                        <i class="fab fa-linkedin fa-lg" style="color:#0077b5;"></i>
+                    </a>
+                    {% endif %}
+                    {% if s.instagram %}
+                    <a href="{{ s.instagram }}" target="_blank" aria-label="Instagram" rel="noopener">
+                        <i class="fab fa-instagram fa-lg" style="color:#e4405f;"></i>
+                    </a>
+                    {% endif %}
+                    {% if s.youtube %}
+                    <a href="{{ s.youtube }}" target="_blank" aria-label="YouTube" rel="noopener">
+                        <i class="fab fa-youtube fa-lg" style="color:#ff0000;"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Column 3: Navigation Links -->
+            <div class="col-md-3">
+                <h5 class="fw-bold mb-3">Quick Links</h5>
+                <nav aria-label="Footer Navigation">
+                    <ul class="list-unstyled">
+                        <li><a class="text-white text-decoration-none" href="{% url 'home' %}">Home</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'feature_list' %}">Feature</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'how_it_work_list' %}">How It Works</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'pricing_list' %}">Pricing</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'video_list' %}">Video</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'qa_list' %}">Q&A</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'blog_post_list' %}">Blog</a></li>
+                        <li><a class="text-white text-decoration-none" href="{% url 'documentation_list' %}">Documentation</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Column 4: Map -->
+            <div class="col-md-3">
+                <h5 class="fw-bold mb-3">📍 Our Location</h5>
+                {% if s.google_map_embed_url %}
+                <div class="ratio ratio-4x3">
+                    <iframe src="{{ s.google_map_embed_url }}" width="100%" height="100%" style="border:0;"
+                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                {% else %}
+                <p class="small text-white-50 mb-0">Map not available</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <hr class="border-light my-4">
+
+        <!-- Footer Bottom -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+            <p class="small mb-0 text-white-50">
+                &copy; {% if s.copy_right %} {{ s.copy_right }} {% else %} {{ s.site_name }} {% endif %} | All Rights Reserved
+            </p>
+
+            <ul class="list-inline mb-0">
+                <li class="list-inline-item"><a class="text-white text-decoration-none" href="{% url 'privacy_list' %}">Privacy</a></li>
+                <li class="list-inline-item"><a class="text-white text-decoration-none" href="{% url 'terms_list' %}">Terms & Conditions</a></li>
+            </ul>
+
+            <div>
+                <a class="btn btn-warning btn-sm me-2" href="{% url 'register' %}">Sign Up</a>
+                <a class="btn btn-warning btn-sm" href="{% url 'login' %}">Login</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</footer>

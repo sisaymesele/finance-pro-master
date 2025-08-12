@@ -100,8 +100,8 @@ def delete_earning_adjustment(request, pk):
 
     return render(request, 'earning_adjustment/delete_confirm.html', context)
 
-
-
+#
+# #
 def export_earning_adjustment_list_to_excel(request):
     context = get_earning_adjustment_context(request)
     adjustments = context.get('earning_adjustments', [])
@@ -138,7 +138,6 @@ def export_earning_adjustment_list_to_excel(request):
     export_util = ExportUtilityService()
     ws.append([export_util.split_header_to_lines(h) for h in headers])
 
-
     # Header style
     header_fill = PatternFill(start_color="FF0070C0", end_color="FF0070C0", fill_type="solid")  # Blue
     header_font = Font(bold=True, color="FFFFFFFF")  # White
@@ -152,17 +151,27 @@ def export_earning_adjustment_list_to_excel(request):
         cell.alignment = header_alignment
         cell.border = thin_border
 
-    # Data rows (start at row 4)
+    # Simple safe_getattr helper for one-level safety
     def safe_getattr(obj, attr, default=""):
         return getattr(obj, attr, default) if obj else default
 
+    # Data rows (start at row 4)
     for ea in adjustments:
         original_payroll_record = getattr(ea, 'original_payroll_record', None)
         payroll_needing_adjustment = getattr(ea, 'payroll_needing_adjustment', None)
 
+        # Manually doing one more safe_getattr nesting for payroll_month (3 levels):
+        record_month_obj = safe_getattr(original_payroll_record, 'payroll_month', None)
+        record_month = safe_getattr(record_month_obj, 'payroll_month', "")
+        record_month_final = safe_getattr(record_month, 'payroll_month', "")  # extra level
+
+        adjusted_month_obj = safe_getattr(payroll_needing_adjustment, 'payroll_month', None)
+        adjusted_month = safe_getattr(adjusted_month_obj, 'payroll_month', "")
+        adjusted_month_final = safe_getattr(adjusted_month, 'payroll_month', "")  # extra level
+
         ws.append([
-            safe_getattr(safe_getattr(original_payroll_record, 'payroll_month', None), 'payroll_month', ""),
-            safe_getattr(safe_getattr(payroll_needing_adjustment, 'payroll_month', None), 'payroll_month', ""),
+            record_month_final,
+            adjusted_month_final,
             safe_getattr(safe_getattr(original_payroll_record, 'personnel_full_name', None), 'first_name', ""),
             safe_getattr(safe_getattr(original_payroll_record, 'personnel_full_name', None), 'father_name', ""),
             safe_getattr(safe_getattr(original_payroll_record, 'personnel_full_name', None), 'last_name', ""),
@@ -208,7 +217,7 @@ def export_earning_adjustment_list_to_excel(request):
     response['Content-Disposition'] = 'attachment; filename=earning_adjustments_individual.xlsx'
     return response
 
-#
+
 
 #per adjusted month export
 @login_required
@@ -259,8 +268,8 @@ def export_earning_per_adjusted_month_to_excel(request):
     # Data rows
     for adj in data:
         ws.append([
-            safe_get(adj, "original_payroll_record__payroll_month__payroll_month", ""),
-            safe_get(adj, "payroll_needing_adjustment__payroll_month__payroll_month", ""),
+            safe_get(adj, "original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
+            safe_get(adj, "payroll_needing_adjustment__payroll_month__payroll_month__payroll_month", ""),
             safe_get(adj, "original_payroll_record__personnel_full_name__personnel_id", ""),
             safe_get(adj, "original_payroll_record__personnel_full_name__first_name", ""),
             safe_get(adj, "original_payroll_record__personnel_full_name__father_name", ""),
@@ -354,7 +363,7 @@ def export_monthly_earning_adjustment_to_excel(request):
     # Append data rows (no index variable since unused)
     for row in data:
         ws.append([
-            row.get("original_payroll_record__payroll_month__payroll_month", ""),
+            row.get("original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
             row.get("original_payroll_record__personnel_full_name__personnel_id", ""),
             row.get("original_payroll_record__personnel_full_name__first_name", ""),
             row.get("original_payroll_record__personnel_full_name__father_name", ""),

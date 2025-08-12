@@ -84,8 +84,8 @@
                             <tbody>
                             {% for sp in page_obj %}
                             <tr>
-                                <td>{{ sp.year }}</td>
-                                <td>{{ sp.month }}</td>
+                                <td>{{ sp.severance_record_month.year }}</td>
+                                <td>{{ sp.severance_record_month.payroll_month }}</td>
                                 <td>{{ sp.get_severance_type_display }}</td>
                                 <td>
                                     <a

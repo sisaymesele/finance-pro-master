@@ -52,7 +52,7 @@
                     >
                         {% csrf_token %}
                         <div class="row col-md-3">
-                                {% for field in form.visible_fields|slice:":2" %}
+                                {% for field in form.visible_fields|slice:":1" %}
                                 <div class="mb-3">
                                     {{ field.label_tag }}
                                     {{ field }}
@@ -68,7 +68,7 @@
 
                             <div class="col-md-3">
                                 <h3 class="text-success">Earnings</h3>
-                                {% for field in form.visible_fields|slice:"2:10" %}
+                                {% for field in form.visible_fields|slice:"1:9" %}
                                 <div class="mb-3">
                                     {{ field.label_tag }}
                                     {{ field }}
@@ -83,7 +83,7 @@
 
                             <div class="col-md-3">
                                 <h3 class="text-success">Earnings</h3>
-                                {% for field in form.visible_fields|slice:"10:16" %}
+                                {% for field in form.visible_fields|slice:"9:15" %}
                                 <div class="mb-3">
                                     {{ field.label_tag }}
                                     {{ field }}
@@ -98,7 +98,7 @@
 
                             <div class="col-md-3">
                                 <h3 class="text-success">Earnings</h3>
-                                {% for field in form.visible_fields|slice:"16:23" %}
+                                {% for field in form.visible_fields|slice:"15:22" %}
                                 <div class="mb-3">
                                     {{ field.label_tag }}
                                     {{ field }}
@@ -113,7 +113,7 @@
 
                             <div class="col-md-3">
                                 <h3 class="text-primary">Deductions</h3>
-                                {% for field in form.visible_fields|slice:"23:33" %}
+                                {% for field in form.visible_fields|slice:"22:32" %}
                                 <div class="mb-3">
                                     {{ field.label_tag }}
                                     {{ field }}
@@ -131,7 +131,6 @@
                             {% if edit_mode %} Update {% else %} Create {% endif %}
                         </button>
                     </form>
-
 
                 </div>
             </div>

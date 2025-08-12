@@ -44,7 +44,7 @@
     <!-- === Grouped by Employee + Month Summary === -->
     {% for adjustment in monthly_earning_adjustment %}
     {% with person_id=adjustment.original_payroll_record__personnel_full_name__personnel_id %}
-    {% with recorded_month=adjustment.original_payroll_record__payroll_month__payroll_month %}
+    {% with recorded_month=adjustment.original_payroll_record__payroll_month__payroll_month__payroll_month %}
 
     <div class="border rounded p-3 mb-4">
         <h4 class="fw-bold">Employee: {{ person_id }} -
@@ -80,7 +80,7 @@
                 <tbody>
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ adjustment.original_payroll_record__payroll_month__payroll_month }}</td>
+                    <td>{{ adjustment.original_payroll_record__payroll_month__payroll_month__payroll_month }}</td>
                     <td>{{ adjustment.recorded_month_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     <td>{{ adjustment.recorded_month_non_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                     <td>{{ adjustment.recorded_month_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
@@ -126,11 +126,11 @@
                 </thead>
                 <tbody>
                 {% for item in earning_per_adjusted_month %}
-                {% if item.original_payroll_record__personnel_full_name__personnel_id == person_id and item.original_payroll_record__payroll_month__payroll_month == recorded_month %}
+                {% if item.original_payroll_record__personnel_full_name__personnel_id == person_id and item.original_payroll_record__payroll_month__payroll_month__payroll_month == recorded_month %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ item.original_payroll_record__payroll_month__payroll_month }}</td>
-                    <td>{{ item.payroll_needing_adjustment__payroll_month__payroll_month }}</td>
+                    <td>{{ item.original_payroll_record__payroll_month__payroll_month__payroll_month }}</td>
+                    <td>{{ item.payroll_needing_adjustment__payroll_month__payroll_month__payroll_month }}</td>
                     <td class="text-start py-1">
                         <span class="badge bg-warning text-dark">Gross Taxable: {{ item.payroll_needing_adjustment__gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}</span>
                         <span class="badge bg-warning text-dark">Employment Income Tax: {{ item.payroll_needing_adjustment__employment_income_tax|default:"0.00"|floatformat:2|intcomma }}</span>
@@ -183,11 +183,11 @@
                 </thead>
                 <tbody>
                 {% for earning in page_obj %}
-                {% if earning.original_payroll_record.personnel_full_name.personnel_id == person_id and earning.original_payroll_record.payroll_month.payroll_month == recorded_month %}
+                {% if earning.original_payroll_record.personnel_full_name.personnel_id == person_id and earning.original_payroll_record.payroll_month.payroll_month.payroll_month == recorded_month %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ earning.original_payroll_record.payroll_month }}</td>
-                    <td>{{ earning.payroll_needing_adjustment.payroll_month }}</td>
+                    <td>{{ earning.original_payroll_record.payroll_month.payroll_month.payroll_month }}</td>
+                    <td>{{ earning.payroll_needing_adjustment.payroll_month.payroll_month.payroll_month }}</td>
                     <td>{{ earning.original_payroll_record.personnel_full_name.first_name }}</td>
                     <td>{{ earning.original_payroll_record.personnel_full_name.father_name }}</td>
                     <td>{{ earning.original_payroll_record.personnel_full_name.last_name }}</td>

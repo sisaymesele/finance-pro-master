@@ -15,7 +15,6 @@ from datetime import datetime
 from compensation_payroll.services.excel_export import ExportUtilityService
 
 
-
 # start severance
 @login_required
 def severance_pay_list(request):
@@ -24,9 +23,9 @@ def severance_pay_list(request):
     search_query = request.GET.get('search', '').strip()
     if search_query:
         severance_pays = severance_pays.filter(
-            Q(year__icontains=search_query) | Q(month__icontains=search_query) |
-            Q(personnel_full_name__personnel_id__icontains=search_query) | Q(personnel_full_name__first_name__icontains=search_query) |
-            Q(personnel_full_name__father_name__icontains=search_query) | Q(personnel_full_name__last_name__icontains=search_query)
+            Q(severance_record_month__icontains=search_query) | Q(personnel_full_name__personnel_id__icontains=search_query) |
+            Q(personnel_full_name__first_name__icontains=search_query) | Q(personnel_full_name__father_name__icontains=search_query) |
+            Q(personnel_full_name__last_name__icontains=search_query)
         )
     severance_pays = severance_pays.order_by('-id')
 
@@ -36,7 +35,9 @@ def severance_pay_list(request):
     page_obj = paginator.get_page(page_number)
 
     # Pass data to the template
-    context = {'page_obj': page_obj, }
+    context = {
+        'page_obj': page_obj,
+    }
     return render(request, 'severance_pay/list.html', context)
 
 
@@ -194,24 +195,29 @@ def export_severance_pay_to_excel(request):
 
 @login_required
 def severance_pay_report(request, template_name):
-    # Filter by logged-in user
-    user_severance_pay = SeverancePay.objects.filter(organization_name=request.user.organization_name)
-
-    # Aggregated by Year-Month
-    severance_summary_month_year = user_severance_pay.values('year', 'month').annotate(
+    severance_summary_month_year = SeverancePay.objects.filter(
+        organization_name=request.user.organization_name
+    ).values(
+        'severance_record_month__year',
+        'severance_record_month__month',
+        'severance_record_month__payroll_month'
+    ).annotate(
         total_gross_severance=Sum('gross_severance_pay'),
         total_employment_income_tax_from_severance_pay=Sum('employment_income_tax_from_severance_pay'),
         total_net_severance_pay=Sum('net_severance_pay')
-    ).order_by('year', 'month')
+    ).order_by('severance_record_month__year', 'severance_record_month__month')
 
-    # Aggregated by Year
-    severance_summary_year = user_severance_pay.values('year').annotate(
+    severance_summary_year = SeverancePay.objects.filter(
+        organization_name=request.user.organization_name
+    ).values(
+        'severance_record_month__year'
+    ).annotate(
         total_gross_severance=Sum('gross_severance_pay'),
         total_employment_income_tax_from_severance_pay=Sum('employment_income_tax_from_severance_pay'),
         total_net_severance_pay=Sum('net_severance_pay')
-    ).order_by('year')
+    ).order_by('severance_record_month__year')
 
     return render(request, template_name, {
         'severance_summary_month_year': severance_summary_month_year,
-        'severance_summary_year': severance_summary_year
+        'severance_summary_year': severance_summary_year,
     })

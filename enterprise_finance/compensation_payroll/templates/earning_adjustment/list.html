@@ -79,8 +79,8 @@
             {% for ea in page_obj %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ ea.original_payroll_record.payroll_month }}</td>
-                <td>{{ ea.payroll_needing_adjustment.payroll_month }}</td>
+                <td>{{ ea.original_payroll_record.payroll_month.payroll_month.payroll_month }}</td>
+                <td>{{ ea.payroll_needing_adjustment.payroll_month.payroll_month.payroll_month }}</td>
                 <td>{{ ea.original_payroll_record.personnel_full_name.first_name }}</td>
                 <td>{{ ea.original_payroll_record.personnel_full_name.father_name }}</td>
                 <td>{{ ea.original_payroll_record.personnel_full_name.last_name }}</td>

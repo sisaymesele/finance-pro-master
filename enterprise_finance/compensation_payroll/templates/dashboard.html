@@ -90,6 +90,18 @@
                     </div>
                 </li>
 
+                <li class="nav-item bg-primary">
+                    <a hx-get="{% url 'payroll_period_list' %}"
+                       hx-target="#full-page-container"
+                       hx-swap="innerHTML"
+                       hx-trigger="click"
+                       hx-push-url="{% url 'payroll_period_list' %}"
+                       href="{% url 'payroll_period_list' %}"
+                       class="nav-link text-white">
+                        <i class="bi bi-calendar3"></i> Payroll Period
+                    </a>
+                </li>
+
 
                 <li class="nav-item bg-primary">
                     <a hx-get="{% url 'payroll_month_and_component_list' %}"

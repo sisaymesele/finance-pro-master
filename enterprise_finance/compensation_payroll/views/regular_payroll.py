@@ -18,12 +18,15 @@ from compensation_payroll.services.excel_export import ExportUtilityService
 # payroll month list
 @login_required
 def payroll_month_list(request):
-    # Query to get distinct payroll months for the logged-in user
-    payroll_months = PayrollMonthComponent.objects.filter(organization_name=request.user.organization_name).values(
-        'payroll_month', 'slug'
+    payroll_months = PayrollMonthComponent.objects.filter(
+        organization_name=request.user.organization_name
+    ).values(
+        'payroll_month__year',
+        'payroll_month__payroll_month',
+        'payroll_month__slug',
     ).order_by(
-        '-year',
-        '-month'
+        '-payroll_month__year',
+        '-payroll_month__month'
     ).distinct()
 
     return render(request, 'payroll_month/list.html', {
@@ -39,7 +42,7 @@ def regular_payroll_list(request, payroll_month_slug):
     regular_payrolls = RegularPayroll.objects.filter(
         payroll_month=payroll_month,
         organization_name=request.user.organization_name
-    ).order_by('-payroll_month__year', '-payroll_month__month')
+    ).order_by('-payroll_month__payroll_month__year', '-payroll_month__payroll_month__month')
 
     # Apply search functionality if search query exists
     search_query = request.GET.get('search', '')
@@ -118,7 +121,7 @@ def create_regular_payroll(request, payroll_month_slug):
     context = {
         'form': form,
         # Updated to use month and year fields instead of name
-        'form_title': f'Create Regular Payroll for {payroll_month.payroll_month}',
+        'form_title': f'Create Regular Payroll for {payroll_month.payroll_month.payroll_month}',
         'submit_button_text': 'Create Regular Payroll',
         'back_url': reverse('regular_payroll_list', kwargs={'payroll_month_slug': payroll_month.slug}),
         'show_add_personnel': True,
@@ -154,7 +157,7 @@ def update_regular_payroll(request, payroll_month_slug, pk):
 
     context = {
         'form': form,
-        'form_title': f'Update Regular Payroll for {payroll_month.month} {payroll_month.year}',
+        'form_title': f'Update Regular Payroll for {payroll_month.payroll_month.month} {payroll_month.payroll_month.year}',
         'submit_button_text': 'Update Regular Payroll',
         'back_url': reverse('regular_payroll_list', kwargs={'payroll_month_slug': payroll_month.slug}),
         'show_add_personnel': True,
@@ -188,15 +191,15 @@ def delete_regular_payroll(request, payroll_month_slug, pk):
 @login_required
 def payroll_month_for_journal_entry_report(request):
     # Get distinct payroll months for the current user
-    payroll_months = RegularPayroll.objects.filter(
+    payroll_month_journal_entry = RegularPayroll.objects.filter(
         organization_name=request.user.organization_name
     ).select_related('payroll_month').values(
         'payroll_month__slug',
-        'payroll_month__payroll_month'
-    ).distinct().order_by('-payroll_month__year', '-payroll_month__month')
+        'payroll_month__payroll_month__payroll_month'
+    ).distinct().order_by('-payroll_month__payroll_month__year', '-payroll_month__payroll_month__month')
 
     context = {
-        'payroll_months': payroll_months,
+        'payroll_month_journal_entry': payroll_month_journal_entry,
     }
     return render(request, 'regular_payroll/journal_entry/month_list.html', context)
 
@@ -204,15 +207,15 @@ def payroll_month_for_journal_entry_report(request):
 @login_required
 def payroll_month_for_summary_report(request):
     # Get payroll months only for the current user's organization
-    payroll_months = RegularPayroll.objects.filter(
+    payroll_month_summary = RegularPayroll.objects.filter(
         organization_name=request.user.organization_name
     ).select_related('payroll_month').values(
         'payroll_month__slug',
-        'payroll_month__payroll_month'
-    ).distinct().order_by('-payroll_month__year', '-payroll_month__month')
+        'payroll_month__payroll_month__payroll_month'
+    ).distinct().order_by('-payroll_month__payroll_month__year', '-payroll_month__payroll_month__month')
 
     context = {
-        'payroll_months': payroll_months,
+        'payroll_month_summary': payroll_month_summary,
     }
     return render(request, 'regular_payroll/summary/month_list.html', context)
 
@@ -226,7 +229,7 @@ def get_regular_payroll_by_month_report(request, payroll_month_slug):
         payroll_month=payroll_month,
         organization_name=request.user.organization_name
     ).values(
-        'payroll_month__year', 'payroll_month__month'
+        'payroll_month__payroll_month__year', 'payroll_month__payroll_month__payroll_month'
     ).annotate(
         aggregate_basic_salary=Sum('basic_salary'),
         aggregate_overtime=Sum('overtime'),
@@ -275,7 +278,7 @@ def get_regular_payroll_by_month_report(request, payroll_month_slug):
         aggregate_total_payroll_deduction=Sum('total_payroll_deduction'),
         aggregate_net_pay=Sum('net_pay'),
         aggregate_expense=Sum('expense')
-    ).order_by('-payroll_month__year', '-payroll_month__month')
+    ).order_by('-payroll_month__payroll_month__year', '-payroll_month__payroll_month__month')
 
     return {
         'payroll_month': payroll_month,
@@ -303,7 +306,7 @@ def payroll_by_year_summary_report(request):
     aggregate_by_year = RegularPayroll.objects.filter(
         organization_name=request.user.organization_name
     ).values(
-        'payroll_month__year'
+        'payroll_month__payroll_month__year'
     ).annotate(
         aggregate_basic_salary=Sum('basic_salary'),
         aggregate_overtime=Sum('overtime'),
@@ -352,7 +355,7 @@ def payroll_by_year_summary_report(request):
         aggregate_total_payroll_deduction=Sum('total_payroll_deduction'),
         aggregate_net_pay=Sum('net_pay'),
         aggregate_expense=Sum('expense')
-    ).order_by('-payroll_month__year')
+    ).order_by('-payroll_month__payroll_month__year')
 
     return render(
         request,
@@ -367,7 +370,7 @@ def payroll_processing_graphs(request):
     payroll_months = PayrollMonthComponent.objects.filter(organization_name=request.user.organization_name)
 
     # Labels for the x-axis (month names)
-    month_labels = [payroll_month.payroll_month for payroll_month in payroll_months]
+    month_labels = [payroll_month.payroll_month.payroll_month for payroll_month in payroll_months]
 
     # Lists to store values for each field (for all months)
     employment_income_tax_values = []
@@ -563,7 +566,7 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
 
     workbook = Workbook()
     sheet = workbook.active
-    sheet.title = f"Payroll process for {payroll_month.payroll_month}"
+    sheet.title = f"Payroll process for {payroll_month.payroll_month.payroll_month}"
 
     # Build header list dynamically based on payroll_month flags
     header = ["ID"]
@@ -665,7 +668,7 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
     total_cols = len(header)
     sheet.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_cols)
     title_cell = sheet.cell(row=1, column=1)
-    title_cell.value = f"Regular Payroll For - {payroll_month.payroll_month}"
+    title_cell.value = f"Regular Payroll For - {payroll_month.payroll_month.payroll_month}"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = Alignment(horizontal='center', vertical='center')
     sheet.row_dimensions[1].height = 30
@@ -821,6 +824,6 @@ def export_regular_payroll_to_excel(request, payroll_month_slug):
         buffer,
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename=payroll_for_{payroll_month.payroll_month}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename=payroll_for_{payroll_month.payroll_month.payroll_month}.xlsx'
 
     return response

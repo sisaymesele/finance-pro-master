@@ -173,12 +173,43 @@ class PersonnelList(models.Model):
         super().save(*args, **kwargs)
 
 
+
+class PayrollPeriod(models.Model):
+    organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
+    year = models.CharField(max_length=4, choices=YEAR_CHOICES,
+                            default=str(datetime.datetime.now().year),
+                            help_text='payroll processing year')
+    month = models.CharField(max_length=12, choices=MONTH_CHOICES,
+                             default=datetime.datetime.now().strftime('%B'),
+                             help_text='payroll processing month')
+
+    payroll_month = models.CharField(max_length=70, blank=True)
+    slug = models.SlugField(unique=True)  # Slug for payroll month
+
+    def __str__(self):
+        # Defensive: ensure always string
+        if isinstance(self.payroll_month, str):
+            return self.payroll_month
+        return str(self.payroll_month)
+
+    class Meta:
+        verbose_name = "              Payroll Month and Component"
+        verbose_name_plural = "              Payroll Month and Components"
+        ordering = ['-id']  # You can change the ordering field as needed
+
+    def save(self, *args, **kwargs):
+        self.payroll_month = f"{self.get_month_display()}-{self.year}"
+        if self.organization_name_id:
+            self.slug = f"{self.organization_name.id}-{self.payroll_month}"
+        else:
+            self.slug = self.payroll_month
+        super().save(*args, **kwargs)
+
+
+
 class PayrollMonthComponent(models.Model):
     organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
-    year = models.CharField(max_length=4, choices=YEAR_CHOICES, default=str(datetime.datetime.now().year),
-                            help_text='payroll processing year')
-    month = models.CharField(max_length=12, choices=MONTH_CHOICES, default=datetime.datetime.now().strftime('%B'),
-                             help_text='payroll processing month')
+    payroll_month = models.ForeignKey(PayrollPeriod, on_delete=models.PROTECT, help_text='payroll processing month')
     use_basic_salary = models.BooleanField(default=False)
     use_overtime = models.BooleanField(default=False)
     use_housing_allowance = models.BooleanField(default=False)
@@ -215,11 +246,10 @@ class PayrollMonthComponent(models.Model):
     use_red_cross = models.BooleanField(default=False)
     use_party_contribution = models.BooleanField(default=False)
     use_other_deduction = models.BooleanField(default=False)
-    payroll_month = models.CharField(max_length=70, blank=True)
     slug = models.SlugField(unique=True)  # Slug for payroll month
 
     def __str__(self):
-        return self.payroll_month
+        return str(self.payroll_month)
 
     class Meta:
         verbose_name = "              Payroll Month and Component"
@@ -227,7 +257,6 @@ class PayrollMonthComponent(models.Model):
         ordering = ['-id']  # You can change the ordering field as needed
 
     def save(self, *args, **kwargs):
-        self.payroll_month = f"{self.get_month_display()}-{self.year}"
         if self.organization_name_id:
             self.slug = f"{self.organization_name.id}-{self.payroll_month}"
         else:
@@ -742,10 +771,8 @@ class SeverancePay(models.Model):
     ]
 
     organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
-    year = models.CharField(max_length=4, choices=YEAR_CHOICES, default=str(datetime.datetime.now().year),
-                            help_text='Severance processing year')
-    month = models.CharField(max_length=12, choices=MONTH_CHOICES, default=datetime.datetime.now().strftime('%B'),
-                             help_text='Severance processing month')
+
+    severance_record_month = models.ForeignKey(PayrollPeriod, on_delete=models.PROTECT, help_text='Severance processing month')
     severance_type = models.CharField(max_length=150, choices=SEVERANCE_TYPE_CHOICES, default='normal')
     personnel_full_name = models.ForeignKey(PersonnelList, on_delete=models.SET_NULL, null=True,
                                             related_name='personnel_severance_pay')

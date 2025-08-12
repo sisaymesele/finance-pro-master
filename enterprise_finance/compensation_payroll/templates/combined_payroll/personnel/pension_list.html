@@ -57,7 +57,7 @@
                     {% for item in payroll_data %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ item.payroll.payroll_month.payroll_month }}</td>
+                        <td>{{ item.payroll.payroll_month.payroll_month.payroll_month }}</td>
                         <td>{{ item.payroll.personnel_full_name.personnel_id }}</td>
                         <td>{{ item.payroll.personnel_full_name.first_name }}</td>
                         <td>{{ item.payroll.personnel_full_name.father_name }}</td>

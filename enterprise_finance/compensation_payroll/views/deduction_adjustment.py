@@ -141,15 +141,14 @@ def export_deduction_adjustment_list_to_excel(request):
     subtitle_cell.alignment = Alignment(horizontal='center', vertical='center')
     ws.row_dimensions[2].height = 20
 
-    # Use ExportUtilityService to split header lines on row 3
+    # Headers row (3rd)
     export_util = ExportUtilityService()
     ws.append([export_util.split_header_to_lines(h) for h in headers])
 
     # Header styling
-    header_fill = PatternFill(start_color="FF0070C0", end_color="FF0070C0", fill_type="solid")  # Blue fill
-    header_font = Font(bold=True, color="FFFFFFFF")  # White font
+    header_fill = PatternFill(start_color="FF0070C0", end_color="FF0070C0", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFFFF")
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
     thin_border = Border(right=Side(style='thin', color='FF000000'))
 
     for cell in ws[3]:
@@ -158,20 +157,34 @@ def export_deduction_adjustment_list_to_excel(request):
         cell.alignment = header_alignment
         cell.border = thin_border
 
-    # Add data rows starting at row 4
+    # Helper function for safe nested getattr one level
+    def safe_getattr(obj, attr, default=""):
+        return getattr(obj, attr, default) if obj else default
+
+    # Manually 3-level safe getattr for payroll_month fields
     for d in deductions:
+        # Record Month nested 3 levels
+        rec_month_obj = safe_getattr(d.original_payroll_record, 'payroll_month', None)
+        rec_month_lvl2 = safe_getattr(rec_month_obj, 'payroll_month', None)
+        rec_month_final = safe_getattr(rec_month_lvl2, 'payroll_month', "")
+
+        # Adjusted Month nested 3 levels
+        adj_month_obj = safe_getattr(d.payroll_needing_adjustment, 'payroll_month', None)
+        adj_month_lvl2 = safe_getattr(adj_month_obj, 'payroll_month', None)
+        adj_month_final = safe_getattr(adj_month_lvl2, 'payroll_month', "")
+
         ws.append([
-            getattr(d.original_payroll_record.payroll_month, "payroll_month", ""),
-            getattr(d.payroll_needing_adjustment.payroll_month, "payroll_month", ""),
-            getattr(d.original_payroll_record.personnel_full_name, "first_name", ""),
-            getattr(d.original_payroll_record.personnel_full_name, "father_name", ""),
-            getattr(d.original_payroll_record.personnel_full_name, "last_name", ""),
+            rec_month_final,
+            adj_month_final,
+            safe_getattr(safe_getattr(d.original_payroll_record, 'personnel_full_name', None), 'first_name', ""),
+            safe_getattr(safe_getattr(d.original_payroll_record, 'personnel_full_name', None), 'father_name', ""),
+            safe_getattr(safe_getattr(d.original_payroll_record, 'personnel_full_name', None), 'last_name', ""),
             d.get_case_display(),
             d.get_component_display(),
             float(d.deduction_amount or 0),
             d.period_start.strftime("%Y-%m-%d") if d.period_start else "",
             d.period_end.strftime("%Y-%m-%d") if d.period_end else "",
-            d.months_covered,
+            d.months_covered or "",
             d.created_at.strftime("%Y-%m-%d %H:%M") if d.created_at else "",
             d.updated_at.strftime("%Y-%m-%d %H:%M") if d.updated_at else "",
         ])
@@ -190,7 +203,7 @@ def export_deduction_adjustment_list_to_excel(request):
         adjusted_width = min(max(max_length + 2, MIN_WIDTH), MAX_WIDTH)
         ws.column_dimensions[get_column_letter(idx)].width = adjusted_width
 
-    # Output to HttpResponse
+    # Prepare response
     output = BytesIO()
     wb.save(output)
     output.seek(0)
@@ -253,8 +266,8 @@ def export_deduction_per_adjusted_month_to_excel(request):
     # Append data rows starting from row 4
     for item in data:
         ws.append([
-            item.get("original_payroll_record__payroll_month__payroll_month", ""),
-            item.get("payroll_needing_adjustment__payroll_month__payroll_month", ""),
+            item.get("original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
+            item.get("payroll_needing_adjustment__payroll_month__payroll_month__payroll_month", ""),
             item.get("original_payroll_record__personnel_full_name__personnel_id", ""),
             item.get("original_payroll_record__personnel_full_name__first_name", ""),
             item.get("original_payroll_record__personnel_full_name__father_name", ""),
@@ -335,7 +348,7 @@ def export_monthly_deduction_adjustment_to_excel(request):
     # Append data rows
     for item in data:
         ws.append([
-            item.get("original_payroll_record__payroll_month__payroll_month", ""),
+            item.get("original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
             item.get("original_payroll_record__personnel_full_name__personnel_id", ""),
             item.get("original_payroll_record__personnel_full_name__first_name", ""),
             item.get("original_payroll_record__personnel_full_name__father_name", ""),

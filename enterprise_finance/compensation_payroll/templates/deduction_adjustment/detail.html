@@ -43,7 +43,7 @@
 
     {% for adjustment in monthly_deduction_adjustment %}
     {% with person_id=adjustment.original_payroll_record__personnel_full_name__personnel_id %}
-    {% with recorded_month=adjustment.original_payroll_record__payroll_month__payroll_month %}
+    {% with recorded_month=adjustment.original_payroll_record__payroll_month__payroll_month__payroll_month %}
     <div class="border rounded p-3 mb-4">
         <h4 class="fw-bold">Employee: {{ person_id }} -
             {{ adjustment.original_payroll_record__personnel_full_name__first_name }}
@@ -63,7 +63,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ adjustment.original_payroll_record__payroll_month__payroll_month }}</td>
+                    <td>{{ adjustment.original_payroll_record__payroll_month__payroll_month__payroll_month }}</td>
                     <td>{{ adjustment.recorded_month_total_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
                 </tr>
             </tbody>
@@ -81,10 +81,10 @@
             </thead>
             <tbody>
                 {% for item in deduction_per_adjusted_month %}
-                {% if item.original_payroll_record__personnel_full_name__personnel_id == person_id and item.original_payroll_record__payroll_month__payroll_month == recorded_month %}
+                {% if item.original_payroll_record__personnel_full_name__personnel_id == person_id and item.original_payroll_record__payroll_month__payroll_month__payroll_month == recorded_month %}
                 <tr>
-                    <td>{{ item.original_payroll_record__payroll_month__payroll_month }}</td>
-                    <td>{{ item.payroll_needing_adjustment__payroll_month__payroll_month }}</td>
+                    <td>{{ item.original_payroll_record__payroll_month__payroll_month__payroll_month }}</td>
+                    <td>{{ item.payroll_needing_adjustment__payroll_month__payroll_month__payroll_month }}</td>
                     <td>{{ item.adjusted_month_total_deduction|default:"0.00"|floatformat:2|intcomma }}</td>
                 </tr>
                 {% endif %}
@@ -115,11 +115,11 @@
             </thead>
             <tbody>
                 {% for deduction in page_obj %}
-                {% if deduction.original_payroll_record.personnel_full_name.personnel_id == person_id and deduction.original_payroll_record.payroll_month.payroll_month == recorded_month %}
+                {% if deduction.original_payroll_record.personnel_full_name.personnel_id == person_id and deduction.original_payroll_record.payroll_month.payroll_month.payroll_month == recorded_month %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td>{{ deduction.original_payroll_record.payroll_month }}</td>
-                    <td>{{ deduction.payroll_needing_adjustment.payroll_month }}</td>
+                    <td>{{ deduction.original_payroll_record.payroll_month.payroll_month.payroll_month }}</td>
+                    <td>{{ deduction.payroll_needing_adjustment.payroll_month.payroll_month.payroll_month }}</td>
 
                     <td>{{ deduction.original_payroll_record.personnel_full_name.first_name }}</td>
                     <td>{{ deduction.original_payroll_record.personnel_full_name.father_name }}</td>

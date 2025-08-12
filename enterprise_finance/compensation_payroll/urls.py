@@ -19,6 +19,12 @@ urlpatterns = [
     path('personnel-list/delete/<int:pk>/', views.delete_personnel, name='delete_personnel'),
     path('personnel-graph', views.personnel_graph_view, name='personnel_graph'),
 
+    # payroll period URLs
+    path('payroll-period/', views.payroll_period_list, name='payroll_period_list'),
+    path('payroll-period/create/', views.create_payroll_period, name='create_payroll_period'),
+    path('payroll-period/update/<int:pk>/', views.update_payroll_period, name='update_payroll_period'),
+    path('payroll-period/delete/<int:pk>/', views.delete_payroll_period, name='delete_payroll_period'),
+
     # payroll month component
     path('payroll-month-and-component/', views.payroll_month_and_component_list, name='payroll_month_and_component_list'),
     path('payroll-month-and-component/create/', views.create_payroll_month_and_component, name='create_payroll_month_and_component'),
@@ -101,7 +107,7 @@ urlpatterns = [
     path('severance-pay/update/<int:pk>/', views.update_severance_pay, name='update_severance_pay'),
     path('severance-pay/delete/<int:pk>/', views.delete_severance_pay, name='delete_severance_pay'),
     path('severance-pay-summary/', views.severance_pay_report, {'template_name': 'severance_pay/summary.html'}, name='severance_pay_summary'),
-    path('severance-pay-journal-entry/', views.severance_pay_report, {'template_name': 'severance_pay/journal-entry.html'}, name='severance_pay_journal_entry'),
+    path('severance-pay-journal-entry/', views.severance_pay_report, {'template_name': 'severance_pay/journal_entry.html'}, name='severance_pay_journal_entry'),
 
     # absence deduction
     path('absence-deduction', views.absence_deduction_list, name='absence_deduction_list'),

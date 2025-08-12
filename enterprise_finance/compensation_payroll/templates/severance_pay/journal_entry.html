@@ -17,7 +17,7 @@
     {% for entry in severance_summary_month_year %}
 
     <div class="card mb-4" id="month-severance-accrual-entry-{{ entry.id }}">
-        <h4 class="text-center m-2">Severance Pay Accrual Entry for {{ entry.month }} - {{ entry.year }}</h4>
+        <h4 class="text-center m-2">Severance Pay Accrual Entry for {{ entry.severance_record_month__payroll_month }}</h4>
         <div class="table-responsive col-md-12">
             <table class="table table-bordered table-striped table-sm">
                 <thead>
@@ -62,7 +62,7 @@
     <!-- Payment Journal Entry -->
     {% for entry in severance_summary_month_year %}
     <div class="card" id="month-severance-payment-entry-{{ entry.id }}">
-        <h4 class="card-title text-center m-2">Severance Payment Entry for {{ entry.month }} - {{ entry.year }}</h4>
+        <h4 class="card-title text-center m-2">Severance Payment Entry for {{ entry.severance_record_month__year }}</h4>
         <div class="card-body">
             <table class="table table-bordered">
                 <thead>

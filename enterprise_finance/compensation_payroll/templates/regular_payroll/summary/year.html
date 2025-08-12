@@ -10,7 +10,7 @@
     <div class="bg-light p-4 mt-4 w-100">
 
         {% for summary in aggregate_by_year %}
-        <h3 class="text-center">Regular Payroll Yearly Summary for {{ summary.payroll_month__year }}</h3>
+        <h3 class="text-center">Regular Payroll Yearly Summary for {{ summary.payroll_month__payroll_month__year }}</h3>
 
         <div class="table-responsive" id="aggregate-payroll-summary-{{ summary.id }}">
             <table class="table table-bordered table-striped">
@@ -335,7 +335,7 @@
         <div class="m-2 d-flex justify-content-center align-items-center">
             <button class="btn btn-success mt-2"
                     onclick="printCommon('aggregate-payroll-summary-{{ summary.id }}')">
-                Save or Print Summary for {{ summary.payroll_month__year }}
+                Save or Print Summary for {{ summary.payroll_month__payroll_month__year }}
             </button>
         </div>
         {% endfor %}

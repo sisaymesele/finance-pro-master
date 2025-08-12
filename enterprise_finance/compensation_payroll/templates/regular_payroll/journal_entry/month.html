@@ -27,7 +27,7 @@
                     <thead style="border-bottom: 2px solid #000;">
                     <tr style="text-align: center;">
                         <th colspan="3">
-                            <h4>Regular Payroll Accruals Entry for Month: {{ payroll_month.month }} Year: {{ payroll_month.year }}</h4>
+                            <h4>Regular Payroll Accruals Entry for Month: {{ payroll_month.payroll_month.payroll_month }}</h4>
                         </th>
                     </tr>
                     </thead>
@@ -403,7 +403,7 @@
             <!-- Print button for accrual -->
             <div class="m-2 d-flex justify-content-center align-items-center">
                <button class="btn btn-success" onclick="printCommon('aggregate-accrual-entry-{{ entry.id }}')">
-                    Save or Print Accrual Entry for {{ entry.payroll_month__month }} {{ entry.payroll_month__year }}
+                    Save or Print Accrual Entry for {{ entry.payroll_month__payroll_month__month }} {{ entry.payroll_month__payroll_month__year }}
                 </button>
             </div>
             <hr>
@@ -418,8 +418,8 @@
                     <thead style="border-bottom: 2px solid #000;">
                     <tr>
                         <th colspan="3">
-                            <h4 class="text-center">Regular Payroll Payment Entry for Month: {{ payroll_month.month }}
-                                Year: {{ payroll_month.year }}</h4>
+                            <h4 class="text-center">Regular Payroll Payment Entry for Month: {{ payroll_month.payroll_month.month }}
+                                Year: {{ payroll_month.payroll_month.year }}</h4>
                         </th>
                     </tr>
                     </thead>
@@ -559,7 +559,7 @@
             <!-- Print button for payment -->
             <div class="m-2 d-flex justify-content-center align-items-center">
                 <button class="btn btn-success" onclick="printCommon('aggregate-payment-entry-{{ entry.id }}')">
-                    Save or Print Payment Entry for {{ entry.payroll_month__month }} {{ entry.payroll_month__year }}
+                    Save or Print Payment Entry for {{ entry.payroll_month__payroll_month__month }} {{ entry.payroll_month__payroll_month__year }}
                 </button>
             </div>
             <hr>

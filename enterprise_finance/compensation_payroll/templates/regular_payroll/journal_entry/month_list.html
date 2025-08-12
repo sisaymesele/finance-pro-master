@@ -16,7 +16,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for payroll in payroll_months %}
+      {% for payroll in payroll_month_journal_entry %}
         <tr>
           <td>
             <a
@@ -27,7 +27,7 @@
               hx-push-url="{% url 'payroll_by_month_journal_entry' payroll.payroll_month__slug %}"
               href="{% url 'payroll_by_month_journal_entry' payroll.payroll_month__slug %}"
             >
-              {{ payroll.payroll_month__payroll_month }} - Click to show journal entry report by month
+              {{ payroll.payroll_month__payroll_month__payroll_month }} - Click to show journal entry report by month
             </a>
           </td>
         </tr>

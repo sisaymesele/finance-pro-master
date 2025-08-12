@@ -23,7 +23,7 @@ def get_combined_yearly_detail(request):
         organization_name=request.user.organization_name
     ).select_related('payroll_month') \
         .prefetch_related('earning_adjustments', 'deduction_adjustments')
-    payrolls = payrolls.order_by('-payroll_month__year')
+    payrolls = payrolls.order_by('-payroll_month__payroll_month__year')
 
     #
     yearly_summary = defaultdict(lambda: {
@@ -87,64 +87,13 @@ def get_combined_yearly_detail(request):
 
     for payroll in payrolls:
         if payroll and payroll.payroll_month:
-            year_key = payroll.payroll_month.year
+            year_key = payroll.payroll_month.payroll_month.year
         else:
             # handle None case — skip, set default, or log warning
             year_key = None  # or continue/skip processing this record
 
-        # year_key = payroll.payroll_month.year
+        #assign before it's initialized for the current payroll month key
         year_data = yearly_summary[year_key]
-
-        year_data['regular']['taxable_gross'] += safe_dec(payroll.gross_taxable_pay)
-        year_data['regular']['non_taxable_gross'] += safe_dec(payroll.gross_non_taxable_pay)
-        year_data['regular']['gross'] += safe_dec(payroll.gross_pay)
-        year_data['regular']['pensionable'] += safe_dec(payroll.basic_salary)
-        year_data['regular']['employee_pension'] += safe_dec(payroll.employee_pension_contribution)
-        year_data['regular']['employer_pension'] += safe_dec(payroll.employer_pension_contribution)
-        year_data['regular']['total_pension'] += safe_dec(payroll.total_pension_contribution)
-        year_data['regular']['employment_income_tax'] += safe_dec(payroll.employment_income_tax)
-        year_data['regular']['total_regular_deduction'] += safe_dec(payroll.total_payroll_deduction)
-        year_data['regular']['net_pay'] += safe_dec(payroll.net_pay)
-        year_data['regular']['expense'] += safe_dec(payroll.expense)
-
-        # Calculate pensionable sum once per payroll
-        pensionable_sum = payroll.earning_adjustments.filter(
-            component='basic_salary'
-        ).aggregate(total=Sum('earning_amount'))['total'] or Decimal('0.00')
-
-        adjusted_pensionable = safe_dec(pensionable_sum)
-
-        # Add it once to monthly summary
-        year_data['adjustment']['adjusted_pensionable'] += adjusted_pensionable
-
-        for ea in payroll.earning_adjustments.all():
-            c = ea.component
-            year_data['adjustment']['earning_adj_by_component']['taxable'][c] += safe_dec(ea.taxable)
-            year_data['adjustment']['earning_adj_by_component']['non_taxable'][c] += safe_dec(ea.non_taxable)
-            year_data['adjustment']['earning_adj_by_component']['total_earning_adjustment'][c] += safe_dec(ea.earning_amount)
-            year_data['adjustment']['earning_adj_by_component']['employee_pension_contribution'][c] += safe_dec(ea.employee_pension_contribution)
-            year_data['adjustment']['earning_adj_by_component']['employer_pension_contribution'][c] += safe_dec(ea.employer_pension_contribution)
-            year_data['adjustment']['earning_adj_by_component']['total_pension'][c] += safe_dec(ea.total_pension)
-
-
-        for da in payroll.deduction_adjustments.all():
-            c = da.component
-            year_data['adjustment']['deduction_adj_by_component'][c] += safe_dec(getattr(da, 'deduction_amount', 0))
-
-
-
-        ea_first = payroll.earning_adjustments.first() or type('Empty', (), {})()
-        #
-        year_data['adjustment']['taxable_gross'] += safe_dec(getattr(ea_first, 'recorded_month_taxable_gross_pay', 0))
-        year_data['adjustment']['non_taxable_gross'] += safe_dec(getattr(ea_first, 'recorded_month_non_taxable_gross_pay', 0))
-        year_data['adjustment']['gross'] += safe_dec(getattr(ea_first, 'recorded_month_gross_pay', 0))
-        year_data['adjustment']['adjusted_pensionable'] += safe_dec(getattr(ea_first, 'recorded_month_adjusted_pensionable', 0))
-        year_data['adjustment']['employee_pension'] += safe_dec(getattr(ea_first, 'recorded_month_employee_pension_contribution', 0))
-        year_data['adjustment']['employer_pension'] += safe_dec(getattr(ea_first, 'recorded_month_employer_pension_contribution', 0))
-        year_data['adjustment']['total_pension'] += safe_dec(getattr(ea_first, 'recorded_month_total_pension_contribution', 0))
-        year_data['adjustment']['employment_income_tax'] += safe_dec(getattr(ea_first, 'recorded_month_employment_income_tax', 0))
-        year_data['adjustment']['total_adjustment_deduction'] += safe_dec(getattr(ea_first, 'recorded_month_total_earning_deduction', 0))
-        year_data['adjustment']['expense'] += safe_dec(getattr(ea_first, 'recorded_month_expense', 0))
 
         regular_components = {
             'basic_salary': payroll.basic_salary,
@@ -195,9 +144,70 @@ def get_combined_yearly_detail(request):
         for comp, val in regular_components.items():
             year_data['regular']['components'][comp] += safe_dec(val)
 
+
+
+        year_data['regular']['taxable_gross'] += safe_dec(payroll.gross_taxable_pay)
+        year_data['regular']['non_taxable_gross'] += safe_dec(payroll.gross_non_taxable_pay)
+        year_data['regular']['gross'] += safe_dec(payroll.gross_pay)
+        year_data['regular']['pensionable'] += safe_dec(payroll.basic_salary)
+        year_data['regular']['employee_pension'] += safe_dec(payroll.employee_pension_contribution)
+        year_data['regular']['employer_pension'] += safe_dec(payroll.employer_pension_contribution)
+        year_data['regular']['total_pension'] += safe_dec(payroll.total_pension_contribution)
+        year_data['regular']['employment_income_tax'] += safe_dec(payroll.employment_income_tax)
+        year_data['regular']['total_regular_deduction'] += safe_dec(payroll.total_payroll_deduction)
+        year_data['regular']['net_pay'] += safe_dec(payroll.net_pay)
+        year_data['regular']['expense'] += safe_dec(payroll.expense)
+
+        # Calculate pensionable sum once per payroll
+        pensionable_sum = payroll.earning_adjustments.filter(
+            component='basic_salary'
+        ).aggregate(total=Sum('earning_amount'))['total'] or Decimal('0.00')
+
+        adjusted_pensionable = safe_dec(pensionable_sum)
+
+        # Add it once to monthly summary
+        year_data['adjustment']['adjusted_pensionable'] += adjusted_pensionable
+
+        for ea in payroll.earning_adjustments.all():
+            c = ea.component
+            year_data['adjustment']['earning_adj_by_component']['taxable'][c] += safe_dec(ea.taxable)
+            year_data['adjustment']['earning_adj_by_component']['non_taxable'][c] += safe_dec(ea.non_taxable)
+            year_data['adjustment']['earning_adj_by_component']['total_earning_adjustment'][c] += safe_dec(ea.earning_amount)
+            year_data['adjustment']['earning_adj_by_component']['employee_pension_contribution'][c] += safe_dec(ea.employee_pension_contribution)
+            year_data['adjustment']['earning_adj_by_component']['employer_pension_contribution'][c] += safe_dec(ea.employer_pension_contribution)
+            year_data['adjustment']['earning_adj_by_component']['total_pension'][c] += safe_dec(ea.total_pension)
+
+
+        ea_first = payroll.earning_adjustments.first() or type('Empty', (), {})()
+        #
+        year_data['adjustment']['taxable_gross'] += safe_dec(getattr(ea_first, 'recorded_month_taxable_gross_pay', 0))
+        year_data['adjustment']['non_taxable_gross'] += safe_dec(getattr(ea_first, 'recorded_month_non_taxable_gross_pay', 0))
+        year_data['adjustment']['gross'] += safe_dec(getattr(ea_first, 'recorded_month_gross_pay', 0))
+        year_data['adjustment']['adjusted_pensionable'] += safe_dec(getattr(ea_first, 'recorded_month_adjusted_pensionable', 0))
+        year_data['adjustment']['employee_pension'] += safe_dec(getattr(ea_first, 'recorded_month_employee_pension_contribution', 0))
+        year_data['adjustment']['employer_pension'] += safe_dec(getattr(ea_first, 'recorded_month_employer_pension_contribution', 0))
+        year_data['adjustment']['total_pension'] += safe_dec(getattr(ea_first, 'recorded_month_total_pension_contribution', 0))
+        year_data['adjustment']['employment_income_tax'] += safe_dec(getattr(ea_first, 'recorded_month_employment_income_tax', 0))
+        year_data['adjustment']['total_adjustment_deduction'] += safe_dec(getattr(ea_first, 'recorded_month_total_earning_deduction', 0))
+        year_data['adjustment']['expense'] += safe_dec(getattr(ea_first, 'recorded_month_expense', 0))
+
+
+
+    # Aggregate deduction adjustments by component (detailed) for the year
+    for da in payroll.deduction_adjustments.all():
+        c = da.component
+        year_data['adjustment']['deduction_adj_by_component'][c] += safe_dec(getattr(da, 'deduction_amount', 0))
+
+    # Aggregate total adjustment deduction (summary) for the year
+    deduction_adj_first = payroll.deduction_adjustments.first() or type('Empty', (), {})()
+    year_data['adjustment']['total_adjustment_deduction'] += safe_dec(
+        getattr(deduction_adj_first, 'recorded_month_total_earning_deduction', 0)
+    )
+
     severances = SeverancePay.objects.filter(organization_name=request.user.organization_name)
     for sev in severances:
-        year_key = str(sev.year)
+
+        year_key = str(sev.severance_record_month.year)
         year_data = yearly_summary[year_key]
 
         gross = safe_dec(sev.gross_severance_pay)

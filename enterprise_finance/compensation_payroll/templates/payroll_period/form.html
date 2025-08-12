@@ -1,0 +1,65 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="mb-3">
+    <a
+        href="{% url 'payroll_period_list' %}"
+        class="btn btn-secondary"
+        hx-get="{% url 'payroll_period_list' %}"
+        hx-trigger="click"
+        hx-target="#full-page-container"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+    >
+        Back to Payroll Period List
+    </a>
+</div>
+
+<div class="container-fluid">
+    <div>
+        <div class="row" id="payroll-container">
+            <h2>Payroll Period Form</h2>
+
+            <div class="col-md-12 mb-4">
+                <div class="p-3 border rounded shadow-lg" id="form-container">
+                    <h4>Payroll Period Form</h4>
+                    <h4>
+                        {% if edit_mode %}
+                            Update Payroll Period: {{ editing_payroll_period.payroll_month }}
+                        {% else %}
+                            Create Payroll Period
+                        {% endif %}
+                    </h4>
+
+                    <!-- Display Form Error Messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form
+                        action="{% if form.instance.id %}{% url 'update_payroll_period' form.instance.id %}{% else %}{% url 'create_payroll_period' %}{% endif %}"
+                        method="POST"
+                        hx-post="{% if form.instance.id %}{% url 'update_payroll_period' form.instance.id %}{% else %}{% url 'create_payroll_period' %}{% endif %}"
+                        hx-target="#full-page-container"
+                        hx-swap="innerHTML"
+                        hx-push-url="true"
+                    >
+                        {% csrf_token %}
+                        {{ form.as_p }}
+
+                        <button type="submit" class="btn btn-primary">
+                            {% if edit_mode %} Update {% else %} Create {% endif %}
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

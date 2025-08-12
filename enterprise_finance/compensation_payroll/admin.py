@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import OrganizationalProfile, PersonnelList, PayrollMonthComponent, RegularPayroll, EarningAdjustment, \
+from .models import OrganizationalProfile, PersonnelList, PayrollPeriod, PayrollMonthComponent, RegularPayroll, EarningAdjustment, \
     SeverancePay, AbsenceDeduction
 from .forms import *
 from django.http import HttpResponseRedirect
@@ -61,11 +61,52 @@ class PersonnelListAdmin(admin.ModelAdmin):
         return qs.none()
 
 
+
+
+@admin.register(PayrollPeriod)
+class PayrollPeriodAdmin(admin.ModelAdmin):
+
+    list_display = [
+        'organization_name', 'year', 'month', 'payroll_month',
+    ]
+    list_filter = ['year', 'month']
+
+    # Explicitly get the form to ensure custom widgets are used
+    def get_form(self, request, obj=None, **kwargs):
+        kwargs['form'] = PayrollPeriodForm
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if not request.user.is_superuser and hasattr(request.user, 'organization_name'):
+            org = request.user.organization_name
+            if db_field.name == 'organization_name':
+                kwargs["queryset"] = OrganizationalProfile.objects.filter(organization_name=org)
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_form_kwargs(self, request, obj=None, **kwargs):
+        # This method is new in Django 5+ and allows passing custom kwargs to the form
+        form_kwargs = super().get_form_kwargs(request, obj, **kwargs)
+        form_kwargs["request"] = request
+        return form_kwargs
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        if hasattr(request.user, 'organization_name') and request.user.organization_name:
+            return qs.filter(
+                organization_name=request.user.organization_name
+            )
+        return qs.none()
+
+
+
 @admin.register(PayrollMonthComponent)
 class PayrollMonthComponentAdmin(admin.ModelAdmin):
     # form = PayrollMonthComponentForm
     list_display = [
-        'organization_name', 'year', 'month',
+        'organization_name', 'payroll_month',
         'use_basic_salary', 'use_overtime', 'use_housing_allowance', 'use_position_allowance',
         'use_commission', 'use_telephone_allowance', 'use_one_time_bonus', 'use_causal_labor_wage',
         # partial taxable
@@ -79,12 +120,12 @@ class PayrollMonthComponentAdmin(admin.ModelAdmin):
         'use_loan_payment', 'use_court_order', 'use_workers_association', 'use_personnel_insurance_saving',
         'use_university_cost_share_pay', 'use_red_cross', 'use_party_contribution', 'use_other_deduction', 'slug',
     ]
-    list_filter = ['year', 'month']
+    list_filter = ['payroll_month']
 
     # Group fields by their categories for better organization
     fieldsets = (
         ('Payroll Month', {
-            'fields': ('organization_name', 'year', 'month')
+            'fields': ('organization_name', 'payroll_month')
         }),
         ('Fully Taxable Components', {
             'fields': (
@@ -179,7 +220,7 @@ class RegularPayrollAdmin(admin.ModelAdmin):
         'total_payroll_deduction', 'gross_pay', 'gross_taxable_pay',
         'gross_non_taxable_pay', 'net_pay', 'expense',
     ]
-    list_filter = ['payroll_month__month', 'payroll_month__year', 'organization_name']
+    list_filter = ['payroll_month__payroll_month__month', 'payroll_month__payroll_month__year', 'organization_name']
 
     @admin.display(ordering='personnel_full_name__personnel_id', description='Personnel ID')
     def get_personnel_id(self, obj):
@@ -376,7 +417,7 @@ class DeductionAdjustmentAdmin(admin.ModelAdmin):
 @admin.register(SeverancePay)
 class SeverancePayAdmin(admin.ModelAdmin):
     list_display = (
-        'year', 'month', 'severance_type', 'get_personnel_id', 'personnel_full_name',
+        'severance_record_month', 'severance_type', 'get_personnel_id', 'personnel_full_name',
         'get_first_name', 'get_father_name', 'get_last_name',
         'last_week_daily_wages', 'start_date', 'end_date',
         'service_years', 'service_days', 'severance_for_years', 'severance_for_days',

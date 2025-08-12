@@ -96,25 +96,18 @@ class PersonnelListForm(forms.ModelForm):
     required_css_class = 'font-weight-bold'
 
 
-class PayrollMonthComponentForm(forms.ModelForm):
+
+class PayrollPeriodForm(forms.ModelForm):
 
     class Meta:
-        model = PayrollMonthComponent
+        model = PayrollPeriod
         fields = [
             'year', 'month',
-            'use_basic_salary', 'use_overtime', 'use_housing_allowance', 'use_position_allowance',
-            'use_commission', 'use_telephone_allowance', 'use_one_time_bonus', 'use_causal_labor_wage',
-            'use_transport_home_to_office', 'use_transport_for_work', 'use_fuel_home_to_office',
-            'use_fuel_for_work', 'use_per_diem', 'use_hardship_allowance', 'use_public_cash_award',
-            'use_incidental_operation_allowance', 'use_medical_allowance',
-            'use_cash_gift', 'use_tuition_fees', 'use_personal_injury',
-            'use_child_support_payment', 'use_charitable_donation', 'use_saving_plan', 'use_loan_payment',
-            'use_court_order', 'use_workers_association', 'use_personnel_insurance_saving',
-            'use_university_cost_share_pay', 'use_red_cross', 'use_party_contribution', 'use_other_deduction'
+
         ]
         widgets = {
             'year': forms.Select(choices=YEAR_CHOICES),
-            'payroll_month': forms.Select(choices=MONTH_CHOICES),
+            'month': forms.Select(choices=MONTH_CHOICES),
             **{field.name: forms.CheckboxInput(attrs={'class': 'form-check-input'})
                for field in model._meta.get_fields()
                if isinstance(field, models.BooleanField)}
@@ -127,6 +120,44 @@ class PayrollMonthComponentForm(forms.ModelForm):
         # Adding the Bootstrap 'form-select' class to the year and month select fields
         self.fields['year'].widget.attrs.update({'class': 'form-select'})
         self.fields['month'].widget.attrs.update({'class': 'form-select'})
+
+        # Add inline CSS to the help text
+        for field in self.fields.values():
+            if field.help_text:
+                field.help_text = f'<span style="color: blue; font-style: italic;">{field.help_text}</span>'
+
+
+
+class PayrollMonthComponentForm(forms.ModelForm):
+
+    class Meta:
+        model = PayrollMonthComponent
+        fields = [
+            'payroll_month',
+            'use_basic_salary', 'use_overtime', 'use_housing_allowance', 'use_position_allowance',
+            'use_commission', 'use_telephone_allowance', 'use_one_time_bonus', 'use_causal_labor_wage',
+            'use_transport_home_to_office', 'use_transport_for_work', 'use_fuel_home_to_office',
+            'use_fuel_for_work', 'use_per_diem', 'use_hardship_allowance', 'use_public_cash_award',
+            'use_incidental_operation_allowance', 'use_medical_allowance',
+            'use_cash_gift', 'use_tuition_fees', 'use_personal_injury',
+            'use_child_support_payment', 'use_charitable_donation', 'use_saving_plan', 'use_loan_payment',
+            'use_court_order', 'use_workers_association', 'use_personnel_insurance_saving',
+            'use_university_cost_share_pay', 'use_red_cross', 'use_party_contribution', 'use_other_deduction'
+        ]
+        widgets = {
+            'payroll_month': forms.Select(attrs={'class': 'form-control'}),
+             #
+            **{field.name: forms.CheckboxInput(attrs={'class': 'form-check-input'})
+               for field in model._meta.get_fields()
+               if isinstance(field, models.BooleanField)}
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+        # Adding the Bootstrap 'form-select' class to the year and month select fields
+        self.fields['payroll_month'].widget.attrs.update({'class': 'form-select'})
 
         # Add inline CSS to the help text
         for field in self.fields.values():
@@ -525,8 +556,7 @@ class SeverancePayForm(forms.ModelForm):
             'employment_income_tax_from_prorate_salary', 'employment_income_tax_from_severance_pay', 'net_severance_pay',
         ]
         widgets = {
-            'year': forms.Select(choices=YEAR_CHOICES),
-            'month': forms.Select(choices=MONTH_CHOICES),
+            'severance_record_month': forms.Select(choices=MONTH_CHOICES),
             'personnel_full_name': forms.Select(attrs={'class': 'form-control'}),
             'severance_type': forms.Select(attrs={'class': 'form-control'}),
 
@@ -549,9 +579,7 @@ class SeverancePayForm(forms.ModelForm):
         else:
             self.fields['personnel_full_name'].queryset = PersonnelList.objects.none()
 
-
-        self.fields['year'].widget.attrs.update({'class': 'form-select'})
-        self.fields['month'].widget.attrs.update({'class': 'form-select'})
+        self.fields['severance_record_month'].widget.attrs.update({'class': 'form-select'})
 
         # Add inline CSS to the help text
         for field in self.fields.values():

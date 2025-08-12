@@ -17,7 +17,8 @@
 
         {% for summary in severance_summary_month_year %}
         <div class="table-responsive col-md-12" id="month-severance-summary-{{ summary.id }}">
-            <h4>Severance Pay Summary for {{ summary.month }} - {{ summary.year }}</h4>
+
+            <h4>Severance Pay Summary for {{ summary.severance_record_month__payroll_month }}</h4>
             <hr>
             <table class="table table-bordered table-striped table-sm">
                 <tbody>
@@ -55,7 +56,7 @@
 
         {% for summary in severance_summary_year %}
         <div class="table-responsive col-md-12" id="year-severance-summary-{{ summary.id }}">
-            <h4>Severance Pay Aggregate Summary for {{ summary.year }}</h4>
+            <h4>Severance Pay Aggregate Summary for {{ summary.severance_record_month__year }}</h4>
             <table class="table table-bordered table-striped table-sm">
                 <tbody>
                 <tr>

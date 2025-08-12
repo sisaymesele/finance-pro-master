@@ -6,7 +6,9 @@
 <div class="container-fluid mt-2" id="regular_payroll_detail_print" style="width:80%;">
 
     <div class="text-center mb-3">
-        <h5 class="mb-1">Payslip for Regular Payroll<br>Processing Date {{ regular_payroll.processing_date }}</h5>
+        <h4 class="mb-1">Payslip for Regular Payroll For Month {{ regular_payroll.payroll_month.payroll_month }}</h4>
+        <h5>Processing Date {{ regular_payroll.processing_date }}</h5>
+
         <h6 class="mb-0">Bank: {{ regular_payroll.personnel_full_name.bank_name }}</h6>
         <h6 class="mb-0">{{ regular_payroll.personnel_full_name.organization_name.organization_name }}</h6>
     </div>

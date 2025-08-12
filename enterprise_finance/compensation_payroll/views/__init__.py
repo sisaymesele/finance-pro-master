@@ -7,6 +7,9 @@ from .personnel import personnel_list, create_personnel, update_personnel, delet
 from .organization import organizational_profile, create_organizational_profile, update_organizational_profile, \
     delete_organizational_profile
 
+from .payroll_period import payroll_period_list, create_payroll_period, \
+    update_payroll_period, delete_payroll_period
+
 from .payroll_month_and_component import payroll_month_and_component_list, create_payroll_month_and_component, \
     update_payroll_month_and_component, delete_payroll_month_and_component
 

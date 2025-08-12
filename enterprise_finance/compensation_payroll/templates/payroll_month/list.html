@@ -1,29 +1,22 @@
 {% extends "dashboard.html" %}
 {% load humanize %}
 
-
-
 {% block content %}
-<div class="container mt-4">
-    <h2>Make Payroll by Months</h2>
+<div class="container my-4">
+    <h2 class="mb-4 text-center">Payroll Months</h2>
 
-    <!-- List of distinct payroll months -->
     {% if payroll_months %}
-        <ul class="list-group">
-        {% for month in payroll_months %}
-            <li class="list-group-item">
-                <a hx-get="{% url 'regular_payroll_list' month.slug %}"
-                   hx-target="#full-page-container"
-                   hx-swap="innerHTML"
-                   hx-push-url="{% url 'regular_payroll_list' month.slug %}"
-                   href="{% url 'regular_payroll_list' month.slug %}">
-                    {{ month.payroll_month }} --  click here to make payroll by months
-                </a>
-            </li>
-        {% endfor %}
+        <ul class="list-group mx-auto" style="max-width: 600px;">
+            {% for month in payroll_months %}
+                <li class="list-group-item">
+                    <a href="{% url 'regular_payroll_list' month.payroll_month__slug %}" class="text-decoration-none">
+                        {{ month.payroll_month__payroll_month }} &mdash; click here to make payroll by months
+                    </a>
+                </li>
+            {% endfor %}
         </ul>
     {% else %}
-        <p>No payroll months available.</p>
+        <p class="text-center text-muted">No payroll months available.</p>
     {% endif %}
 </div>
 {% endblock %}

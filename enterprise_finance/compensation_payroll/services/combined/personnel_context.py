@@ -34,7 +34,7 @@ def get_combined_personnel_payroll_context(request):
     search_query = request.GET.get('search', '')
     if search_query:
         payrolls = payrolls.filter(
-            Q(payroll_month__payroll_month__icontains=search_query) |
+            Q(payroll_month__payroll_month__payroll_month__icontains=search_query) |
             Q(personnel_full_name__personnel_id__icontains=search_query) |
             Q(personnel_full_name__first_name__icontains=search_query) |
             Q(personnel_full_name__father_name__icontains=search_query) |
@@ -42,8 +42,8 @@ def get_combined_personnel_payroll_context(request):
         )
 
     payrolls = payrolls.order_by(
-        '-payroll_month__year',
-        '-payroll_month__month'
+        '-payroll_month__payroll_month__year',
+        '-payroll_month__payroll_month__month'
     )
     paginator = Paginator(payrolls, 15)
     page_number = request.GET.get('page')
@@ -118,18 +118,24 @@ def get_combined_personnel_payroll_context(request):
             'other_deduction': safe_dec(payroll.other_deduction),
         }
         #adjustment
-        earning_adj = (payroll.earning_adjustments.order_by(
-            '-original_payroll_record__payroll_month__year', '-original_payroll_record__payroll_month__month')).first() or type('Empty', (), {})()
+        earning_adj = payroll.earning_adjustments.order_by(
+            '-original_payroll_record__payroll_month__payroll_month__year',
+            '-original_payroll_record__payroll_month__payroll_month__month'
+        ).first() or type('Empty', (), {})()
 
         deduction_adj = payroll.deduction_adjustments.order_by(
-            '-original_payroll_record__payroll_month__year', '-original_payroll_record__payroll_month__month').first() or type('Empty', (), {})()
+            '-original_payroll_record__payroll_month__payroll_month__year',
+            '-original_payroll_record__payroll_month__payroll_month__month'
+        ).first() or type('Empty', (), {})()
 
+        adjusted_deduction = safe_dec(getattr(deduction_adj, 'recorded_month_total_deduction', 0))
+
+        #pensionable from adjustment
         pensionable_sum = payroll.earning_adjustments.filter(
             component='basic_salary',
         ).aggregate(total=Sum('earning_amount'))['total'] or Decimal('0.00')
 
         adjusted_pensionable = safe_dec(pensionable_sum)
-        adjusted_deduction = safe_dec(getattr(deduction_adj, 'recorded_month_total_deduction', 0))
 
         earning_adjustment = {
             'taxable_gross': safe_dec(getattr(earning_adj, 'recorded_month_taxable_gross_pay', 0)),

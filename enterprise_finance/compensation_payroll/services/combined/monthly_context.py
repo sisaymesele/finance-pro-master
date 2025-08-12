@@ -26,7 +26,7 @@ def get_combined_monthly_detail(request):
         organization_name=request.user.organization_name
     ).select_related('payroll_month') \
         .prefetch_related('earning_adjustments', 'deduction_adjustments')
-    payrolls = payrolls.order_by('-payroll_month__year', '-payroll_month__month')
+    payrolls = payrolls.order_by('-payroll_month__payroll_month__year', '-payroll_month__payroll_month__month')
 
     #
     monthly_summary = defaultdict(lambda: {
@@ -91,23 +91,13 @@ def get_combined_monthly_detail(request):
     # Aggregate payrolls into monthly summary
     for payroll in payrolls:
         if payroll and payroll.payroll_month:
-            key = payroll.payroll_month.payroll_month
+            key = payroll.payroll_month.payroll_month.payroll_month
         else:
             key = None  # or some default/fallback value, or skip the record
 
-        month_data = monthly_summary[key]
+        #assign before it's initialized for the current payroll month key
 
-        month_data['regular']['taxable_gross'] += safe_dec(payroll.gross_taxable_pay)
-        month_data['regular']['non_taxable_gross'] += safe_dec(payroll.gross_non_taxable_pay)
-        month_data['regular']['gross'] += safe_dec(payroll.gross_pay)
-        month_data['regular']['pensionable'] += safe_dec(payroll.basic_salary)
-        month_data['regular']['employee_pension'] += safe_dec(payroll.employee_pension_contribution)
-        month_data['regular']['employer_pension'] += safe_dec(payroll.employer_pension_contribution)
-        month_data['regular']['total_pension'] += safe_dec(payroll.total_pension_contribution)
-        month_data['regular']['employment_income_tax'] += safe_dec(payroll.employment_income_tax)
-        month_data['regular']['total_regular_deduction'] += safe_dec(payroll.total_payroll_deduction)
-        month_data['regular']['net_pay'] += safe_dec(payroll.net_pay)
-        month_data['regular']['expense'] += safe_dec(payroll.expense)
+        month_data = monthly_summary[key]
 
         # Sum regular components
         regular_components = {
@@ -159,6 +149,18 @@ def get_combined_monthly_detail(request):
         for comp, val in regular_components.items():
             month_data['regular']['components'][comp] += safe_dec(val)
 
+        month_data['regular']['taxable_gross'] += safe_dec(payroll.gross_taxable_pay)
+        month_data['regular']['non_taxable_gross'] += safe_dec(payroll.gross_non_taxable_pay)
+        month_data['regular']['gross'] += safe_dec(payroll.gross_pay)
+        month_data['regular']['pensionable'] += safe_dec(payroll.basic_salary)
+        month_data['regular']['employee_pension'] += safe_dec(payroll.employee_pension_contribution)
+        month_data['regular']['employer_pension'] += safe_dec(payroll.employer_pension_contribution)
+        month_data['regular']['total_pension'] += safe_dec(payroll.total_pension_contribution)
+        month_data['regular']['employment_income_tax'] += safe_dec(payroll.employment_income_tax)
+        month_data['regular']['total_regular_deduction'] += safe_dec(payroll.total_payroll_deduction)
+        month_data['regular']['net_pay'] += safe_dec(payroll.net_pay)
+        month_data['regular']['expense'] += safe_dec(payroll.expense)
+
         # Aggregate earning adjustments by component
         # Calculate pensionable sum once per payroll
         pensionable_sum = payroll.earning_adjustments.filter(
@@ -167,7 +169,7 @@ def get_combined_monthly_detail(request):
 
         adjusted_pensionable = safe_dec(pensionable_sum)
 
-        # Add it once to monthly summary
+        # access by component
         month_data['adjustment']['adjusted_pensionable'] += adjusted_pensionable
 
         for ea in payroll.earning_adjustments.all():
@@ -182,11 +184,6 @@ def get_combined_monthly_detail(request):
             month_data['adjustment']['earning_adj_by_component']['employer_pension_contribution'][c] += safe_dec(
                 ea.employer_pension_contribution)
             month_data['adjustment']['earning_adj_by_component']['total_pension'][c] += safe_dec(ea.total_pension)
-
-        # Aggregate deduction adjustments by component
-        for da in payroll.deduction_adjustments.all():
-            c = da.component
-            month_data['adjustment']['deduction_adj_by_component'][c] += safe_dec(getattr(da, 'deduction_amount', 0))
 
         # Aggregate overall adjustment totals
         earning_adj_first = payroll.earning_adjustments.first() or type('Empty', (), {})()
@@ -212,9 +209,21 @@ def get_combined_monthly_detail(request):
         month_data['adjustment']['expense'] += safe_dec(
             getattr(earning_adj_first, 'recorded_month_expense', 0))
 
+    # Aggregate deduction adjustments by component (detailed)
+    for da in payroll.deduction_adjustments.all():
+        c = da.component
+        month_data['adjustment']['deduction_adj_by_component'][c] += safe_dec(getattr(da, 'deduction_amount', 0))
+
+    # Aggregate total adjustment deduction (summary)
+    deduction_adj_first = payroll.deduction_adjustments.first() or type('Empty', (), {})()
+    month_data['adjustment']['total_adjustment_deduction'] += safe_dec(
+        getattr(deduction_adj_first, 'recorded_month_total_earning_deduction', 0)
+    )
+
+    #severance
     severances = SeverancePay.objects.filter(organization_name=request.user.organization_name)
     for sev in severances:
-        key = f"{sev.month}-{sev.year}"
+        key = sev.severance_record_month.payroll_month
         month_data = monthly_summary[key]
 
         gross = safe_dec(sev.gross_severance_pay)
@@ -343,3 +352,8 @@ def get_combined_monthly_detail(request):
         'monthly_summary': monthly_summary,
 
     }
+
+
+
+
+

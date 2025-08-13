@@ -267,7 +267,7 @@ def export_combined_personnel_detail(request):
 
 @login_required
 def export_combined_personnel_list(request):
-    payroll_data = get_combined_personnel_payroll_context(request)['payroll_data']
+    payroll_data = get_combined_personnel_payroll_context(request).get('payroll_data', [])
 
     wb = Workbook()
     ws = wb.active
@@ -279,15 +279,16 @@ def export_combined_personnel_list(request):
     center_align = Alignment(horizontal="center", vertical="center", wrap_text=True)
     bold_font = Font(bold=True)
     currency_format = '#,##0.00'
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
 
-    # Title row merged across all columns (17 columns now: Month + previous 16)
+    # Title
     ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=17)
     title_cell = ws.cell(row=1, column=1)
     title_cell.value = "Combined Personnel Payroll Summary"
     title_cell.font = Font(size=14, bold=True)
     title_cell.alignment = center_align
 
-    # Headers (added "Month" as first column)
+    # Headers
     headers = [
         "Month", "Personnel ID", "First Name", "Father Name", "Last Name", "Type",
         "Taxable Gross", "Non-Taxable Gross", "Total Gross", "Pensionable",
@@ -295,13 +296,9 @@ def export_combined_personnel_list(request):
         "Employment Income Tax", "Total Deduction", "Net Pay", "Total Expense"
     ]
 
-    # Use your ExportUtilityService to transform headers (for multi-line headers)
     export_util = ExportUtilityService()
     decorated_headers = [export_util.split_header_to_lines(h) for h in headers]
 
-    thin_border = Border(right=Side(style='thin', color='FF000000'))
-
-    # Write header row at row 2, styled
     for col_num, header in enumerate(decorated_headers, 1):
         cell = ws.cell(row=2, column=col_num, value=header)
         cell.fill = header_fill
@@ -309,39 +306,42 @@ def export_combined_personnel_list(request):
         cell.alignment = center_align
         cell.border = thin_border
 
+    def fmt_dec(val):
+        return Decimal(val) if val is not None else Decimal('0.00')
+
+    def write_row(row_idx, values, is_total=False):
+        for col_offset, val in enumerate(values, 6):
+            cell = ws.cell(row=row_idx, column=col_offset, value=val)
+            cell.number_format = currency_format
+            if is_total:
+                cell.fill = total_fill
+                cell.font = bold_font
+
     current_row = 3
 
-    def fmt_dec(val):
-        if val is None:
-            return Decimal('0.00')
-        return val
-
     for row in payroll_data:
-        p = row['payroll'].personnel_full_name
-        pm = getattr(row['payroll'], 'payroll_month', None)
-        r = row['regular_totals']
-        a = row['earning_adjustment_item']
-        c = row['combined_adjustment']
-        t = row['totals']
+        payroll = row.get('payroll')
+        p = payroll.personnel_full_name if payroll else None
+        r = row.get('regular_totals', {})
+        a = row.get('earning_adjustment_item', {})
+        c = row.get('combined_adjustment', {})
+        t = row.get('totals', {})
 
-        if pm:
-            month_val = str(pm.payroll_month)  # just convert to string
-        else:
-            month_val = ''
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
-        # Merge Month + Personnel info columns vertically across 3 rows (Regular, Adjustment, Total)
-        for col in range(1, 6):  # columns 1=Month, 2=Personnel ID, 3=First, 4=Father, 5=Last
+        # Merge Month and Personnel columns
+        for col in range(1, 6):
             ws.merge_cells(start_row=current_row, start_column=col, end_row=current_row + 2, end_column=col)
 
-        # Write Month and personnel info cells (center aligned)
-        ws.cell(row=current_row, column=1, value=month_val).alignment = center_align
-        ws.cell(row=current_row, column=2, value=p.personnel_id).alignment = center_align
-        ws.cell(row=current_row, column=3, value=p.first_name).alignment = center_align
-        ws.cell(row=current_row, column=4, value=p.father_name).alignment = center_align
-        ws.cell(row=current_row, column=5, value=p.last_name).alignment = center_align
+        # Personnel Info
+        ws.cell(row=current_row, column=1, value=payroll_month).alignment = center_align
+        ws.cell(row=current_row, column=2, value=getattr(p, 'personnel_id', '')).alignment = center_align
+        ws.cell(row=current_row, column=3, value=getattr(p, 'first_name', '')).alignment = center_align
+        ws.cell(row=current_row, column=4, value=getattr(p, 'father_name', '')).alignment = center_align
+        ws.cell(row=current_row, column=5, value=getattr(p, 'last_name', '')).alignment = center_align
 
-        # Row 1: Regular
-        values_regular = [
+        # Regular
+        write_row(current_row, [
             "Regular",
             fmt_dec(r.get('taxable_gross')),
             fmt_dec(r.get('non_taxable_gross')),
@@ -354,13 +354,10 @@ def export_combined_personnel_list(request):
             fmt_dec(r.get('deduction')),
             fmt_dec(r.get('net_pay')),
             fmt_dec(r.get('expense')),
-        ]
-        for col_offset, val in enumerate(values_regular, 6):  # start from column 6 now
-            cell = ws.cell(row=current_row, column=col_offset, value=val)
-            cell.number_format = currency_format
+        ])
 
-        # Row 2: Adjustment
-        values_adjustment = [
+        # Adjustment
+        write_row(current_row + 1, [
             "Adjustment",
             fmt_dec(a.get('taxable_gross')),
             fmt_dec(a.get('non_taxable_gross')),
@@ -373,13 +370,10 @@ def export_combined_personnel_list(request):
             fmt_dec(c.get('total_adjustment_deduction')),
             fmt_dec(c.get('net_monthly_adjustment')),
             fmt_dec(a.get('expense')),
-        ]
-        for col_offset, val in enumerate(values_adjustment, 6):
-            cell = ws.cell(row=current_row + 1, column=col_offset, value=val)
-            cell.number_format = currency_format
+        ])
 
-        # Row 3: Total (highlighted)
-        values_total = [
+        # Total
+        write_row(current_row + 2, [
             "Total",
             fmt_dec(t.get('taxable_gross')),
             fmt_dec(t.get('non_taxable_gross')),
@@ -392,36 +386,23 @@ def export_combined_personnel_list(request):
             fmt_dec(t.get('deduction')),
             fmt_dec(t.get('final_net_pay')),
             fmt_dec(t.get('expense')),
-        ]
-        for col_offset, val in enumerate(values_total, 6):
-            cell = ws.cell(row=current_row + 2, column=col_offset, value=val)
-            cell.number_format = currency_format
-            cell.fill = total_fill
-            cell.font = Font(bold=True)
+        ], is_total=True)
 
-        # Highlight "Type" column in total row (column 6)
+        # Type column (6) in Total row should also be styled
         type_cell = ws.cell(row=current_row + 2, column=6)
         type_cell.fill = total_fill
-        type_cell.font = Font(bold=True)
+        type_cell.font = bold_font
 
         current_row += 3
 
-    # Set column widths for month and personnel info
-    column_widths = {
-        1: 15,  # Month
-        2: 15,  # Personnel ID
-        3: 15,  # First Name
-        4: 15,  # Father Name
-        5: 15,  # Last Name
-    }
-    for col, width in column_widths.items():
+    # Set column widths
+    for col, width in {1: 15, 2: 15, 3: 15, 4: 15, 5: 15}.items():
         ws.column_dimensions[get_column_letter(col)].width = width
 
-    # Set column widths for financial columns approx
     for col in range(6, 18):
         ws.column_dimensions[get_column_letter(col)].width = 18
 
-    # Prepare response
+    # Return response
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
@@ -492,8 +473,7 @@ def export_personnel_total_adjustment(request):
         personnel = safe_getattr(payroll, 'personnel_full_name', None)
 
         # Payroll Month as string
-        pm_obj = safe_getattr(payroll, 'payroll_month', None)
-        payroll_month = str(safe_getattr(pm_obj, 'payroll_month', pm_obj)) if pm_obj else ''
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
         # Total deduction from deduction adjustment
         deduction_total = safe_getattr(deduction_adj, 'recorded_month_total_deduction', Decimal('0.00'))
@@ -661,13 +641,10 @@ def export_combined_personnel_total(request):
         totals = item.get('totals', {})
 
         # Convert payroll_month to string (avoid Excel errors)
-        if payroll_month_obj:
-            month_str = str(safe_getattr(payroll_month_obj, 'payroll_month', payroll_month_obj))
-        else:
-            month_str = ""
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
         row = [
-            month_str,
+            payroll_month,
             safe_getattr(personnel, 'personnel_id', ''),
             safe_getattr(personnel, 'first_name', ''),
             safe_getattr(personnel, 'father_name', ''),
@@ -728,21 +705,34 @@ def export_combined_personnel_expense(request):
         "Month", "Personnel ID", "First Name", "Father Name", "Last Name",
         "Total Gross Pay", "Employer Pension", "Total Expense"
     ]
-    ws.append(headers)
+
+    export_util = ExportUtilityService()
+    ws.append([export_util.split_header_to_lines(h) for h in headers])
+
+
+    # Header styling
+    header_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type="solid")
+    header_font = Font(bold=True)
+    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    thin_border = Border(right=Side(style='thin', color='FF000000'))
+
+    for cell in ws[2]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = thin_border
 
     for item in payroll_data:
+
+        payroll = item.get('payroll')
         p = getattr(item.get('payroll'), 'personnel_full_name', None)
-        pm = getattr(item.get('payroll'), 'payroll_month', None)
         t = item.get('totals', {})
 
         # Convert payroll_month to string if it's an object
-        if pm:
-            month_val = str(getattr(pm, 'payroll_month', pm))
-        else:
-            month_val = ""
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
         ws.append([
-            month_val,
+            payroll_month,
             getattr(p, 'personnel_id', '') if p else '',
             getattr(p, 'first_name', '') if p else '',
             getattr(p, 'father_name', '') if p else '',
@@ -815,17 +805,13 @@ def export_combined_personnel_net_income(request):
     for item in payroll_data:
         payroll = item.get('payroll')
         personnel = safe_getattr(payroll, 'personnel_full_name', None)
-        payroll_month_obj = safe_getattr(payroll, 'payroll_month', None)
 
-        # Convert payroll_month to string to prevent Excel errors
-        month_str = ""
-        if payroll_month_obj:
-            month_str = str(safe_getattr(payroll_month_obj, 'payroll_month', payroll_month_obj))
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
         totals = item.get('totals', {})
 
         row = [
-            month_str,
+            payroll_month,
             safe_getattr(personnel, 'personnel_id', ''),
             safe_getattr(personnel, 'first_name', ''),
             safe_getattr(personnel, 'father_name', ''),
@@ -901,16 +887,13 @@ def export_combined_personnel_employment_tax(request):
     for item in payroll_data:
         payroll = item.get('payroll')
         personnel = safe_getattr(payroll, 'personnel_full_name', None)
-        payroll_month_obj = safe_getattr(payroll, 'payroll_month', None)
 
-        month_str = ""
-        if payroll_month_obj:
-            month_str = str(safe_getattr(payroll_month_obj, 'payroll_month', payroll_month_obj))
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
         totals = item.get('totals', {})
 
         row = [
-            month_str,
+            payroll_month,
             safe_getattr(personnel, 'personnel_id', ''),
             safe_getattr(personnel, 'first_name', ''),
             safe_getattr(personnel, 'father_name', ''),
@@ -996,11 +979,7 @@ def export_combined_personnel_pension(request):
         totals = item.get('totals', {})
         personnel = getattr(payroll, 'personnel_full_name', None)
 
-        payroll_month = ""
-        if payroll:
-            pm_obj = getattr(payroll, 'payroll_month', None)
-            if pm_obj:
-                payroll_month = str(getattr(pm_obj, 'payroll_month', pm_obj))
+        payroll_month = str(getattr(getattr(payroll, 'payroll_month', None), 'payroll_month', '')) if payroll else ''
 
         if not personnel:
             continue

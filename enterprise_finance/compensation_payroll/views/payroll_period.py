@@ -7,25 +7,12 @@ from compensation_payroll.forms import PayrollPeriodForm
 
 @login_required
 def payroll_period_list(request):
-    qs = PayrollPeriod.objects.filter(
+    payroll_periods = PayrollPeriod.objects.filter(
         organization_name=request.user.organization_name
     )
 
-    enriched_qs = []
-    for obj in qs:
-        selected_fields = []
-        for field in obj._meta.fields:
-            if field.name.startswith('use_') and getattr(obj, field.name, False):
-                label = field.verbose_name or field.name
-                if label.lower().startswith("use "):
-                    label = label[4:]
-                label = label.replace('_', ' ').capitalize()
-                selected_fields.append(label)
-        obj.selected_components = selected_fields
-        enriched_qs.append(obj)
-
     context = {
-        'payroll_periods': enriched_qs,
+        'payroll_periods': payroll_periods,
     }
     return render(request, 'payroll_period/list.html', context)
 

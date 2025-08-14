@@ -11,9 +11,6 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from compensation_payroll.services.excel_export import ExportUtilityService
 
 
-
-
-
 @login_required
 def combined_personnel_detail(request):
     context = get_combined_personnel_payroll_context(request)
@@ -56,13 +53,10 @@ def combined_employee_pension(request):
     context = get_combined_personnel_payroll_context(request)
     return render(request, 'combined_payroll/personnel/pension_list.html', context)
 
-
-#common export header
-
 #detail
 def export_combined_personnel_detail(request):
 
-    # Get the same data as the regular view
+    # Get the same data as the combined view
     context = get_combined_personnel_payroll_context(request)
     payroll_data = context['payroll_data']
 
@@ -575,16 +569,6 @@ def export_personnel_total_adjustment(request):
     return response
 
 
-# #
-
-
-from decimal import Decimal
-from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
-from openpyxl.utils import get_column_letter
-from io import BytesIO
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
-
 @login_required
 def export_combined_personnel_total(request):
     context = get_combined_personnel_payroll_context(request)
@@ -681,8 +665,6 @@ def export_combined_personnel_total(request):
     )
     response["Content-Disposition"] = "attachment; filename=total_combined_payroll_summary.xlsx"
     return response
-
-
 
 
 @login_required

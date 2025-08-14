@@ -39,6 +39,8 @@ urlpatterns = [
     path('earning-adjustment/create/', views.create_earning_adjustment, name='create_earning_adjustment'),
     path('earning-adjustment/update/<int:pk>/', views.update_earning_adjustment, name='update_earning_adjustment'),
     path('earning-adjustment/delete/<int:pk>/', views.delete_earning_adjustment, name='delete_earning_adjustment'),
+    #total
+    path('monthly-earning-adjustment-total', views.monthly_earning_adjustment_total, name='monthly_earning_adjustment_total'),
     # exel
     path('export/earning-adjustment-list/', views.export_earning_adjustment_list_to_excel, name='export_earning_adjustment_list_to_excel'),
     path('export/earning-per-adjusted-month/', views.export_earning_per_adjusted_month_to_excel, name='export_earning_per_adjusted_month_to_excel'),

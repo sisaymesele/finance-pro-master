@@ -21,8 +21,8 @@ from .regular_payroll import payroll_month_list, regular_payroll_list, regular_p
 
 from .earning_adjustment import earning_object_list, earnings_object_detail, \
     create_earning_adjustment, update_earning_adjustment, delete_earning_adjustment, earning_per_adjusted_month, \
-    monthly_earning_adjustment, export_earning_adjustment_list_to_excel, export_earning_per_adjusted_month_to_excel, \
-    export_monthly_earning_adjustment_to_excel
+    monthly_earning_adjustment, monthly_earning_adjustment_total, export_earning_adjustment_list_to_excel, \
+    export_earning_per_adjusted_month_to_excel, export_monthly_earning_adjustment_to_excel
 
 from .deduction_adjustment import deduction_object_list, deduction_object_detail, \
     create_deduction_adjustment, update_deduction_adjustment, delete_deduction_adjustment, deduction_per_adjusted_month, \

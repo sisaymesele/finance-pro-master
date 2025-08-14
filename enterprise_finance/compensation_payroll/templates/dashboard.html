@@ -247,6 +247,19 @@
                                 <i class="bi bi-journal-text"></i> Monthly Earning Adjustment
                             </a>
                         </li>
+
+                        <li>
+                            <a hx-get="{% url 'monthly_earning_adjustment_total' %}"
+                               hx-target="#full-page-container"
+                               hx-swap="innerHTML"
+                               hx-trigger="click"
+                               hx-push-url="{% url 'monthly_earning_adjustment_total' %}"
+                               href="{% url 'monthly_earning_adjustment_total' %}"
+                               class="nav-link text-white">
+                                <i class="bi bi-journal-text"></i> Monthly Earning Adjustment Summary
+                            </a>
+                        </li>
+
                     </ul>
                 </li>
 

@@ -1,7 +1,7 @@
 # services/earning_adjustment_context.py
 #view and excel
 from django.core.paginator import Paginator
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 
 
 
@@ -73,6 +73,7 @@ def get_earning_adjustment_context(request):
         )
     )
 
+    #monthly per employee
     monthly_earning_adjustment = (
         earning_adjustments
         .values(
@@ -102,6 +103,8 @@ def get_earning_adjustment_context(request):
         )
     )
     # Sort data keys by year and month ascending
+
+
 
     return {
         'page_obj': page_obj,

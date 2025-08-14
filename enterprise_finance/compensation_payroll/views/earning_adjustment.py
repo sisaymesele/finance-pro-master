@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Sum
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -11,7 +12,6 @@ from compensation_payroll.forms import EarningAdjustmentForm
 from compensation_payroll.services.earning_adjustment.business import EarningAdjustmentBusinessService
 from compensation_payroll.services.earning_adjustment.context import get_earning_adjustment_context
 from compensation_payroll.services.excel_export import ExportUtilityService
-
 
 
 #
@@ -38,6 +38,36 @@ def monthly_earning_adjustment(request):
     context = get_earning_adjustment_context(request)
     return render(request, 'earning_adjustment/monthly_earning.html', context)
 #
+@login_required
+def monthly_earning_adjustment_total(request):
+
+    monthly_earning_adjustment_total = (
+        EarningAdjustment.objects
+        .values(
+            'original_payroll_record__payroll_month__payroll_month__year',
+            'original_payroll_record__payroll_month__payroll_month__payroll_month'
+        )
+        .annotate(
+            total_gross_pay=Sum('adjusted_month_gross_pay'),
+            total_taxable_pay=Sum('adjusted_month_total_taxable_pay'),
+            total_tax=Sum('adjusted_month_employment_income_tax'),
+            total_deductions=Sum('adjusted_month_total_earning_deduction'),
+            total_expense=Sum('adjusted_month_expense'),
+            total_employee_pension=Sum('adjusted_month_employee_pension_contribution'),
+            total_employer_pension=Sum('adjusted_month_employer_pension_contribution'),
+            total_pension=Sum('adjusted_month_total_pension'),
+        )
+        .order_by(
+            'original_payroll_record__payroll_month__payroll_month__year',
+            'original_payroll_record__payroll_month__payroll_month__month'
+        )
+    )
+    context = {
+        'monthly_earning_adjustment_total': monthly_earning_adjustment_total,
+    }
+
+    return render(request, 'earning_adjustment/monthly_earning_total.html', context)
+
 #
 @login_required
 def create_earning_adjustment(request):

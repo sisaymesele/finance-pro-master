@@ -40,32 +40,7 @@ def monthly_earning_adjustment(request):
 #
 @login_required
 def monthly_earning_adjustment_total(request):
-
-    monthly_earning_adjustment_total = (
-        EarningAdjustment.objects
-        .values(
-            'original_payroll_record__payroll_month__payroll_month__year',
-            'original_payroll_record__payroll_month__payroll_month__payroll_month'
-        )
-        .annotate(
-            total_gross_pay=Sum('adjusted_month_gross_pay'),
-            total_taxable_pay=Sum('adjusted_month_total_taxable_pay'),
-            total_tax=Sum('adjusted_month_employment_income_tax'),
-            total_deductions=Sum('adjusted_month_total_earning_deduction'),
-            total_expense=Sum('adjusted_month_expense'),
-            total_employee_pension=Sum('adjusted_month_employee_pension_contribution'),
-            total_employer_pension=Sum('adjusted_month_employer_pension_contribution'),
-            total_pension=Sum('adjusted_month_total_pension'),
-        )
-        .order_by(
-            'original_payroll_record__payroll_month__payroll_month__year',
-            'original_payroll_record__payroll_month__payroll_month__month'
-        )
-    )
-    context = {
-        'monthly_earning_adjustment_total': monthly_earning_adjustment_total,
-    }
-
+    context = get_earning_adjustment_context(request)
     return render(request, 'earning_adjustment/monthly_earning_total.html', context)
 
 #
@@ -440,3 +415,99 @@ def export_monthly_earning_adjustment_to_excel(request):
     return response
 
 #
+
+@login_required
+def export_monthly_earning_adjustment_aggregate(request):
+    # Your aggregated data
+    context = get_earning_adjustment_context(request)
+    monthly_earning_adjustment_aggregate = context.get('monthly_earning_adjustment_aggregate', [])
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Monthly Earning Adjustment Aggregate"
+
+    # Title row
+    total_columns = 12
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_columns)
+    title_cell = ws.cell(row=1, column=1)
+    title_cell.value = "Monthly Earning Adjustment Aggregate Report"
+    title_cell.font = Font(size=14, bold=True)
+    title_cell.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].height = 30
+
+    # Headers
+    headers = [
+        "Payroll Month",
+        "Adjusted Taxable Gross",
+        "Adjusted Non-Taxable Gross",
+        "Adjusted Gross Pay",
+        "Adjusted Total Taxable Pay",
+        "Adjusted Income Tax Total",
+        "Adjusted Income Tax",
+        "Employee Pension",
+        "Employer Pension",
+        "Total Pension",
+        "Earning Deduction",
+        "Expense",
+
+    ]
+
+    ws.append(headers)
+
+    # Header styles
+    header_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type='solid')
+    header_font = Font(bold=True)
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin_border = Border(right=Side(style='thin'))
+
+    for cell in ws[2]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = thin_border
+
+    # Data rows
+    for row in monthly_earning_adjustment_aggregate:
+        ws.append([
+            row.get('original_payroll_record__payroll_month__payroll_month__payroll_month', ''),
+            row.get('adjusted_gross_taxable_pay', 0),
+            row.get('adjusted_gross_non_taxable_pay', 0),
+            row.get('adjusted_gross_pay', 0),
+            row.get('adjusted_taxable_pay_total', 0),
+            row.get('adjusted_income_tax_total', 0),
+            row.get('adjusted_income_tax', 0),
+            row.get('employee_pension', 0),
+            row.get('employer_pension', 0),
+            row.get('total_pension', 0),
+            row.get('earning_deduction', 0),
+            row.get('expense', 0),
+
+        ])
+
+    # Adjust column widths
+    MIN_WIDTH = 12
+    MAX_WIDTH = 15
+    for col_idx, col_cells in enumerate(ws.columns, 1):
+        max_length = 0
+        for cell in col_cells:
+            try:
+                if cell.value:
+                    cell_length = len(str(cell.value))
+                    if cell_length > max_length:
+                        max_length = cell_length
+            except Exception:
+                pass
+        adjusted_width = max(MIN_WIDTH, min(MAX_WIDTH, max_length + 2))
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = adjusted_width
+
+    # Return response
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=monthly_earning_adjustment_aggregate.xlsx'
+    return response

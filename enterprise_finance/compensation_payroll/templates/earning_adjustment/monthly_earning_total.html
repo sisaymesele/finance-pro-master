@@ -3,93 +3,119 @@
 
 {% block content %}
 <div class="container-fluid my-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h2 class="fw-bold mb-4">Monthly Earnings Adjustment Summary</h2>
+    <!-- Place this wherever you want the export button -->
+<a href="{% url 'export_monthly_earning_adjustment_aggregate' %}" class="btn btn-success">
+    Export Monthly Earning Aggregate Excel
+</a>
 
-    <!-- Page Title -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">Monthly Earning Adjustments</h2>
+        <form
+                method="get"
+                action="{% url 'monthly_earning_adjustment_total' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'monthly_earning_adjustment_total' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search monthly earning..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+</div>
+
+
+    {% for month_data in monthly_earning_adjustment_aggregate %}
+    {% with month_id=month_data.original_payroll_record__payroll_month__payroll_month__payroll_month|stringformat:"s"|slugify %}
+    <div class="card shadow-sm mb-5 border-primary mx-auto" style="max-width: 1160px;" id="earning-summary-{{ month_id }}">
+        <div class="card-header bg-primary text-white fw-bold fs-5 text-center">
+            Monthly Earnings Adjustment for {{ month_data.original_payroll_record__payroll_month__payroll_month__payroll_month }}
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0 align-middle">
+                <thead class="table-light text-center">
+                    <tr>
+                        <th style="width: 20%;">Category</th>
+                        <th style="width: 50%;">Component</th>
+                        <th style="width: 30%;">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table-success">
+                        <td rowspan="4" class="align-middle fw-bold text-success text-center">Earning</td>
+                        <td>Adjusted Gross Taxable Pay</td>
+                        <td class="text-end">{{ month_data.adjusted_gross_taxable_pay|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td>Adjusted Gross Non-Taxable Pay</td>
+                        <td class="text-end">{{ month_data.adjusted_gross_non_taxable_pay|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td>Adjusted Gross Pay</td>
+                        <td class="text-end">{{ month_data.adjusted_gross_pay|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td>Adjusted Taxable Pay Total</td>
+                        <td class="text-end">{{ month_data.adjusted_taxable_pay_total|floatformat:2|intcomma }}</td>
+                    </tr>
+
+                    <tr class="table-danger">
+                        <td rowspan="2" class="align-middle fw-bold text-danger text-center">Tax</td>
+                        <td>Adjusted Income Tax Total</td>
+                        <td class="text-end">{{ month_data.adjusted_income_tax_total|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td>Adjusted Income Tax</td>
+                        <td class="text-end">{{ month_data.adjusted_income_tax|floatformat:2|intcomma }}</td>
+                    </tr>
+
+                    <tr class="table-info">
+                        <td rowspan="3" class="align-middle fw-bold text-primary text-center">Pension</td>
+                        <td>Employee Pension Contribution</td>
+                        <td class="text-end">{{ month_data.employee_pension|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td>Employer Pension Contribution</td>
+                        <td class="text-end">{{ month_data.employer_pension|floatformat:2|intcomma }}</td>
+                    </tr>
+                    <tr>
+                        <td>Total Pension</td>
+                        <td class="text-end">{{ month_data.total_pension|floatformat:2|intcomma }}</td>
+                    </tr>
+
+                    <tr class="table-warning fw-bold">
+                        <td class="text-center">Deduction</td>
+                        <td>Total Deduction</td>
+                        <td class="text-end">{{ month_data.earning_deduction|floatformat:2|intcomma }}</td>
+                    </tr>
+
+                    <tr class="table-secondary fw-bold">
+                        <td class="text-center">Expense</td>
+                        <td>Earning Adjustment Expense</td>
+                        <td class="text-end">{{ month_data.expense|floatformat:2|intcomma }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="row g-4">
-        {% for row in monthly_earning_adjustment_total %}
-        <div class="col-lg-4 col-md-6">
-            <div class="card shadow-sm h-100 border-0">
-
-                <!-- Month-Year Header -->
-                <div class="card-header bg-primary text-white text-center fw-semibold">
-                    {{ row.original_payroll_record__payroll_month__payroll_month__payroll_month }}
-                </div>
-
-                <!-- Card Body -->
-                <div class="card-body p-0">
-                    <table class="table table-sm table-bordered mb-0 align-middle">
-                        <thead class="table-light text-center fw-bold">
-                            <tr>
-                                <th style="width: 30%">Category</th>
-                                <th style="width: 40%">Component</th>
-                                <th style="width: 30%">Value</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Earnings -->
-                            <tr class="table-success fw-bold">
-                                <td rowspan="2" class="text-center align-middle">Earnings</td>
-                                <td>Total Gross Pay</td>
-                                <td class="text-end">{{ row.total_gross_pay|floatformat:2|intcomma }}</td>
-                            </tr>
-                            <tr>
-                                <td>Total Taxable Pay</td>
-                                <td class="text-end">{{ row.total_taxable_pay|floatformat:2|intcomma }}</td>
-                            </tr>
-
-                            <!-- Taxes -->
-                            <tr class="table-danger fw-bold">
-                                <td rowspan="1" class="text-center align-middle">Taxes</td>
-                                <td>Total Tax</td>
-                                <td class="text-end">{{ row.total_tax|floatformat:2|intcomma }}</td>
-                            </tr>
-
-                            <!-- Pension -->
-                            <tr class="table-info fw-bold">
-                                <td rowspan="3" class="text-center align-middle">Pension</td>
-                                <td>Employee Pension</td>
-                                <td class="text-end">{{ row.total_employee_pension|floatformat:2|intcomma }}</td>
-                            </tr>
-                            <tr>
-                                <td>Employer Pension</td>
-                                <td class="text-end">{{ row.total_employer_pension|floatformat:2|intcomma }}</td>
-                            </tr>
-                            <tr class="fw-bold">
-                                <td>Total Pension</td>
-                                <td class="text-end">{{ row.total_pension|floatformat:2|intcomma }}</td>
-                            </tr>
-
-                            <!-- Total Deductions (Moved Below Pension) -->
-                            <tr class="table-warning fw-bold">
-                                <td rowspan="1" class="text-center align-middle">Total Deductions</td>
-                                <td>All Deductions</td>
-                                <td class="text-end">{{ row.total_deductions|floatformat:2|intcomma }}</td>
-                            </tr>
-
-                            <!-- Expense -->
-                            <tr class="table-secondary fw-bold">
-                                <td rowspan="1" class="text-center align-middle">Expense</td>
-                                <td>Total Expense</td>
-                                <td class="text-end">{{ row.total_expense|floatformat:2|intcomma }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info text-center shadow-sm">
-                No monthly earning adjustments found.
-            </div>
-        </div>
-        {% endfor %}
+    <div class="text-center mb-5">
+        <button class="btn btn-success shadow-sm"
+                onclick="printAdjustment('earning-summary-{{ month_id }}')">
+            <i class="bi bi-printer"></i> Save or Print This Month
+        </button>
     </div>
+    {% endwith %}
+    {% empty %}
+        <p class="text-muted text-center">No data available for this period.</p>
+    {% endfor %}
 
 </div>
+
 {% endblock %}

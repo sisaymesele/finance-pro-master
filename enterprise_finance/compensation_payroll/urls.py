@@ -45,6 +45,7 @@ urlpatterns = [
     path('export/earning-adjustment-list/', views.export_earning_adjustment_list_to_excel, name='export_earning_adjustment_list_to_excel'),
     path('export/earning-per-adjusted-month/', views.export_earning_per_adjusted_month_to_excel, name='export_earning_per_adjusted_month_to_excel'),
     path('export/monthly-earning-adjustment/', views.export_monthly_earning_adjustment_to_excel, name='export_monthly_earning_adjustment_to_excel'),
+    path('export_monthly_earning_adjustment_aggregate', views.export_monthly_earning_adjustment_aggregate, name='export_monthly_earning_adjustment_aggregate'),
 
     #
 
@@ -56,11 +57,14 @@ urlpatterns = [
     path('deduction-adjustment/create/', views.create_deduction_adjustment, name='create_deduction_adjustment'),
     path('deduction-adjustment/update/<int:pk>/', views.update_deduction_adjustment, name='update_deduction_adjustment'),
     path('deduction-adjustment/delete/<int:pk>/', views.delete_deduction_adjustment, name='delete_deduction_adjustment'),
+    #total
+    path('monthly-deduction-adjustment-total', views.monthly_deduction_adjustment_total, name='monthly_deduction_adjustment_total'),
+
     #export
     path('export-deduction-adjustment/', views.export_deduction_adjustment_list_to_excel, name='export_deduction_adjustment_list_to_excel'),
     path('export-deduction-per-adjusted-month/', views.export_deduction_per_adjusted_month_to_excel, name='export_deduction_per_adjusted_month_to_excel'),
     path('export-monthly-deduction-adjustment/', views.export_monthly_deduction_adjustment_to_excel, name='export_monthly_deduction_adjustment_to_excel'),
-
+    path('export_monthly_deduction_adjustment_aggregate', views.export_monthly_deduction_adjustment_aggregate, name='export_monthly_deduction_adjustment_aggregate'),
 
     #
     # combined personnel
@@ -84,8 +88,11 @@ urlpatterns = [
     path('combined-total-payroll/export/', views.export_combined_personnel_total, name='export_combined_personnel_total'),
 
     #combined monthly and yearly
-    path('combined-monthly-detail/', views.monthly_combined_detail_view, name='combined_monthly_detail'),
-    path('combined-monthly-summary/', views.monthly_combined_summary_view, name='combined_monthly_summary'),
+    path('combined-monthly-detail/', views.monthly_combined_detail, name='combined_monthly_detail'),
+    path('combined-monthly-summary/', views.monthly_combined_summary, name='combined_monthly_summary'),
+    path('combined-monthly-adjustment-journal/', views.monthly_combined_adjustment_journal, name='monthly_combined_adjustment_journal'),
+    path('monthly-combined-adjustment-summary/', views.monthly_combined_adjustment_summary, name='monthly_combined_adjustment_summary'),
+
     #yearly
     path('combined-yearly-detail/', views.yearly_combined_detail_view, name='combined_yearly_detail'),
     path('combined-yearly-summary/', views.yearly_combined_summary_view, name='combined_yearly_summary'),

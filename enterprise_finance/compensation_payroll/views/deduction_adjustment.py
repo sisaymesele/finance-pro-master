@@ -38,6 +38,11 @@ def monthly_deduction_adjustment(request):
     context = get_deduction_adjustment_context(request)
     return render(request, 'deduction_adjustment/monthly_deduction.html', context)
 
+@login_required
+def monthly_deduction_adjustment_total(request):
+    context = get_deduction_adjustment_context(request)
+    return render(request, 'deduction_adjustment/monthly_deduction_total.html', context)
+
 
 
 # Create View
@@ -381,4 +386,74 @@ def export_monthly_deduction_adjustment_to_excel(request):
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
     response["Content-Disposition"] = "attachment; filename=monthly_deduction_adjustment.xlsx"
+    return response
+
+
+@login_required
+def export_monthly_deduction_adjustment_aggregate(request):
+    # Get aggregated data
+    context = get_deduction_adjustment_context(request)
+    monthly_deduction_adjustment_aggregate = context.get('monthly_deduction_adjustment_aggregate', [])
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Monthly Deduction Aggregate"
+
+    # Title row
+    total_columns = 3
+    ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=total_columns)
+    title_cell = ws.cell(row=1, column=1)
+    title_cell.value = "Monthly Deduction Adjustment Aggregate Report"
+    title_cell.font = Font(size=14, bold=True)
+    title_cell.alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[1].height = 30
+
+    # Headers
+    headers = [
+        "Payroll Month",
+        "Total Deduction",
+    ]
+    ws.append(headers)
+
+    # Header styles
+    header_fill = PatternFill(start_color="FFC000", end_color="FFC000", fill_type='solid')
+    header_font = Font(bold=True)
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin_border = Border(right=Side(style='thin'))
+
+    for cell in ws[2]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = header_alignment
+        cell.border = thin_border
+
+    # Data rows
+    for row in monthly_deduction_adjustment_aggregate:
+        payroll_month = row.get('original_payroll_record__payroll_month__payroll_month__payroll_month', '')
+        total_deduction = row.get('total_deduction', 0)
+        # Convert Decimal to float
+        if total_deduction is None:
+            total_deduction = 0
+        else:
+            total_deduction = float(total_deduction)
+
+        ws.append([payroll_month, total_deduction])
+
+    # Adjust column widths
+    MIN_WIDTH = 15
+    MAX_WIDTH = 25
+    for col_idx, col_cells in enumerate(ws.columns, 1):
+        max_length = max((len(str(cell.value)) for cell in col_cells if cell.value), default=0)
+        adjusted_width = max(MIN_WIDTH, min(MAX_WIDTH, max_length + 2))
+        ws.column_dimensions[get_column_letter(col_idx)].width = adjusted_width
+
+    # Return response
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    response = HttpResponse(
+        output.read(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=monthly_deduction_aggregate.xlsx'
     return response

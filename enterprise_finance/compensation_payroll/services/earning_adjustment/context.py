@@ -1,7 +1,7 @@
 # services/earning_adjustment_context.py
 #view and excel
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, F
 
 
 
@@ -104,6 +104,28 @@ def get_earning_adjustment_context(request):
     )
     # Sort data keys by year and month ascending
 
+    monthly_earning_adjustment_aggregate = (
+        earning_adjustments
+        .values('original_payroll_record__payroll_month__payroll_month__payroll_month')
+        .annotate(
+            adjusted_gross_taxable_pay=Sum('adjusted_month_gross_taxable_pay'),
+            adjusted_gross_non_taxable_pay=Sum('adjusted_month_gross_non_taxable_pay'),
+            adjusted_gross_pay=Sum('adjusted_month_gross_pay'),
+            adjusted_taxable_pay_total=Sum('adjusted_month_total_taxable_pay'),
+            adjusted_income_tax_total=Sum('adjusted_month_employment_income_tax_total'),
+            adjusted_income_tax=Sum('adjusted_month_employment_income_tax'),
+            earning_deduction=Sum('adjusted_month_total_earning_deduction'),
+            expense=Sum('adjusted_month_expense'),
+            employee_pension=Sum('adjusted_month_employee_pension_contribution'),
+            employer_pension=Sum('adjusted_month_employer_pension_contribution'),
+            total_pension=Sum('adjusted_month_total_pension'),
+            record_count=Count('id')
+        )
+        .order_by(
+            '-original_payroll_record__payroll_month__payroll_month__year',
+            '-original_payroll_record__payroll_month__payroll_month__month'
+        )
+    )
 
 
     return {
@@ -112,6 +134,7 @@ def get_earning_adjustment_context(request):
         'earning_adjustments': earning_adjustments,
         'earning_per_adjusted_month': earning_per_adjusted_month,
         'monthly_earning_adjustment': monthly_earning_adjustment,
+        'monthly_earning_adjustment_aggregate': monthly_earning_adjustment_aggregate,
     }
 
 

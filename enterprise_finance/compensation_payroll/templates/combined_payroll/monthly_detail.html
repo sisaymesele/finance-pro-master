@@ -43,7 +43,7 @@
                     <div class="col-md-8 pe-md-4 border-end">
 
                         <!-- Regular Payroll Details -->
-                        {% if month.regular_item_by_component and month.regular_item_by_component.values|length > 0 %}
+                        {% if month.regular_item_by_component %}
                         <div>
                             <h5 class="text-primary border-bottom pb-1">Regular Payroll Details</h5>
                             <div class="table-responsive">
@@ -74,6 +74,18 @@
                                         <tr>
                                             <td>Employment Income Tax</td>
                                             <td class="text-end">{{ month.regular.employment_income_tax|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Regular Deduction</td>
+                                            <td class="text-end">{{ month.regular.total_regular_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Net Pay</td>
+                                            <td class="text-end">{{ month.regular.net_pay|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Expense</td>
+                                            <td class="text-end">{{ month.regular.expense|floatformat:2|intcomma }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -115,17 +127,6 @@
                                     </tbody>
                                 </table>
                             </div>
-
-                            <div class="container mb-4">
-                                <table class="table table-bordered">
-                                    <tbody>
-                                        <tr>
-                                            <td>Employment Income Tax:</td>
-                                            <td>{{ month.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
                         {% endif %}
 
@@ -150,12 +151,48 @@
                                         </tr>
                                         {% endif %}
                                         {% endfor %}
+                                        <tr>
+                                            <td>Total Individual Deduction</td>
+                                            <td class="text-end">{{ month.adjustment.individual_adjustment_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         {% endif %}
+<!--                        total adjustment-->
+                        <div class="m-3">
+                            <h5>Total Adjustment</h5>
+                            <!-- Full Adjustment Summary -->
+                            <div class="table-responsive mt-2">
+                                <table class="table table-bordered table-sm">
+                                    <tbody>
+                                        <tr>
+                                            <td>Recorded Employment Income Tax:</td>
+                                            <td class="text-end">{{ month.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
+                                        </tr>
 
+                                        <tr>
+                                            <td>Earning Adjustment Deduction:</td>
+                                            <td class="text-end">{{ month.adjustment.earning_adjustment_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Net Monthly Adjustment:</td>
+                                            <td class="text-end">{{ month.adjustment.net_monthly_adjustment|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Adjustment Deduction:</td>
+                                            <td class="text-end">{{ month.adjustment.total_monthly_adjustment_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Expense:</td>
+                                            <td class="text-end">{{ month.adjustment.expense|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+<!---->
                         <!-- Severance Pay -->
                         {% with s=month.severance %}
                         {% if s.taxable_gross or s.gross or s.employment_income_tax or s.total_severance_deduction or s.net or s.expense %}

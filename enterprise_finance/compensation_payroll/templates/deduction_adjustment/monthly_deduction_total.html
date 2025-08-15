@@ -1,0 +1,75 @@
+{% extends "dashboard.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <!-- Header Actions -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+        <h5 class="mb-3">Monthly Deduction Adjustment</h5>
+
+        <a href="{% url 'export_monthly_deduction_adjustment_aggregate' %}" class="btn btn-success mb-2">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Export Excel
+        </a>
+
+
+        <form
+                method="get"
+                action="{% url 'monthly_deduction_adjustment_total' %}"
+                class="d-flex mb-3"
+                hx-get="{% url 'monthly_deduction_adjustment_total' %}"
+                hx-target="#full-page-container"
+                hx-trigger="keyup changed delay:800ms from:input[name='search']"
+        >
+            <input
+                    type="text"
+                    name="search"
+                    class="form-control me-2"
+                    placeholder="Search monthly deduction total..."
+                    value="{{ search_query|default_if_none:'' }}"
+            >
+            <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+
+    </div>
+
+    <hr>
+
+    {% for month_data in monthly_deduction_adjustment_aggregate %}
+    {% with month_id=month_data.original_payroll_record__payroll_month__payroll_month__payroll_month|stringformat:"s"|slugify %}
+    <div class="card shadow-sm mb-3 border-primary mx-auto" style="max-width: 1160px;"
+         id="deduction-summary-{{ month_id }}">
+        <div class="card-header bg-primary text-white fw-bold fs-5 text-start">
+            Monthly Deduction Adjustment for {{ month_data.original_payroll_record__payroll_month__payroll_month__payroll_month }}
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0 align-middle">
+                <thead class="table-light text-start">
+                <tr>
+                    <th style="width: 40%;">Category</th>
+                    <th style="width: 40%;">Component</th>
+                    <th style="width: 20%;">Value</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="table-warning fw-bold text-start">
+                    <td>Deduction</td>
+                    <td>Total Deduction</td>
+                    <td>{{ month_data.total_deduction|floatformat:2|intcomma }}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mb-5">
+        <button class="btn btn-success shadow-sm" onclick="printAdjustment('deduction-summary-{{ month_id }}')">
+            <i class="bi bi-printer"></i> Save or Print This Month
+        </button>
+    </div>
+    {% endwith %}
+    {% empty %}
+    <p class="text-muted text-start mt-5">No deduction adjustments available for this period.</p>
+    {% endfor %}
+</div>
+{% endblock %}

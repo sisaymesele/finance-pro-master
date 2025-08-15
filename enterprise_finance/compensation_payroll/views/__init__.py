@@ -22,12 +22,14 @@ from .regular_payroll import payroll_month_list, regular_payroll_list, regular_p
 from .earning_adjustment import earning_object_list, earnings_object_detail, \
     create_earning_adjustment, update_earning_adjustment, delete_earning_adjustment, earning_per_adjusted_month, \
     monthly_earning_adjustment, monthly_earning_adjustment_total, export_earning_adjustment_list_to_excel, \
-    export_earning_per_adjusted_month_to_excel, export_monthly_earning_adjustment_to_excel
+    export_earning_per_adjusted_month_to_excel, export_monthly_earning_adjustment_to_excel, \
+    export_monthly_earning_adjustment_aggregate
 
 from .deduction_adjustment import deduction_object_list, deduction_object_detail, \
     create_deduction_adjustment, update_deduction_adjustment, delete_deduction_adjustment, deduction_per_adjusted_month, \
-    monthly_deduction_adjustment, export_deduction_adjustment_list_to_excel, export_deduction_per_adjusted_month_to_excel, \
-    export_monthly_deduction_adjustment_to_excel
+    monthly_deduction_adjustment, monthly_deduction_adjustment_total, export_deduction_adjustment_list_to_excel, \
+    export_deduction_per_adjusted_month_to_excel, export_monthly_deduction_adjustment_to_excel, \
+    export_monthly_deduction_adjustment_aggregate
 
 from .combined_personnel import get_combined_personnel_payroll_context, combined_personnel_payroll_list, \
     combined_personnel_adjustment_list, combined_personnel_total, combined_personnel_expense, combined_personnel_net_income, \
@@ -36,9 +38,9 @@ from .combined_personnel import get_combined_personnel_payroll_context, combined
     export_combined_personnel_net_income, export_combined_personnel_employment_tax, export_combined_personnel_pension, \
     combined_personnel_detail, export_combined_personnel_detail
 
-from .combined_monthly import get_combined_monthly_detail, monthly_combined_detail_view, \
-    export_combined_monthly_detail_to_excel, combined_monthly_graph_view, monthly_combined_summary_view, \
-    export_combined_monthly_summary_to_excel
+from .combined_monthly import get_combined_monthly_detail, monthly_combined_detail, \
+    monthly_combined_adjustment_journal, monthly_combined_adjustment_summary, export_combined_monthly_detail_to_excel, \
+    combined_monthly_graph_view, monthly_combined_summary, export_combined_monthly_summary_to_excel
 
 from .combined_yearly import get_combined_yearly_detail, yearly_combined_detail_view, \
     export_combined_yearly_detail_to_excel, yearly_combined_summary_view, export_combined_yearly_summary_to_excel

@@ -50,7 +50,7 @@ def get_combined_yearly_detail(request):
             'employer_pension': Decimal('0.00'),
             'total_pension': Decimal('0.00'),
             'employment_income_tax': Decimal('0.00'),
-            'total_adjustment_deduction': Decimal('0.00'),
+            'earning_adjustment_deduction': Decimal('0.00'),
             'expense': Decimal('0.00'),
             'earning_adj_by_component': {
                 'taxable': defaultdict(lambda: Decimal('0.00')),
@@ -60,6 +60,7 @@ def get_combined_yearly_detail(request):
                 'employer_pension_contribution': defaultdict(lambda: Decimal('0.00')),
                 'total_pension': defaultdict(lambda: Decimal('0.00')),
             },
+            'total_adjustment_deduction': Decimal('0.00'),
             'deduction_adj_by_component': defaultdict(lambda: Decimal('0.00')),
         },
         'severance': {
@@ -188,7 +189,7 @@ def get_combined_yearly_detail(request):
         year_data['adjustment']['employer_pension'] += safe_dec(getattr(ea_first, 'recorded_month_employer_pension_contribution', 0))
         year_data['adjustment']['total_pension'] += safe_dec(getattr(ea_first, 'recorded_month_total_pension_contribution', 0))
         year_data['adjustment']['employment_income_tax'] += safe_dec(getattr(ea_first, 'recorded_month_employment_income_tax', 0))
-        year_data['adjustment']['total_adjustment_deduction'] += safe_dec(getattr(ea_first, 'recorded_month_total_earning_deduction', 0))
+        year_data['adjustment']['earning_adjustment_deduction'] += safe_dec(getattr(ea_first, 'recorded_month_total_earning_deduction', 0))
         year_data['adjustment']['expense'] += safe_dec(getattr(ea_first, 'recorded_month_expense', 0))
 
 
@@ -198,12 +199,13 @@ def get_combined_yearly_detail(request):
         c = da.component
         year_data['adjustment']['deduction_adj_by_component'][c] += safe_dec(getattr(da, 'deduction_amount', 0))
 
-    # Aggregate total adjustment deduction (summary) for the year
+        # Aggregate total adjustment deduction (summary)
     deduction_adj_first = payroll.deduction_adjustments.first() or type('Empty', (), {})()
     year_data['adjustment']['total_adjustment_deduction'] += safe_dec(
-        getattr(deduction_adj_first, 'recorded_month_total_earning_deduction', 0)
+        getattr(deduction_adj_first, 'recorded_month_total_deduction', 0)
     )
 
+    #severance
     severances = SeverancePay.objects.filter(organization_name=request.user.organization_name)
     for sev in severances:
 

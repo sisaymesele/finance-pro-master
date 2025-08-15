@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.core.paginator import Paginator
 
 def get_deduction_adjustment_context(request):
@@ -75,10 +75,25 @@ def get_deduction_adjustment_context(request):
         )
     )
 
+    # Aggregate per month
+    monthly_deduction_adjustment_aggregate = (
+        deduction_adjustments
+        .values('original_payroll_record__payroll_month__payroll_month__payroll_month')
+        .annotate(
+            total_deduction=Sum('adjusted_month_total_deduction'),
+            total_record_count=Count('id'),
+        )
+        .order_by(
+            '-original_payroll_record__payroll_month__payroll_month__year',
+            '-original_payroll_record__payroll_month__payroll_month__month'
+        )
+    )
+
     return {
         'page_obj': page_obj,
         'search_query': search_query,
         'deduction_adjustments': deduction_adjustments,
         'deduction_per_adjusted_month': deduction_per_adjusted_month,
         'monthly_deduction_adjustment': monthly_deduction_adjustment,
+        'monthly_deduction_adjustment_aggregate': monthly_deduction_adjustment_aggregate,
     }

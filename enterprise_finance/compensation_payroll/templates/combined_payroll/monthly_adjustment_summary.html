@@ -1,0 +1,112 @@
+{% extends 'dashboard.html' %}
+{% load humanize %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{% url 'export_combined_monthly_summary_to_excel' %}" class="btn btn-success mb-3">
+            Export Monthly Payroll Adjustment Summary to Excel
+        </a>
+    </div>
+
+    <h3 class="mb-4 text-center">Monthly Payroll Adjustment Summary</h3>
+
+    {% if page_obj %}
+    {% for item in page_obj %}
+    <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Monthly Payroll Adjustment Summary For {{ item.month }}</h3>
+            <!-- Collapse toggle button -->
+            <button class="btn btn-sm btn-light" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#combined_monthly_summary_{{ forloop.counter }}"
+                    aria-expanded="true" aria-controls="combined_monthly_summary_{{ forloop.counter }}">
+                <i class="bi bi-caret-down-fill"></i>
+            </button>
+        </div>
+
+        <div id="combined_monthly_summary_{{ forloop.counter }}" class="collapse show card-body">
+            <h3 class="mb-2 text-center">Monthly Payroll Summary For {{ item.month }}</h3>
+            <hr class="my-4 border-2 border-primary"/>
+
+
+            <div class="row gy-4">
+
+                {% if item.adjustment.gross > 0 %}
+                <section class="col-12 col-md-12">
+                    <h5 class="border-bottom border-warning pb-1 text-warning">Adjustment</h5>
+                    <div class="bg-light p-3 rounded">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                    <tr>
+                                        <th>Component</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                            <tbody>
+                            <tr>
+                                <th>Gross</th>
+                                <td>{{ item.adjustment.gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Taxable Gross</th>
+                                <td>{{ item.adjustment.taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Non-Taxable</th>
+                                <td>{{ item.adjustment.non_taxable_gross|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Pensionable</th>
+                                <td>{{ item.adjustment.adjusted_pensionable|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Employee Pension Contribution</th>
+                                <td>{{ item.adjustment.employee_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Employer Pension Contribution</th>
+                                <td>{{ item.adjustment.employer_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total Pension Contribution</th>
+                                <td>{{ item.adjustment.total_pension|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Income Tax</th>
+                                <td>{{ item.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Deductions</th>
+                                <td>{{ item.adjustment.total_monthly_adjustment_deduction|floatformat:2|intcomma }}</td>
+                            </tr>
+                             <tr>
+                                <th>Net Income</th>
+                                <td>{{ item.adjustment.net_monthly_adjustment|default_if_none:0|floatformat:2|intcomma }}</td>
+                            </tr>
+                            <tr>
+                                <th>Expense</th>
+                                <td>{{ item.adjustment.expense|floatformat:2|intcomma }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                {% endif %}
+
+
+            </div> <!-- /.row -->
+
+            <div class="d-flex justify-content-end mt-3 no-print">
+                <button class="btn btn-outline-success btn-sm"
+                        onclick="printPayrollPayslip('combined_monthly_summary_{{ forloop.counter }}')">
+                    <i class="bi bi-printer"></i> Save or Print
+                </button>
+            </div>
+        </div> <!-- /.collapse card-body -->
+    </div> <!-- /.card -->
+    {% endfor %}
+    {% else %}
+    <p class="text-center">No monthly payroll summary data available.</p>
+    {% endif %}
+</div>
+{% endblock %}

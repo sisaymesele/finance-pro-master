@@ -21,47 +21,406 @@ from compensation_payroll.services.combined.monthly_context import get_combined_
 
 #
 @login_required
-def monthly_combined_detail_view(request):
+def monthly_combined_detail(request):
     context = get_combined_monthly_detail(request)
     return render(request, 'combined_payroll/monthly_detail.html', context)
 
 
 @login_required
-def monthly_combined_summary_view(request):
+def monthly_combined_summary(request):
     context = get_combined_monthly_detail(request)
     return render(request, 'combined_payroll/monthly_summary.html', context)
 
 
 @login_required
+def monthly_combined_adjustment_journal(request):
+    context = get_combined_monthly_detail(request)
+    return render(request, 'combined_payroll/monthly_adjustment_journal.html', context)
+
+@login_required
+def monthly_combined_adjustment_summary(request):
+    context = get_combined_monthly_detail(request)
+    return render(request, 'combined_payroll/monthly_adjustment_summary.html', context)
+
+
+# @login_required
+# def export_combined_monthly_detail_to_excel(request):
+#     context = get_combined_monthly_detail(request)
+#     monthly_list = context['page_obj'].object_list
+#
+#     wb = openpyxl.Workbook()
+#     ws = wb.active
+#     ws.title = "Combined Monthly Payroll"
+#
+#     # Styles
+#     header_font = Font(bold=True, color="FFFFFF")
+#     header_fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
+#     border = Border(left=Side(style='thin'), right=Side(style='thin'),
+#                     top=Side(style='thin'), bottom=Side(style='thin'))
+#     money_format = '#,##0.00'
+#     center_align = Alignment(horizontal="center")
+#
+#     row_num = 1
+#
+#     for item in monthly_list:
+#         # Title
+#         ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=7)
+#         header_cell = ws.cell(row=row_num, column=1, value=f"Combined Payroll Summary for {item['month']}")
+#         header_cell.font = Font(bold=True, size=14)
+#         header_cell.alignment = Alignment(horizontal="center")
+#         row_num += 2
+#
+#         # --- Regular Payroll ---
+#         if any(amount != 0 for amount in item.get('regular_item_by_component', {}).values()):
+#             ws.cell(row=row_num, column=1, value="Regular Payroll").font = Font(bold=True, color="0070C0")
+#             row_num += 1
+#
+#             headers = ["Component", "Amount"]
+#             for col_num, header in enumerate(headers, 1):
+#                 cell = ws.cell(row=row_num, column=col_num, value=header)
+#                 cell.font = header_font
+#                 cell.fill = header_fill
+#                 cell.alignment = center_align
+#                 cell.border = border
+#             row_num += 1
+#
+#             for comp, amount in item['regular_item_by_component'].items():
+#                 if amount != 0:
+#                     ws.cell(row=row_num, column=1, value=comp)
+#                     amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+#                     amt_cell.number_format = money_format
+#                     row_num += 1
+#             row_num += 1
+#
+#         # --- Earning Adjustments ---
+#         if item.get('show_earning') and any(
+#                 vals['earning_amount'] != 0 for vals in item.get('earning_adj_by_component', {}).values()):
+#             ws.cell(row=row_num, column=1, value="Earning Adjustments").font = Font(bold=True, color="00B050")
+#             row_num += 1
+#
+#             earning_headers = [
+#                 "Component", "Total", "Taxable", "Non-Taxable",
+#                 "Employee Pension", "Employer Pension", "Total Pension Contribution"
+#             ]
+#             for col_num, header in enumerate(earning_headers, 1):
+#                 cell = ws.cell(row=row_num, column=col_num, value=header)
+#                 cell.font = header_font
+#                 cell.fill = header_fill
+#                 cell.alignment = center_align
+#                 cell.border = border
+#             row_num += 1
+#
+#             for comp, vals in item['earning_adj_by_component'].items():
+#                 if vals['earning_amount'] != 0:
+#                     ws.cell(row=row_num, column=1, value=comp)
+#                     ws.cell(row=row_num, column=2, value=float(vals['earning_amount'])).number_format = money_format
+#                     ws.cell(row=row_num, column=3, value=float(vals['taxable'])).number_format = money_format
+#                     ws.cell(row=row_num, column=4, value=float(vals['non_taxable'])).number_format = money_format
+#                     ws.cell(row=row_num, column=5,
+#                             value=float(vals['employee_pension_contribution'])).number_format = money_format
+#                     ws.cell(row=row_num, column=6,
+#                             value=float(vals['employer_pension_contribution'])).number_format = money_format
+#                     ws.cell(row=row_num, column=7, value=float(vals['total_pension'])).number_format = money_format
+#                     row_num += 1
+#             row_num += 1
+#
+#             # Adjustment Income Tax
+#             adjustment = item.get('adjustment', {})
+#             if adjustment.get('employment_income_tax', 0) != 0:
+#                 ws.cell(row=row_num, column=1, value="Adjustment Income Tax Summary").font = Font(bold=True,
+#                                                                                                   color="7030A0")
+#                 row_num += 1
+#                 ws.cell(row=row_num, column=1, value="Employment Income Tax")
+#                 val_cell = ws.cell(row=row_num, column=2, value=float(adjustment['employment_income_tax']))
+#                 val_cell.number_format = money_format
+#                 row_num += 2
+#
+#         # --- Deduction Adjustments ---
+#         if item.get('show_deduction') and any(
+#                 amount != 0 for amount in item.get('deduction_adj_by_component', {}).values()):
+#             ws.cell(row=row_num, column=1, value="Deduction Adjustments").font = Font(bold=True, color="FF0000")
+#             row_num += 1
+#
+#             deduction_headers = ["Component", "Amount"]
+#             for col_num, header in enumerate(deduction_headers, 1):
+#                 cell = ws.cell(row=row_num, column=col_num, value=header)
+#                 cell.font = header_font
+#                 cell.fill = header_fill
+#                 cell.alignment = center_align
+#                 cell.border = border
+#             row_num += 1
+#
+#             for comp, amount in item['deduction_adj_by_component'].items():
+#                 if amount != 0:
+#                     ws.cell(row=row_num, column=1, value=comp)
+#                     amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+#                     amt_cell.number_format = money_format
+#                     row_num += 1
+#             row_num += 1
+#
+#         # --- Severance Payroll ---
+#         severance_data = item.get('severance', {})
+#         if any(val != 0 for val in severance_data.values()):
+#             ws.cell(row=row_num, column=1, value="Severance Payroll").font = Font(bold=True, color="C65911")
+#             row_num += 1
+#
+#             severance_headers = ["Component", "Amount"]
+#             for col_num, header in enumerate(severance_headers, 1):
+#                 cell = ws.cell(row=row_num, column=col_num, value=header)
+#                 cell.font = header_font
+#                 cell.fill = header_fill
+#                 cell.alignment = center_align
+#                 cell.border = border
+#             row_num += 1
+#
+#             severance_items = [
+#                 ("Severance Gross (Taxable)", severance_data.get('taxable_gross', 0)),
+#                 ("Severance Gross", severance_data.get('gross', 0)),
+#                 ("Severance Income Tax", severance_data.get('employment_income_tax', 0)),
+#                 ("Total Severance Deductions", severance_data.get('total_severance_deduction', 0)),
+#                 ("Severance Net Pay", severance_data.get('net', 0)),
+#                 ("Severance Expense", severance_data.get('expense', 0)),
+#             ]
+#             for comp, amount in severance_items:
+#                 if amount != 0:
+#                     ws.cell(row=row_num, column=1, value=comp)
+#                     amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+#                     amt_cell.number_format = money_format
+#                     row_num += 1
+#             row_num += 1
+#
+#         # --- Total Summary ---
+#         if any(val != 0 for val in item.get('totals', {}).values()):
+#             ws.cell(row=row_num, column=1, value="Total Summary").font = Font(bold=True)
+#             row_num += 1
+#
+#             summary_headers = ["Component", "Amount"]
+#             for col_num, header in enumerate(summary_headers, 1):
+#                 cell = ws.cell(row=row_num, column=col_num, value=header)
+#                 cell.font = header_font
+#                 cell.fill = header_fill
+#                 cell.alignment = center_align
+#                 cell.border = border
+#             row_num += 1
+#
+#             summary_items = [
+#                 ("Taxable Gross Pay", item['totals'].get('taxable_gross', 0)),
+#                 ("Non-Taxable Gross Pay", item['totals'].get('non_taxable_gross', 0)),
+#                 ("Total Gross Pay", item['totals'].get('gross', 0)),
+#                 ("Total Pensionable", item['totals'].get('pensionable', 0)),
+#                 ("Employee Pension", item['totals'].get('employee_pension', 0)),
+#                 ("Employer Pension", item['totals'].get('employer_pension', 0)),
+#                 ("Total Pension Contribution", item['totals'].get('total_pension', 0)),
+#                 ("Income Tax", item['totals'].get('employment_income_tax', 0)),
+#                 ("Total Deduction", item['totals'].get('total_deduction', 0)),
+#                 ("Total Expense", item['totals'].get('expense', 0)),
+#                 ("Final Net Pay", item['totals'].get('final_net_pay', 0)),
+#             ]
+#             for comp, amount in summary_items:
+#                 if amount != 0:
+#                     ws.cell(row=row_num, column=1, value=comp)
+#                     amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+#                     amt_cell.number_format = money_format
+#                     row_num += 1
+#             row_num += 3
+#
+#     # Adjust column widths
+#     column_max_widths = {}
+#     for row in ws.iter_rows():
+#         for cell in row:
+#             if not isinstance(cell, MergedCell) and cell.value:
+#                 col_idx = cell.column
+#                 length = len(str(cell.value))
+#                 column_max_widths[col_idx] = max(column_max_widths.get(col_idx, 0), length)
+#     for col_idx, max_len in column_max_widths.items():
+#         col_letter = get_column_letter(col_idx)
+#         ws.column_dimensions[col_letter].width = max_len + 4
+#
+#     # Response
+#     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+#     response['Content-Disposition'] = 'attachment; filename=combined_monthly_payroll.xlsx'
+#     wb.save(response)
+#     return response
+
+
+from datetime import datetime
+import io
+
+@login_required
 def export_combined_monthly_detail_to_excel(request):
+    # Get data from context
     context = get_combined_monthly_detail(request)
     monthly_list = context['page_obj'].object_list
 
-    wb = openpyxl.Workbook()
+    # Create workbook in memory
+    output = io.BytesIO()
+    wb = Workbook()
     ws = wb.active
     ws.title = "Combined Monthly Payroll"
 
     # Styles
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
-    border = Border(left=Side(style='thin'), right=Side(style='thin'),
-                    top=Side(style='thin'), bottom=Side(style='thin'))
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                         top=Side(style='thin'), bottom=Side(style='thin'))
     money_format = '#,##0.00'
     center_align = Alignment(horizontal="center")
+    title_font = Font(bold=True, size=14)
+    section_font = Font(bold=True, size=12)
 
-    row_num = 1
+    # Color codes for different sections
+    section_colors = {
+        'regular': "0070C0",  # Blue
+        'adjustment': "00B050",  # Green
+        'deduction': "FF0000",  # Red
+        'severance': "C65911",  # Orange
+        'totals': "7030A0"  # Purple
+    }
+
+    # Helper function to safely convert to float
+    def safe_float(value):
+        try:
+            return float(value) if value not in [None, ''] else 0.0
+        except (ValueError, TypeError):
+            return 0.0
+
+    row_num = 1  # Start from first row
 
     for item in monthly_list:
-        # Title
+        # ================================
+        # 1. Title Section
+        # ================================
         ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=7)
-        header_cell = ws.cell(row=row_num, column=1, value=f"Combined Payroll Summary for {item['month']}")
-        header_cell.font = Font(bold=True, size=14)
-        header_cell.alignment = Alignment(horizontal="center")
-        row_num += 2
+        title_cell = ws.cell(row=row_num, column=1, value=f"Combined Payroll Summary for {item['month']}")
+        title_cell.font = title_font
+        title_cell.alignment = center_align
+        row_num += 3  # Extra space after title
 
-        # --- Regular Payroll ---
-        if any(amount != 0 for amount in item.get('regular_item_by_component', {}).values()):
-            ws.cell(row=row_num, column=1, value="Regular Payroll").font = Font(bold=True, color="0070C0")
+        # ================================
+        # 2. REGULAR PAYROLL SECTION
+        # ================================
+        if 'regular' in item and any(safe_float(val) != 0 for val in item['regular'].values()):
+            ws.cell(row=row_num, column=1, value="REGULAR PAYROLL").font = Font(bold=True, size=12,
+                                                                                color=section_colors['regular'])
+            row_num += 2
+
+            # Regular Components
+            if 'regular_item_by_component' in item and any(
+                    safe_float(amount) != 0 for amount in item['regular_item_by_component'].values()):
+                ws.cell(row=row_num, column=1, value="Regular Components").font = section_font
+                row_num += 1
+
+                headers = ["Component", "Amount"]
+                for col_num, header in enumerate(headers, 1):
+                    cell = ws.cell(row=row_num, column=col_num, value=header)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.border = thin_border
+                    cell.alignment = center_align
+                row_num += 1
+
+                for comp, amount in item['regular_item_by_component'].items():
+                    amount_float = safe_float(amount)
+                    if amount_float != 0:
+                        ws.cell(row=row_num, column=1, value=comp).border = thin_border
+                        amt_cell = ws.cell(row=row_num, column=2, value=amount_float)
+                        amt_cell.number_format = money_format
+                        amt_cell.border = thin_border
+                        row_num += 1
+                row_num += 1
+
+            # Regular Summary
+            ws.cell(row=row_num, column=1, value="Regular Summary").font = section_font
+            row_num += 1
+
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = center_align
+            row_num += 1
+
+            summary_data = [
+                ("Taxable Gross", item['regular'].get('taxable_gross')),
+                ("Non-Taxable Gross", item['regular'].get('non_taxable_gross')),
+                ("Gross Pay", item['regular'].get('gross')),
+                ("Pensionable Amount", item['regular'].get('pensionable')),
+                ("Employee Pension", item['regular'].get('employee_pension')),
+                ("Employer Pension", item['regular'].get('employer_pension')),
+                ("Total Pension", item['regular'].get('total_pension')),
+                ("Income Tax", item['regular'].get('employment_income_tax')),
+                ("Total Deductions", item['regular'].get('total_regular_deduction')),
+                ("Net Pay", item['regular'].get('net_pay')),
+                ("Expense", item['regular'].get('expense')),
+            ]
+
+            for label, value in summary_data:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
+                    amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
+                    row_num += 1
+            row_num += 3
+
+        # ================================
+        # 3. EARNING ADJUSTMENTS SECTION (COMPONENTS ONLY)
+        # ================================
+        if 'adjustment' in item and any(safe_float(val) != 0 for val in item['adjustment'].values()):
+            ws.cell(row=row_num, column=1, value="EARNING ADJUSTMENTS").font = Font(bold=True, size=12,
+                                                                                    color=section_colors['adjustment'])
+            row_num += 2
+
+            if 'earning_adj_by_component' in item and any(safe_float(vals.get('earning_amount', 0)) != 0 for vals in
+                                                          item['earning_adj_by_component'].values()):
+                ws.cell(row=row_num, column=1, value="Adjustment Components").font = section_font
+                row_num += 1
+
+                headers = [
+                    "Component", "Total", "Taxable", "Non-Taxable",
+                    "Employee Pension", "Employer Pension", "Total Pension"
+                ]
+                for col_num, header in enumerate(headers, 1):
+                    cell = ws.cell(row=row_num, column=col_num, value=header)
+                    cell.font = header_font
+                    cell.fill = header_fill
+                    cell.border = thin_border
+                    cell.alignment = center_align
+                row_num += 1
+
+                for comp, vals in item['earning_adj_by_component'].items():
+                    if safe_float(vals.get('earning_amount', 0)) != 0:
+                        ws.cell(row=row_num, column=1, value=comp).border = thin_border
+                        ws.cell(row=row_num, column=2,
+                                value=safe_float(vals.get('earning_amount', 0))).number_format = money_format
+                        ws.cell(row=row_num, column=3,
+                                value=safe_float(vals.get('taxable', 0))).number_format = money_format
+                        ws.cell(row=row_num, column=4,
+                                value=safe_float(vals.get('non_taxable', 0))).number_format = money_format
+                        ws.cell(row=row_num, column=5, value=safe_float(
+                            vals.get('employee_pension_contribution', 0))).number_format = money_format
+                        ws.cell(row=row_num, column=6, value=safe_float(
+                            vals.get('employer_pension_contribution', 0))).number_format = money_format
+                        ws.cell(row=row_num, column=7,
+                                value=safe_float(vals.get('total_pension', 0))).number_format = money_format
+                        for col in range(1, 8):
+                            ws.cell(row=row_num, column=col).border = thin_border
+                        row_num += 1
+                row_num += 3
+
+        # ================================
+        # 4. DEDUCTION ADJUSTMENTS
+        # ================================
+        if 'deduction_adj_by_component' in item and any(
+                safe_float(amt) != 0 for amt in item['deduction_adj_by_component'].values()):
+            ws.cell(row=row_num, column=1, value="DEDUCTION ADJUSTMENTS").font = Font(bold=True, size=12,
+                                                                                      color=section_colors['deduction'])
+            row_num += 2
+
+            ws.cell(row=row_num, column=1, value="Deduction Components").font = section_font
             row_num += 1
 
             headers = ["Component", "Amount"]
@@ -69,305 +428,387 @@ def export_combined_monthly_detail_to_excel(request):
                 cell = ws.cell(row=row_num, column=col_num, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
+                cell.border = thin_border
                 cell.alignment = center_align
-                cell.border = border
-            row_num += 1
-
-            for comp, amount in item['regular_item_by_component'].items():
-                if amount != 0:
-                    ws.cell(row=row_num, column=1, value=comp)
-                    amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
-                    amt_cell.number_format = money_format
-                    row_num += 1
-            row_num += 1
-
-        # --- Earning Adjustments ---
-        if item.get('show_earning') and any(
-                vals['earning_amount'] != 0 for vals in item.get('earning_adj_by_component', {}).values()):
-            ws.cell(row=row_num, column=1, value="Earning Adjustments").font = Font(bold=True, color="00B050")
-            row_num += 1
-
-            earning_headers = [
-                "Component", "Total", "Taxable", "Non-Taxable",
-                "Employee Pension", "Employer Pension", "Total Pension Contribution"
-            ]
-            for col_num, header in enumerate(earning_headers, 1):
-                cell = ws.cell(row=row_num, column=col_num, value=header)
-                cell.font = header_font
-                cell.fill = header_fill
-                cell.alignment = center_align
-                cell.border = border
-            row_num += 1
-
-            for comp, vals in item['earning_adj_by_component'].items():
-                if vals['earning_amount'] != 0:
-                    ws.cell(row=row_num, column=1, value=comp)
-                    ws.cell(row=row_num, column=2, value=float(vals['earning_amount'])).number_format = money_format
-                    ws.cell(row=row_num, column=3, value=float(vals['taxable'])).number_format = money_format
-                    ws.cell(row=row_num, column=4, value=float(vals['non_taxable'])).number_format = money_format
-                    ws.cell(row=row_num, column=5,
-                            value=float(vals['employee_pension_contribution'])).number_format = money_format
-                    ws.cell(row=row_num, column=6,
-                            value=float(vals['employer_pension_contribution'])).number_format = money_format
-                    ws.cell(row=row_num, column=7, value=float(vals['total_pension'])).number_format = money_format
-                    row_num += 1
-            row_num += 1
-
-            # Adjustment Income Tax
-            adjustment = item.get('adjustment', {})
-            if adjustment.get('employment_income_tax', 0) != 0:
-                ws.cell(row=row_num, column=1, value="Adjustment Income Tax Summary").font = Font(bold=True,
-                                                                                                  color="7030A0")
-                row_num += 1
-                ws.cell(row=row_num, column=1, value="Employment Income Tax")
-                val_cell = ws.cell(row=row_num, column=2, value=float(adjustment['employment_income_tax']))
-                val_cell.number_format = money_format
-                row_num += 2
-
-        # --- Deduction Adjustments ---
-        if item.get('show_deduction') and any(
-                amount != 0 for amount in item.get('deduction_adj_by_component', {}).values()):
-            ws.cell(row=row_num, column=1, value="Deduction Adjustments").font = Font(bold=True, color="FF0000")
-            row_num += 1
-
-            deduction_headers = ["Component", "Amount"]
-            for col_num, header in enumerate(deduction_headers, 1):
-                cell = ws.cell(row=row_num, column=col_num, value=header)
-                cell.font = header_font
-                cell.fill = header_fill
-                cell.alignment = center_align
-                cell.border = border
             row_num += 1
 
             for comp, amount in item['deduction_adj_by_component'].items():
-                if amount != 0:
-                    ws.cell(row=row_num, column=1, value=comp)
-                    amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+                amount_float = safe_float(amount)
+                if amount_float != 0:
+                    ws.cell(row=row_num, column=1, value=comp).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=amount_float)
                     amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
                     row_num += 1
+            row_num += 2
+
+        # ================================
+        # 5. ADJUSTMENT SUMMARY (NOW BELOW DEDUCTION)
+        # ================================
+        if 'adjustment' in item and any(safe_float(val) != 0 for val in item['adjustment'].values()):
+            ws.cell(row=row_num, column=1, value="ADJUSTMENT SUMMARY").font = section_font
             row_num += 1
 
-        # --- Severance Payroll ---
-        severance_data = item.get('severance', {})
-        if any(val != 0 for val in severance_data.values()):
-            ws.cell(row=row_num, column=1, value="Severance Payroll").font = Font(bold=True, color="C65911")
-            row_num += 1
-
-            severance_headers = ["Component", "Amount"]
-            for col_num, header in enumerate(severance_headers, 1):
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
                 cell = ws.cell(row=row_num, column=col_num, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
+                cell.border = thin_border
                 cell.alignment = center_align
-                cell.border = border
+            row_num += 1
+
+            adj_summary = [
+                ("Taxable Gross", item['adjustment'].get('taxable_gross')),
+                ("Non-Taxable Gross", item['adjustment'].get('non_taxable_gross')),
+                ("Gross Adjustment", item['adjustment'].get('gross')),
+                ("Adjusted Pensionable", item['adjustment'].get('adjusted_pensionable')),
+                ("Employee Pension", item['adjustment'].get('employee_pension')),
+                ("Employer Pension", item['adjustment'].get('employer_pension')),
+                ("Total Pension", item['adjustment'].get('total_pension')),
+                ("Income Tax", item['adjustment'].get('employment_income_tax')),
+                ("Earning Adjustment Deduction", item['adjustment'].get('earning_adjustment_deduction')),
+                ("Net Monthly Adjustment", item['adjustment'].get('net_monthly_adjustment')),
+                ("Expense", item['adjustment'].get('expense')),
+            ]
+
+            for label, value in adj_summary:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
+                    amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
+                    row_num += 1
+            row_num += 3
+
+        # ================================
+        # 6. SEVERANCE PAYROLL
+        # ================================
+        if 'severance' in item and any(safe_float(val) != 0 for val in item['severance'].values()):
+            ws.cell(row=row_num, column=1, value="SEVERANCE PAYROLL").font = Font(bold=True, size=12,
+                                                                                  color=section_colors['severance'])
+            row_num += 2
+
+            ws.cell(row=row_num, column=1, value="Severance Details").font = section_font
+            row_num += 1
+
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = center_align
             row_num += 1
 
             severance_items = [
-                ("Severance Gross (Taxable)", severance_data.get('taxable_gross', 0)),
-                ("Severance Gross", severance_data.get('gross', 0)),
-                ("Severance Income Tax", severance_data.get('employment_income_tax', 0)),
-                ("Total Severance Deductions", severance_data.get('total_severance_deduction', 0)),
-                ("Severance Net Pay", severance_data.get('net', 0)),
-                ("Severance Expense", severance_data.get('expense', 0)),
+                ("Severance Gross (Taxable)", item['severance'].get('taxable_gross')),
+                ("Severance Gross", item['severance'].get('gross')),
+                ("Severance Income Tax", item['severance'].get('employment_income_tax')),
+                ("Total Severance Deductions", item['severance'].get('total_severance_deduction')),
+                ("Severance Net Pay", item['severance'].get('net')),
+                ("Severance Expense", item['severance'].get('expense')),
             ]
-            for comp, amount in severance_items:
-                if amount != 0:
-                    ws.cell(row=row_num, column=1, value=comp)
-                    amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+
+            for label, value in severance_items:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
                     amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
                     row_num += 1
-            row_num += 1
+            row_num += 3
 
-        # --- Total Summary ---
-        if any(val != 0 for val in item.get('totals', {}).values()):
-            ws.cell(row=row_num, column=1, value="Total Summary").font = Font(bold=True)
-            row_num += 1
+        # ================================
+        # 7. TOTALS
+        # ================================
+        if 'totals' in item and any(safe_float(val) != 0 for val in item['totals'].values()):
+            ws.cell(row=row_num, column=1, value="TOTAL SUMMARY").font = Font(bold=True, size=12,
+                                                                              color=section_colors['totals'])
+            row_num += 2
 
-            summary_headers = ["Component", "Amount"]
-            for col_num, header in enumerate(summary_headers, 1):
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
                 cell = ws.cell(row=row_num, column=col_num, value=header)
                 cell.font = header_font
                 cell.fill = header_fill
+                cell.border = thin_border
                 cell.alignment = center_align
-                cell.border = border
             row_num += 1
 
             summary_items = [
-                ("Taxable Gross Pay", item['totals'].get('taxable_gross', 0)),
-                ("Non-Taxable Gross Pay", item['totals'].get('non_taxable_gross', 0)),
-                ("Total Gross Pay", item['totals'].get('gross', 0)),
-                ("Total Pensionable", item['totals'].get('pensionable', 0)),
-                ("Employee Pension", item['totals'].get('employee_pension', 0)),
-                ("Employer Pension", item['totals'].get('employer_pension', 0)),
-                ("Total Pension Contribution", item['totals'].get('total_pension', 0)),
-                ("Income Tax", item['totals'].get('employment_income_tax', 0)),
-                ("Total Deduction", item['totals'].get('total_deduction', 0)),
-                ("Total Expense", item['totals'].get('expense', 0)),
-                ("Final Net Pay", item['totals'].get('final_net_pay', 0)),
+                ("Taxable Gross Pay", item['totals'].get('taxable_gross')),
+                ("Non-Taxable Gross Pay", item['totals'].get('non_taxable_gross')),
+                ("Total Gross Pay", item['totals'].get('gross')),
+                ("Total Pensionable", item['totals'].get('pensionable')),
+                ("Employee Pension", item['totals'].get('employee_pension')),
+                ("Employer Pension", item['totals'].get('employer_pension')),
+                ("Total Pension Contribution", item['totals'].get('total_pension')),
+                ("Income Tax", item['totals'].get('employment_income_tax')),
+                ("Total Deduction", item['totals'].get('total_deduction')),
+                ("Total Expense", item['totals'].get('expense')),
+                ("Final Net Pay", item['totals'].get('final_net_pay')),
             ]
-            for comp, amount in summary_items:
-                if amount != 0:
-                    ws.cell(row=row_num, column=1, value=comp)
-                    amt_cell = ws.cell(row=row_num, column=2, value=float(amount))
+
+            for label, value in summary_items:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
                     amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
                     row_num += 1
             row_num += 3
 
     # Adjust column widths
-    column_max_widths = {}
-    for row in ws.iter_rows():
-        for cell in row:
-            if not isinstance(cell, MergedCell) and cell.value:
-                col_idx = cell.column
-                length = len(str(cell.value))
-                column_max_widths[col_idx] = max(column_max_widths.get(col_idx, 0), length)
-    for col_idx, max_len in column_max_widths.items():
-        col_letter = get_column_letter(col_idx)
-        ws.column_dimensions[col_letter].width = max_len + 4
-
-    # Response
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=combined_monthly_payroll.xlsx'
-    wb.save(response)
-    return response
-
-
-
-#monthly summary export
-@login_required
-def export_combined_monthly_summary_to_excel(request):
-    context = get_combined_monthly_detail(request)
-    monthly_summary = context.get('monthly_summary', {})
-
-    section_fields = {
-        'regular': {
-            'taxable_gross': 'Taxable Gross',
-            'non_taxable_gross': 'Non-Taxable Gross',
-            'gross': 'Gross Pay',
-            'pensionable': 'Pensionable',
-            'employee_pension': 'Employee Pension',
-            'employer_pension': 'Employer Pension',
-            'total_pension': 'Total Pension Contribution',
-            'employment_income_tax': 'Income Tax',
-            'total_regular_deduction': 'Total Deductions',
-            'net_pay': 'Net Pay',
-            'expense': 'Expense',
-        },
-        'adjustment': {
-            'taxable_gross': 'Adjusted Taxable Gross',
-            'non_taxable_gross': 'Adjusted Non-Taxable Gross',
-            'gross': 'Adjusted Gross Pay',
-            'adjusted_pensionable': 'Adjusted Pensionable',
-            'employee_pension': 'Adjusted Employee Pension',
-            'employer_pension': 'Adjusted Employer Pension',
-            'total_pension': 'Adjusted Total Pension Contribution',
-            'employment_income_tax': 'Income Tax on Adjustment',
-            'total_adjustment_deduction': 'Adjustment Deductions',
-            'expense': 'Adjusted Expense',
-        },
-        'severance': {
-            'taxable_gross': 'Severance Gross (Taxable)',
-            'gross': 'Severance Gross',
-            'employment_income_tax': 'Severance Income Tax',
-            'total_severance_deduction': 'Total Severance Deductions',
-            'net': 'Severance Net Pay',
-            'expense': 'Severance Expense',
-        },
-        'totals': {
-            'taxable_gross': 'Total Taxable Gross',
-            'non_taxable_gross': 'Total Non-Taxable Gross',
-            'gross': 'Total Gross Pay',
-            'pensionable': 'Total Pensionable',
-            'employee_pension': 'Total Employee Pension',
-            'employer_pension': 'Total Employer Pension',
-            'total_pension': 'Total Pension Contribution',
-            'employment_income_tax': 'Total Income Tax',
-            'total_deduction': 'Total Deductions',
-            'expense': 'Total Expense',
-            'final_net_pay': 'Final Net Pay',
-        }
-    }
-
-    section_colors = {
-        'regular': 'BDD7EE',
-        'adjustment': 'FDE9D9',
-        'severance': 'F8CBAD',
-        'totals': 'D9EAD3',
-    }
-
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Payroll Summary"
-    row = 1
-
-    for month, data in monthly_summary.items():
-        # Month Header
-        month_cell = ws.cell(row=row, column=1, value=f"{month} Payroll Summary")
-        month_cell.font = Font(bold=True, size=14)
-        row += 2
-
-        for section_title, key in [('Regular', 'regular'), ('Adjustment', 'adjustment'),
-                                   ('Severance', 'severance'), ('Totals', 'totals')]:
-            section_data = data.get(key, {})
-            labels = section_fields.get(key, {})
-
-            # Skip section if all values are 0 or None
-            has_data = any(
-                v is not None and float(v) != 0.0
-                for k, v in section_data.items()
-                if k in labels
-            )
-            if not has_data:
-                continue
-
-            # Section Title
-            sec_cell = ws.cell(row=row, column=1, value=section_title)
-            sec_cell.font = Font(bold=True, size=12)
-            fill_color = section_colors.get(key)
-            if fill_color:
-                sec_cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
-            row += 1
-
-            # Sub-header
-            comp_cell = ws.cell(row=row, column=1, value="Component")
-            amt_cell = ws.cell(row=row, column=2, value="Amount")
-            comp_cell.font = amt_cell.font = Font(bold=True)
-            comp_cell.fill = amt_cell.fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
-            comp_cell.alignment = Alignment(horizontal="center")
-            amt_cell.alignment = Alignment(horizontal="center")
-            row += 1
-
-            # Component rows
-            for field_key, label in labels.items():
-                value = section_data.get(field_key)
-                if value is None or float(value) == 0.0:
-                    continue
-                amount = float(value)
-                ws.cell(row=row, column=1, value=label)
-                amt_cell = ws.cell(row=row, column=2, value=amount)
-                amt_cell.number_format = '#,##0.00'
-                row += 1
-
-            row += 3  # Space between sections
-
-        row += 2  # Space between months
-
-    # Auto-size columns
-    for col in range(1, 3):
+    for col in ws.columns:
         max_length = 0
-        col_letter = get_column_letter(col)
-        for cell in ws[col_letter]:
-            if cell.value:
-                max_length = max(max_length, len(str(cell.value)))
-        ws.column_dimensions[col_letter].width = max_length + 5
+        column_letter = get_column_letter(col[0].column)
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = (max_length + 2) * 1.2
+        ws.column_dimensions[column_letter].width = adjusted_width
 
+    # Prepare response
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = 'attachment; filename="Vertical_Payroll_Report.xlsx"'
+    filename = f"combined_monthly_payroll_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    # Save workbook to response
     wb.save(response)
+
     return response
 
+
+@login_required
+def export_combined_monthly_summary_to_excel(request):
+    # Get data from context
+    context = get_combined_monthly_detail(request)
+    monthly_list = context['page_obj'].object_list
+
+    # Create workbook
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Monthly Payroll Summary"
+
+    # Styles
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="0070C0", end_color="0070C0", fill_type="solid")
+    thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                        top=Side(style='thin'), bottom=Side(style='thin'))
+    money_format = '#,##0.00'
+    center_align = Alignment(horizontal="center")
+    title_font = Font(bold=True, size=14)
+    section_font = Font(bold=True, size=12)
+
+    # Section colors
+    section_colors = {
+        'regular': "0070C0",
+        'adjustment': "00B050",
+        'severance': "C65911",
+        'totals': "7030A0"
+    }
+
+    def safe_float(value):
+        try:
+            return float(value) if value not in [None, ''] else 0.0
+        except:
+            return 0.0
+
+    row_num = 1
+
+    for item in monthly_list:
+        # Title
+        ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=3)
+        title_cell = ws.cell(row=row_num, column=1, value=f"Monthly Payroll Summary for {item['month']}")
+        title_cell.font = title_font
+        title_cell.alignment = center_align
+        row_num += 3
+
+        # -------------------------------
+        # 1. Regular Payroll
+        # -------------------------------
+        if 'regular' in item and any(safe_float(v) != 0 for v in item['regular'].values()):
+            ws.cell(row=row_num, column=1, value="REGULAR PAYROLL").font = Font(bold=True, size=12, color=section_colors['regular'])
+            row_num += 2
+
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = center_align
+            row_num += 1
+
+            summary_data = [
+                ("Taxable Gross", item['regular'].get('taxable_gross')),
+                ("Non-Taxable Gross", item['regular'].get('non_taxable_gross')),
+                ("Gross Pay", item['regular'].get('gross')),
+                ("Pensionable Amount", item['regular'].get('pensionable')),
+                ("Employee Pension", item['regular'].get('employee_pension')),
+                ("Employer Pension", item['regular'].get('employer_pension')),
+                ("Total Pension", item['regular'].get('total_pension')),
+                ("Income Tax", item['regular'].get('employment_income_tax')),
+                ("Total Deductions", item['regular'].get('total_regular_deduction')),
+                ("Net Pay", item['regular'].get('net_pay')),
+                ("Expense", item['regular'].get('expense')),
+            ]
+
+            for label, value in summary_data:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
+                    amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
+                    row_num += 1
+            row_num += 3
+
+        # -------------------------------
+        # 2. Earning Adjustments (Summary only)
+        # -------------------------------
+        if 'adjustment' in item and any(safe_float(v) != 0 for v in item['adjustment'].values()):
+            ws.cell(row=row_num, column=1, value="EARNING ADJUSTMENTS").font = Font(bold=True, size=12, color=section_colors['adjustment'])
+            row_num += 2
+
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = center_align
+            row_num += 1
+
+            adj_summary = [
+                ("Taxable Gross", item['adjustment'].get('taxable_gross')),
+                ("Non-Taxable Gross", item['adjustment'].get('non_taxable_gross')),
+                ("Gross Adjustment", item['adjustment'].get('gross')),
+                ("Adjusted Pensionable", item['adjustment'].get('adjusted_pensionable')),
+                ("Employee Pension", item['adjustment'].get('employee_pension')),
+                ("Employer Pension", item['adjustment'].get('employer_pension')),
+                ("Total Pension", item['adjustment'].get('total_pension')),
+                ("Income Tax", item['adjustment'].get('employment_income_tax')),
+                ("Earning Adjustment Deduction", item['adjustment'].get('earning_adjustment_deduction')),
+                ("Net Monthly Adjustment", item['adjustment'].get('net_monthly_adjustment')),
+                ("Expense", item['adjustment'].get('expense')),
+            ]
+
+            for label, value in adj_summary:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
+                    amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
+                    row_num += 1
+            row_num += 3
+
+        # -------------------------------
+        # 3. Severance Payroll
+        # -------------------------------
+        if 'severance' in item and any(safe_float(v) != 0 for v in item['severance'].values()):
+            ws.cell(row=row_num, column=1, value="SEVERANCE PAYROLL").font = Font(bold=True, size=12, color=section_colors['severance'])
+            row_num += 2
+
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = center_align
+            row_num += 1
+
+            severance_items = [
+                ("Severance Gross (Taxable)", item['severance'].get('taxable_gross')),
+                ("Severance Gross", item['severance'].get('gross')),
+                ("Severance Income Tax", item['severance'].get('employment_income_tax')),
+                ("Total Severance Deductions", item['severance'].get('total_severance_deduction')),
+                ("Severance Net Pay", item['severance'].get('net')),
+                ("Severance Expense", item['severance'].get('expense')),
+            ]
+
+            for label, value in severance_items:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
+                    amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
+                    row_num += 1
+            row_num += 3
+
+        # -------------------------------
+        # 4. Total Summary
+        # -------------------------------
+        if 'totals' in item and any(safe_float(v) != 0 for v in item['totals'].values()):
+            ws.cell(row=row_num, column=1, value="TOTAL SUMMARY").font = Font(bold=True, size=12, color=section_colors['totals'])
+            row_num += 2
+
+            headers = ["Item", "Amount"]
+            for col_num, header in enumerate(headers, 1):
+                cell = ws.cell(row=row_num, column=col_num, value=header)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = center_align
+            row_num += 1
+
+            summary_items = [
+                ("Taxable Gross Pay", item['totals'].get('taxable_gross')),
+                ("Non-Taxable Gross Pay", item['totals'].get('non_taxable_gross')),
+                ("Total Gross Pay", item['totals'].get('gross')),
+                ("Total Pensionable", item['totals'].get('pensionable')),
+                ("Employee Pension", item['totals'].get('employee_pension')),
+                ("Employer Pension", item['totals'].get('employer_pension')),
+                ("Total Pension Contribution", item['totals'].get('total_pension')),
+                ("Income Tax", item['totals'].get('employment_income_tax')),
+                ("Total Deduction", item['totals'].get('total_deduction')),
+                ("Total Expense", item['totals'].get('expense')),
+                ("Final Net Pay", item['totals'].get('final_net_pay')),
+            ]
+
+            for label, value in summary_items:
+                value_float = safe_float(value)
+                if value_float != 0:
+                    ws.cell(row=row_num, column=1, value=label).border = thin_border
+                    amt_cell = ws.cell(row=row_num, column=2, value=value_float)
+                    amt_cell.number_format = money_format
+                    amt_cell.border = thin_border
+                    row_num += 1
+            row_num += 3
+
+    # Adjust column widths
+    for col in ws.columns:
+        max_length = 0
+        column_letter = get_column_letter(col[0].column)
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        ws.column_dimensions[column_letter].width = (max_length + 2) * 1.2
+
+    # Prepare response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"combined_monthly_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    wb.save(response)
+    return response
 
 
 

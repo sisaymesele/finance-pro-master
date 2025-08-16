@@ -1,51 +1,21 @@
+
+
+
 {% extends "dashboard.html" %}
+{% load static %}
+
 {% block content %}
+<div class="container-fluid my-4">
 
-
-<div class="row mb-4">
-    <!-- Bar Chart in Card -->
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                Monthly Payroll Summary By Components
-            </div>
-            <div class="card-body">
-                {{ bar_div|safe }}
-            </div>
-        </div>
+    <!-- Page Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Combined Monthly Payroll Overview</h2>
     </div>
+
+    <!-- Graph -->
+    <div class="card shadow-sm p-3 mb-4">
+        {{ graph_div|safe }}
+    </div>
+
 </div>
-
-<div class="row mb-4">
-    <!-- Month Selector & Pie Chart -->
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                Select Month
-            </div>
-            <div class="card-body">
-                <form id="monthForm" hx-get="." hx-target="#full-page-container" hx-swap="innerHTML">
-                    <label for="monthSelect" class="form-label">Choose Month</label>
-                    <select name="month" id="monthSelect" class="form-select" onchange="this.form.requestSubmit()">
-                        {% for month in month_options %}
-                            <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
-                        {% endfor %}
-                    </select>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-info text-white">
-                Payroll Cost Breakdown for {{ selected_month }}
-            </div>
-            <div class="card-body">
-                {{ pie_div|safe }}
-            </div>
-        </div>
-    </div>
-</div>
-
 {% endblock %}

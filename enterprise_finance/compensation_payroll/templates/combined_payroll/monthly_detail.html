@@ -39,30 +39,60 @@
         <div id="collapse_{{ forloop.counter }}" class="collapse show">
             <div class="card-body px-4">
                 <div class="row g-4">
-                    <!-- LEFT COLUMN -->
-                    <div class="col-md-8 pe-md-4 border-end">
+                    <!-- LEFT COLUMN (Main Content) -->
+                    <div class="col-md-8 pe-md-4">
+                        <!-- REGULAR PAYROLL SECTION -->
+                        <div class="mb-4">
+                            <h5 class="text-success border-bottom pb-2 mb-3">Regular Payroll</h5>
 
-                        <!-- Regular Payroll Details -->
-                        {% if month.regular_item_by_component %}
-                        <div>
-                            <h5 class="text-primary border-bottom pb-1">Regular Payroll Details</h5>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered table-striped">
-                                    <thead class="table-light">
+                            <!-- Regular Components -->
+                            <div class="table-responsive mb-4">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-success">
                                         <tr>
                                             <th>Component</th>
                                             <th class="text-end">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for key, val in month.regular_item_by_component.items %}
-                                        {% if val %}
+                                        {% for comp, amount in month.regular_item_by_component.items %}
+                                        {% if amount %}
                                         <tr>
-                                            <td>{{ key }}</td>
-                                            <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                            <td>{{ comp }}</td>
+                                            <td class="text-end">{{ amount|floatformat:2|intcomma }}</td>
                                         </tr>
                                         {% endif %}
                                         {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Regular Summary -->
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th>Summary Item</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Taxable Gross</td>
+                                            <td class="text-end">{{ month.regular.taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Non-Taxable Gross</td>
+                                            <td class="text-end">{{ month.regular.non_taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td><strong>Gross Pay</strong></td>
+                                            <td class="text-end"><strong>{{ month.regular.gross|floatformat:2|intcomma }}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Pensionable Amount</td>
+                                            <td class="text-end">{{ month.regular.pensionable|floatformat:2|intcomma }}</td>
+                                        </tr>
                                         <tr>
                                             <td>Employee Pension</td>
                                             <td class="text-end">{{ month.regular.employee_pension|floatformat:2|intcomma }}</td>
@@ -72,6 +102,10 @@
                                             <td class="text-end">{{ month.regular.employer_pension|floatformat:2|intcomma }}</td>
                                         </tr>
                                         <tr>
+                                            <td>Total Pension</td>
+                                            <td class="text-end">{{ month.regular.total_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
                                             <td>Employment Income Tax</td>
                                             <td class="text-end">{{ month.regular.employment_income_tax|floatformat:2|intcomma }}</td>
                                         </tr>
@@ -79,9 +113,9 @@
                                             <td>Total Regular Deduction</td>
                                             <td class="text-end">{{ month.regular.total_regular_deduction|floatformat:2|intcomma }}</td>
                                         </tr>
-                                        <tr>
-                                            <td>Net Pay</td>
-                                            <td class="text-end">{{ month.regular.net_pay|floatformat:2|intcomma }}</td>
+                                        <tr class="table-success">
+                                            <td><strong>Net Pay</strong></td>
+                                            <td class="text-end"><strong>{{ month.regular.net_pay|floatformat:2|intcomma }}</strong></td>
                                         </tr>
                                         <tr>
                                             <td>Expense</td>
@@ -91,15 +125,16 @@
                                 </table>
                             </div>
                         </div>
-                        {% endif %}
 
-                        <!-- Earning Adjustments -->
+                        <!-- EARNING ADJUSTMENTS SECTION -->
                         {% if month.show_earning %}
-                        <div class="mt-4">
-                            <h5 class="text-success border-bottom pb-1">Earning Adjustments</h5>
-                            <div class="table-responsive">
-                                <table class="table table-sm table-bordered table-striped">
-                                    <thead class="table-light">
+                        <div class="mb-4">
+                            <h5 class="text-warning border-bottom pb-2 mb-3">Earning Adjustments</h5>
+
+                            <!-- Earning Components -->
+                            <div class="table-responsive mb-4">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-warning">
                                         <tr>
                                             <th>Component</th>
                                             <th class="text-end">Earning Amount</th>
@@ -127,32 +162,102 @@
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                        {% endif %}
 
-                        <!-- Deduction Adjustments -->
-                        {% if month.show_deduction %}
-                        <div class="mt-4">
-                            <h5 class="text-danger border-bottom pb-1">Deduction Adjustments</h5>
+                            <!-- Earning Summary -->
                             <div class="table-responsive">
-                                <table class="table table-sm table-bordered table-striped">
-                                    <thead class="table-light">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-warning">
                                         <tr>
-                                            <th>Component</th>
-                                            <th class="text-end">Deduction Amount</th>
+                                            <th>Summary Item</th>
+                                            <th class="text-end">Amount</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for comp, val in month.deduction_adj_by_component.items %}
-                                        {% if val %}
+                                        <tr>
+                                            <td>Taxable Gross</td>
+                                            <td class="text-end">{{ month.adjustment.taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Non-Taxable Gross</td>
+                                            <td class="text-end">{{ month.adjustment.non_taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td><strong>Gross Adjustment</strong></td>
+                                            <td class="text-end"><strong>{{ month.adjustment.gross|floatformat:2|intcomma }}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Adjusted Pensionable</td>
+                                            <td class="text-end">{{ month.adjustment.adjusted_pensionable|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employee Pension</td>
+                                            <td class="text-end">{{ month.adjustment.employee_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employer Pension</td>
+                                            <td class="text-end">{{ month.adjustment.employer_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Pension</td>
+                                            <td class="text-end">{{ month.adjustment.total_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employment Income Tax</td>
+                                            <td class="text-end">{{ month.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Earning Adjustment Deduction</td>
+                                            <td class="text-end">{{ month.adjustment.earning_adjustment_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Expense</td>
+                                            <td class="text-end">{{ month.adjustment.expense|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- DEDUCTION ADJUSTMENTS SECTION -->
+                        {% if month.show_deduction %}
+                        <div class="mb-4">
+                            <h5 class="text-danger border-bottom pb-2 mb-3">Deduction Adjustments</h5>
+
+                            <!-- Deduction Components -->
+                            <div class="table-responsive mb-4">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-danger">
+                                        <tr>
+                                            <th>Component</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for comp, amount in month.deduction_adj_by_component.items %}
+                                        {% if amount %}
                                         <tr>
                                             <td>{{ comp }}</td>
-                                            <td class="text-end">{{ val|floatformat:2|intcomma }}</td>
+                                            <td class="text-end">{{ amount|floatformat:2|intcomma }}</td>
                                         </tr>
                                         {% endif %}
                                         {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Deduction Summary -->
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-danger">
                                         <tr>
-                                            <td>Total Individual Deduction</td>
+                                            <th>Summary Item</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Individual Adjustment Deduction</td>
                                             <td class="text-end">{{ month.adjustment.individual_adjustment_deduction|floatformat:2|intcomma }}</td>
                                         </tr>
                                     </tbody>
@@ -160,47 +265,85 @@
                             </div>
                         </div>
                         {% endif %}
-<!--                        total adjustment-->
-                        <div class="m-3">
-                            <h5>Total Adjustment</h5>
-                            <!-- Full Adjustment Summary -->
-                            <div class="table-responsive mt-2">
-                                <table class="table table-bordered table-sm">
+
+                        <!-- ADJUSTMENT SUMMARY (Combined Earning & Deduction) -->
+                        <div class="mb-4">
+                            <h5 class="text-info border-bottom pb-2 mb-3">Adjustment Summary</h5>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-info">
+                                        <tr>
+                                            <th>Summary Item</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
                                         <tr>
-                                            <td>Recorded Employment Income Tax:</td>
+                                            <td>Taxable Gross</td>
+                                            <td class="text-end">{{ month.adjustment.taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Non-Taxable Gross</td>
+                                            <td class="text-end">{{ month.adjustment.non_taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td><strong>Gross Adjustment</strong></td>
+                                            <td class="text-end"><strong>{{ month.adjustment.gross|floatformat:2|intcomma }}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Adjusted Pensionable</td>
+                                            <td class="text-end">{{ month.adjustment.adjusted_pensionable|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employee Pension</td>
+                                            <td class="text-end">{{ month.adjustment.employee_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employer Pension</td>
+                                            <td class="text-end">{{ month.adjustment.employer_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Pension</td>
+                                            <td class="text-end">{{ month.adjustment.total_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employment Income Tax</td>
                                             <td class="text-end">{{ month.adjustment.employment_income_tax|floatformat:2|intcomma }}</td>
                                         </tr>
-
                                         <tr>
-                                            <td>Earning Adjustment Deduction:</td>
+                                            <td>Earning Adjustment Deduction</td>
                                             <td class="text-end">{{ month.adjustment.earning_adjustment_deduction|floatformat:2|intcomma }}</td>
                                         </tr>
                                         <tr>
-                                            <td>Net Monthly Adjustment:</td>
-                                            <td class="text-end">{{ month.adjustment.net_monthly_adjustment|floatformat:2|intcomma }}</td>
+                                            <td>Individual Adjustment Deduction</td>
+                                            <td class="text-end">{{ month.adjustment.individual_adjustment_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td><strong>Total Monthly Adjustment Deduction</strong></td>
+                                            <td class="text-end"><strong>{{ month.adjustment.total_monthly_adjustment_deduction|floatformat:2|intcomma }}</strong></td>
+                                        </tr>
+                                        <tr class="table-success">
+                                            <td><strong>Net Monthly Adjustment</strong></td>
+                                            <td class="text-end"><strong>{{ month.adjustment.net_monthly_adjustment|floatformat:2|intcomma }}</strong></td>
                                         </tr>
                                         <tr>
-                                            <td>Total Adjustment Deduction:</td>
-                                            <td class="text-end">{{ month.adjustment.total_monthly_adjustment_deduction|floatformat:2|intcomma }}</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Expense:</td>
+                                            <td>Expense</td>
                                             <td class="text-end">{{ month.adjustment.expense|floatformat:2|intcomma }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-<!---->
-                        <!-- Severance Pay -->
-                        {% with s=month.severance %}
-                        {% if s.taxable_gross or s.gross or s.employment_income_tax or s.total_severance_deduction or s.net or s.expense %}
-                        <div class="mt-4">
-                            <h5 class="text-info border-bottom pb-1">Severance Pay</h5>
+
+                        <!-- SEVERANCE PAY SECTION -->
+                        {% if month.severance.gross %}
+                        <div class="mb-4">
+                            <h5 class="text-purple border-bottom pb-2 mb-3">Severance Pay</h5>
+
                             <div class="table-responsive">
-                                <table class="table table-sm table-bordered table-striped">
-                                    <thead class="table-light">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-purple">
                                         <tr>
                                             <th>Component</th>
                                             <th class="text-end">Amount</th>
@@ -209,94 +352,96 @@
                                     <tbody>
                                         <tr>
                                             <td>Taxable Gross</td>
-                                            <td class="text-end">{{ s.taxable_gross|floatformat:2|intcomma }}</td>
+                                            <td class="text-end">{{ month.severance.taxable_gross|floatformat:2|intcomma }}</td>
                                         </tr>
-                                        <tr>
-                                            <td>Total Gross</td>
-                                            <td class="text-end">{{ s.gross|floatformat:2|intcomma }}</td>
+                                        <tr class="table-primary">
+                                            <td><strong>Gross Pay</strong></td>
+                                            <td class="text-end"><strong>{{ month.severance.gross|floatformat:2|intcomma }}</strong></td>
                                         </tr>
                                         <tr>
                                             <td>Employment Income Tax</td>
-                                            <td class="text-end">{{ s.employment_income_tax|floatformat:2|intcomma }}</td>
+                                            <td class="text-end">{{ month.severance.employment_income_tax|floatformat:2|intcomma }}</td>
                                         </tr>
                                         <tr>
                                             <td>Total Severance Deduction</td>
-                                            <td class="text-end">{{ s.total_severance_deduction|floatformat:2|intcomma }}</td>
+                                            <td class="text-end">{{ month.severance.total_severance_deduction|floatformat:2|intcomma }}</td>
                                         </tr>
-                                        <tr>
-                                            <td>Net Severance</td>
-                                            <td class="text-end">{{ s.net|floatformat:2|intcomma }}</td>
+                                        <tr class="table-success">
+                                            <td><strong>Net Pay</strong></td>
+                                            <td class="text-end"><strong>{{ month.severance.net|floatformat:2|intcomma }}</strong></td>
                                         </tr>
                                         <tr>
                                             <td>Expense</td>
-                                            <td class="text-end">{{ s.expense|floatformat:2|intcomma }}</td>
+                                            <td class="text-end">{{ month.severance.expense|floatformat:2|intcomma }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         {% endif %}
-                        {% endwith %}
                     </div>
 
-                    <!-- RIGHT COLUMN: Total Summary -->
+                    <!-- RIGHT COLUMN (Total Summary) -->
                     <div class="col-md-4">
-                        <h5 class="text-dark border-bottom pb-1">Total Summary</h5>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered table-striped">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Component</th>
-                                        <th class="text-end">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="table-info">
-                                        <td>Taxable Gross</td>
-                                        <td class="text-end">{{ month.totals.taxable_gross|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-info">
-                                        <td>Non-Taxable Gross</td>
-                                        <td class="text-end">{{ month.totals.non_taxable_gross|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-info">
-                                        <td>Total Gross</td>
-                                        <td class="text-end">{{ month.totals.gross|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-warning">
-                                        <td>Pensionable</td>
-                                        <td class="text-end">{{ month.totals.pensionable|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-warning">
-                                        <td>Employee Pension</td>
-                                        <td class="text-end">{{ month.totals.employee_pension|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-warning">
-                                        <td>Employer Pension</td>
-                                        <td class="text-end">{{ month.totals.employer_pension|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-warning">
-                                        <td>Total Pension</td>
-                                        <td class="text-end">{{ month.totals.total_pension|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Employment Income Tax</td>
-                                        <td class="text-end">{{ month.totals.employment_income_tax|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Total Deduction</td>
-                                        <td class="text-end">{{ month.totals.total_deduction|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr class="table-success fw-bold">
-                                        <td>Final Net Pay</td>
-                                        <td class="text-end">{{ month.totals.final_net_pay|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Expense</td>
-                                        <td class="text-end">{{ month.totals.expense|floatformat:2|intcomma }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="sticky-top" style="top: 20px;">
+                            <h5 class="text-primary border-bottom pb-2 mb-3">Total Summary</h5>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>Component</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="table-info">
+                                            <td>Taxable Gross</td>
+                                            <td class="text-end">{{ month.totals.taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-info">
+                                            <td>Non-Taxable Gross</td>
+                                            <td class="text-end">{{ month.totals.non_taxable_gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-info">
+                                            <td>Total Gross</td>
+                                            <td class="text-end">{{ month.totals.gross|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td>Pensionable</td>
+                                            <td class="text-end">{{ month.totals.pensionable|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td>Employee Pension</td>
+                                            <td class="text-end">{{ month.totals.employee_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td>Employer Pension</td>
+                                            <td class="text-end">{{ month.totals.employer_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td>Total Pension</td>
+                                            <td class="text-end">{{ month.totals.total_pension|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Employment Income Tax</td>
+                                            <td class="text-end">{{ month.totals.employment_income_tax|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Deduction</td>
+                                            <td class="text-end">{{ month.totals.total_deduction|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr class="table-success fw-bold">
+                                            <td>Final Net Pay</td>
+                                            <td class="text-end">{{ month.totals.final_net_pay|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Expense</td>
+                                            <td class="text-end">{{ month.totals.expense|floatformat:2|intcomma }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -308,7 +453,6 @@
                         Save or Print Payslip
                     </button>
                 </div>
-
             </div>
         </div>
     </div>
@@ -322,4 +466,16 @@
         {% include "pagination.html" %}
     </div>
 </div>
+
+<style>
+    .table-purple {
+        background-color: #7030A0;
+        color: white;
+    }
+    .text-purple {
+        color: #7030A0;
+    }
+</style>
+
 {% endblock %}
+

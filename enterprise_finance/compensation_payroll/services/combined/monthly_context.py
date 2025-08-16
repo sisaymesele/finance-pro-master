@@ -302,7 +302,7 @@ def get_combined_monthly_detail(request):
 
     final_monthly_list = []
 
-    # for month_key, data in sorted(monthly_summary.items()):
+    # for month order
     for month_key, data in sorted(
             monthly_summary.items(),
             key=lambda item: parse_key(item[0]),

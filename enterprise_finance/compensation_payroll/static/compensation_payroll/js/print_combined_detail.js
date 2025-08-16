@@ -1,3 +1,5 @@
+
+
 function printCombinedDetail(elementId) {
     const element = document.getElementById(elementId);
 

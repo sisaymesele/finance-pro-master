@@ -162,11 +162,11 @@ def export_earning_adjustment_list_to_excel(request):
 
     # Data rows (start at row 4)
     for ea in adjustments:
-        original_payroll_record = getattr(ea, 'original_payroll_record', None)
+        payroll_to_record = getattr(ea, 'payroll_to_record', None)
         payroll_needing_adjustment = getattr(ea, 'payroll_needing_adjustment', None)
 
         # Manually doing one more safe_getattr nesting for payroll_month (3 levels):
-        record_month_obj = safe_getattr(original_payroll_record, 'payroll_month', None)
+        record_month_obj = safe_getattr(payroll_to_record, 'payroll_month', None)
         record_month = safe_getattr(record_month_obj, 'payroll_month', "")
         record_month_final = safe_getattr(record_month, 'payroll_month', "")  # extra level
 
@@ -177,9 +177,9 @@ def export_earning_adjustment_list_to_excel(request):
         ws.append([
             record_month_final,
             adjusted_month_final,
-            safe_getattr(safe_getattr(original_payroll_record, 'personnel_full_name', None), 'first_name', ""),
-            safe_getattr(safe_getattr(original_payroll_record, 'personnel_full_name', None), 'father_name', ""),
-            safe_getattr(safe_getattr(original_payroll_record, 'personnel_full_name', None), 'last_name', ""),
+            safe_getattr(safe_getattr(payroll_to_record, 'personnel_full_name', None), 'first_name', ""),
+            safe_getattr(safe_getattr(payroll_to_record, 'personnel_full_name', None), 'father_name', ""),
+            safe_getattr(safe_getattr(payroll_to_record, 'personnel_full_name', None), 'last_name', ""),
             ea.get_case_display() if ea else "",
             ea.get_component_display() if ea else "",
             float(ea.earning_amount or 0),
@@ -273,12 +273,12 @@ def export_earning_per_adjusted_month_to_excel(request):
     # Data rows
     for adj in data:
         ws.append([
-            safe_get(adj, "original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
+            safe_get(adj, "payroll_to_record__payroll_month__payroll_month__payroll_month", ""),
             safe_get(adj, "payroll_needing_adjustment__payroll_month__payroll_month__payroll_month", ""),
-            safe_get(adj, "original_payroll_record__personnel_full_name__personnel_id", ""),
-            safe_get(adj, "original_payroll_record__personnel_full_name__first_name", ""),
-            safe_get(adj, "original_payroll_record__personnel_full_name__father_name", ""),
-            safe_get(adj, "original_payroll_record__personnel_full_name__last_name", ""),
+            safe_get(adj, "payroll_to_record__personnel_full_name__personnel_id", ""),
+            safe_get(adj, "payroll_to_record__personnel_full_name__first_name", ""),
+            safe_get(adj, "payroll_to_record__personnel_full_name__father_name", ""),
+            safe_get(adj, "payroll_to_record__personnel_full_name__last_name", ""),
             f"Gross Taxable: {safe_get(adj, 'payroll_needing_adjustment__gross_taxable_pay', 0)} / "
             f"Tax: {safe_get(adj, 'payroll_needing_adjustment__employment_income_tax', 0)}",
             safe_get(adj, "adjusted_month_gross_taxable_pay", 0),
@@ -368,11 +368,11 @@ def export_monthly_earning_adjustment_to_excel(request):
     # Append data rows (no index variable since unused)
     for row in data:
         ws.append([
-            row.get("original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
-            row.get("original_payroll_record__personnel_full_name__personnel_id", ""),
-            row.get("original_payroll_record__personnel_full_name__first_name", ""),
-            row.get("original_payroll_record__personnel_full_name__father_name", ""),
-            row.get("original_payroll_record__personnel_full_name__last_name", ""),
+            row.get("payroll_to_record__payroll_month__payroll_month__payroll_month", ""),
+            row.get("payroll_to_record__personnel_full_name__personnel_id", ""),
+            row.get("payroll_to_record__personnel_full_name__first_name", ""),
+            row.get("payroll_to_record__personnel_full_name__father_name", ""),
+            row.get("payroll_to_record__personnel_full_name__last_name", ""),
             row.get("recorded_month_taxable_gross_pay", 0),
             row.get("recorded_month_non_taxable_gross_pay", 0),
             row.get("recorded_month_gross_pay", 0),
@@ -469,7 +469,7 @@ def export_monthly_earning_adjustment_aggregate(request):
     # Data rows
     for row in monthly_earning_adjustment_aggregate:
         ws.append([
-            row.get('original_payroll_record__payroll_month__payroll_month__payroll_month', ''),
+            row.get('payroll_to_record__payroll_month__payroll_month__payroll_month', ''),
             row.get('adjusted_gross_taxable_pay', 0),
             row.get('adjusted_gross_non_taxable_pay', 0),
             row.get('adjusted_gross_pay', 0),

@@ -420,7 +420,7 @@ class RegularPayrollForm(forms.ModelForm):
 #earning adjustment
 class EarningAdjustmentForm(forms.ModelForm):
 
-    original_payroll_record = forms.ModelChoiceField(
+    payroll_to_record = forms.ModelChoiceField(
         queryset=RegularPayroll.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})  # Add Bootstrap class here
@@ -435,12 +435,12 @@ class EarningAdjustmentForm(forms.ModelForm):
         model = EarningAdjustment
 
         fields = [
-            'original_payroll_record', 'payroll_needing_adjustment', 'case', 'component', 'earning_amount',
+            'payroll_to_record', 'payroll_needing_adjustment', 'case', 'component', 'earning_amount',
             'period_start', 'period_end', 'months_covered',
         ]
 
         widgets = {
-            'original_payroll_record': forms.Select(attrs={'class': 'form-control'}),
+            'payroll_to_record': forms.Select(attrs={'class': 'form-control'}),
             'payroll_needing_adjustment': forms.Select(attrs={'class': 'form-control', 'Placeholder': 'Processing Month'}),
             'case': forms.Select(attrs={'class': 'form-control'}),
             'component': forms.Select(attrs={'class': 'form-control'}),
@@ -454,7 +454,7 @@ class EarningAdjustmentForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        self.fields['original_payroll_record'].help_text = "The current payroll month where you're recording the adjustment."
+        self.fields['payroll_to_record'].help_text = "The current payroll month where you're recording the adjustment."
         self.fields[
             'payroll_needing_adjustment'].help_text = "The past payroll month that had an issue, missed pay, or error."
         #
@@ -470,19 +470,19 @@ class EarningAdjustmentForm(forms.ModelForm):
             self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.filter(
                 organization_name=org
             )
-            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.filter(
+            self.fields['payroll_to_record'].queryset = RegularPayroll.objects.filter(
                 organization_name=org
             )
         else:
             self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.none()
-            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.none()
+            self.fields['payroll_to_record'].queryset = RegularPayroll.objects.none()
 
 
 
 #deduction adjustment
 
 class DeductionAdjustmentForm(forms.ModelForm):
-    original_payroll_record = forms.ModelChoiceField(
+    payroll_to_record = forms.ModelChoiceField(
         queryset=RegularPayroll.objects.all(),
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})  # Add Bootstrap class here
@@ -497,13 +497,13 @@ class DeductionAdjustmentForm(forms.ModelForm):
         model = DeductionAdjustment
 
         fields = [
-            'original_payroll_record', 'payroll_needing_adjustment',
+            'payroll_to_record', 'payroll_needing_adjustment',
             'case', 'component', 'deduction_amount', 'period_start',
             'period_end', 'months_covered', 'created_at', 'updated_at',
         ]
 
         widgets = {
-            'original_payroll_record': forms.Select(attrs={'class': 'form-select'}),
+            'payroll_to_record': forms.Select(attrs={'class': 'form-select'}),
             'payroll_needing_adjustment': forms.Select(attrs={'class': 'form-select'}),
             'case': forms.Select(attrs={'class': 'form-select'}),
             'component': forms.Select(attrs={'class': 'form-select'}),
@@ -519,7 +519,7 @@ class DeductionAdjustmentForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-        self.fields['original_payroll_record'].help_text = "The current payroll month where you're recording the adjustment."
+        self.fields['payroll_to_record'].help_text = "The current payroll month where you're recording the adjustment."
         self.fields[
             'payroll_needing_adjustment'].help_text = "The past payroll month that had an issue, missed pay, or error."
         #
@@ -535,12 +535,12 @@ class DeductionAdjustmentForm(forms.ModelForm):
             self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.filter(
                 organization_name=org
             )
-            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.filter(
+            self.fields['payroll_to_record'].queryset = RegularPayroll.objects.filter(
                 organization_name=org
             )
         else:
             self.fields['payroll_needing_adjustment'].queryset = RegularPayroll.objects.none()
-            self.fields['original_payroll_record'].queryset = RegularPayroll.objects.none()
+            self.fields['payroll_to_record'].queryset = RegularPayroll.objects.none()
 
 
 #severance pay

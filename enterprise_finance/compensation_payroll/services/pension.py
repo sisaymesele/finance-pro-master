@@ -102,9 +102,9 @@ def calculate_pension_contributions(instance):
 #     personnel = getattr(instance, 'personnel_full_name', None)
 #     organization = getattr(instance, 'organization_name', None)
 #
-#     # If not directly on the instance, try through original_payroll_record (used by EarningAdjustment)
+#     # If not directly on the instance, try through payroll_to_record (used by EarningAdjustment)
 #     if not personnel or not organization:
-#         payroll_record = getattr(instance, 'original_payroll_record', None)
+#         payroll_record = getattr(instance, 'payroll_to_record', None)
 #         if payroll_record:
 #             personnel = getattr(payroll_record, 'personnel_full_name', None)
 #             organization = getattr(payroll_record, 'organization_name', organization)

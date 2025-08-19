@@ -22,7 +22,7 @@ def _recalc_earning_adjustment(instance):
 def recalc_adjustments_on_regular_payroll_save(sender, instance, **kwargs):
     def _recalc_all():
         adjustments = EarningAdjustment.objects.filter(
-            Q(original_payroll_record=instance) | Q(payroll_needing_adjustment=instance)
+            Q(payroll_to_record=instance) | Q(payroll_needing_adjustment=instance)
         )
         for adj in adjustments:
             _recalc_earning_adjustment(adj)
@@ -31,12 +31,12 @@ def recalc_adjustments_on_regular_payroll_save(sender, instance, **kwargs):
 
 @receiver(post_save, sender=EarningAdjustment)
 def recalc_regular_payroll_on_adjustment_save(sender, instance, **kwargs):
-    if instance.original_payroll_record:
+    if instance.payroll_to_record:
         transaction.on_commit(lambda: _recalc_earning_adjustment(instance))
 
 @receiver(post_delete, sender=EarningAdjustment)
 def recalc_regular_payroll_on_adjustment_delete(sender, instance, **kwargs):
-    if instance.original_payroll_record:
+    if instance.payroll_to_record:
         _recalc_earning_adjustment(instance)
 
 # -------------------------------

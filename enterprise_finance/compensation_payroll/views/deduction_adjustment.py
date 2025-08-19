@@ -169,7 +169,7 @@ def export_deduction_adjustment_list_to_excel(request):
     # Manually 3-level safe getattr for payroll_month fields
     for d in deductions:
         # Record Month nested 3 levels
-        rec_month_obj = safe_getattr(d.original_payroll_record, 'payroll_month', None)
+        rec_month_obj = safe_getattr(d.payroll_to_record, 'payroll_month', None)
         rec_month_lvl2 = safe_getattr(rec_month_obj, 'payroll_month', None)
         rec_month_final = safe_getattr(rec_month_lvl2, 'payroll_month', "")
 
@@ -181,9 +181,9 @@ def export_deduction_adjustment_list_to_excel(request):
         ws.append([
             rec_month_final,
             adj_month_final,
-            safe_getattr(safe_getattr(d.original_payroll_record, 'personnel_full_name', None), 'first_name', ""),
-            safe_getattr(safe_getattr(d.original_payroll_record, 'personnel_full_name', None), 'father_name', ""),
-            safe_getattr(safe_getattr(d.original_payroll_record, 'personnel_full_name', None), 'last_name', ""),
+            safe_getattr(safe_getattr(d.payroll_to_record, 'personnel_full_name', None), 'first_name', ""),
+            safe_getattr(safe_getattr(d.payroll_to_record, 'personnel_full_name', None), 'father_name', ""),
+            safe_getattr(safe_getattr(d.payroll_to_record, 'personnel_full_name', None), 'last_name', ""),
             d.get_case_display(),
             d.get_component_display(),
             float(d.deduction_amount or 0),
@@ -271,12 +271,12 @@ def export_deduction_per_adjusted_month_to_excel(request):
     # Append data rows starting from row 4
     for item in data:
         ws.append([
-            item.get("original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
+            item.get("payroll_to_record__payroll_month__payroll_month__payroll_month", ""),
             item.get("payroll_needing_adjustment__payroll_month__payroll_month__payroll_month", ""),
-            item.get("original_payroll_record__personnel_full_name__personnel_id", ""),
-            item.get("original_payroll_record__personnel_full_name__first_name", ""),
-            item.get("original_payroll_record__personnel_full_name__father_name", ""),
-            item.get("original_payroll_record__personnel_full_name__last_name", ""),
+            item.get("payroll_to_record__personnel_full_name__personnel_id", ""),
+            item.get("payroll_to_record__personnel_full_name__first_name", ""),
+            item.get("payroll_to_record__personnel_full_name__father_name", ""),
+            item.get("payroll_to_record__personnel_full_name__last_name", ""),
             float(item.get("adjusted_month_total_deduction", 0) or 0),
         ])
 
@@ -353,11 +353,11 @@ def export_monthly_deduction_adjustment_to_excel(request):
     # Append data rows
     for item in data:
         ws.append([
-            item.get("original_payroll_record__payroll_month__payroll_month__payroll_month", ""),
-            item.get("original_payroll_record__personnel_full_name__personnel_id", ""),
-            item.get("original_payroll_record__personnel_full_name__first_name", ""),
-            item.get("original_payroll_record__personnel_full_name__father_name", ""),
-            item.get("original_payroll_record__personnel_full_name__last_name", ""),
+            item.get("payroll_to_record__payroll_month__payroll_month__payroll_month", ""),
+            item.get("payroll_to_record__personnel_full_name__personnel_id", ""),
+            item.get("payroll_to_record__personnel_full_name__first_name", ""),
+            item.get("payroll_to_record__personnel_full_name__father_name", ""),
+            item.get("payroll_to_record__personnel_full_name__last_name", ""),
             float(item.get("recorded_month_total_deduction", 0) or 0),
         ])
 
@@ -429,7 +429,7 @@ def export_monthly_deduction_adjustment_aggregate(request):
 
     # Data rows
     for row in monthly_deduction_adjustment_aggregate:
-        payroll_month = row.get('original_payroll_record__payroll_month__payroll_month__payroll_month', '')
+        payroll_month = row.get('payroll_to_record__payroll_month__payroll_month__payroll_month', '')
         total_deduction = row.get('total_deduction', 0)
         # Convert Decimal to float
         if total_deduction is None:

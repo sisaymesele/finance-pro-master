@@ -31,10 +31,10 @@
 
 
     {% for month_data in monthly_earning_adjustment_aggregate %}
-    {% with month_id=month_data.original_payroll_record__payroll_month__payroll_month__payroll_month|stringformat:"s"|slugify %}
+    {% with month_id=month_data.payroll_to_record__payroll_month__payroll_month__payroll_month|stringformat:"s"|slugify %}
     <div class="card shadow-sm mb-5 border-primary mx-auto" style="max-width: 1160px;" id="earning-summary-{{ month_id }}">
         <div class="card-header bg-primary text-white fw-bold fs-5 text-center">
-            Monthly Earnings Adjustment for {{ month_data.original_payroll_record__payroll_month__payroll_month__payroll_month }}
+            Monthly Earnings Adjustment for {{ month_data.payroll_to_record__payroll_month__payroll_month__payroll_month }}
         </div>
 
         <div class="card-body p-0">

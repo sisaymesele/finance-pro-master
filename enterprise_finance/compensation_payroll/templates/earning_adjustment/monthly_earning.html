@@ -64,16 +64,16 @@
             {% for row in monthly_earning_adjustment %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ row.original_payroll_record__payroll_month__payroll_month__payroll_month }}</td>
-                <td>{{ row.original_payroll_record__personnel_full_name__personnel_id }}</td>
+                <td>{{ row.payroll_to_record__payroll_month__payroll_month__payroll_month }}</td>
+                <td>{{ row.payroll_to_record__personnel_full_name__personnel_id }}</td>
                 <td class="text-start">
-                    {{ row.original_payroll_record__personnel_full_name__first_name }}
+                    {{ row.payroll_to_record__personnel_full_name__first_name }}
                 </td>
                 <td class="text-start">
-                    {{ row.original_payroll_record__personnel_full_name__father_name }}
+                    {{ row.payroll_to_record__personnel_full_name__father_name }}
                 </td>
                 <td class="text-start">
-                    {{ row.original_payroll_record__personnel_full_name__last_name }}
+                    {{ row.payroll_to_record__personnel_full_name__last_name }}
                 </td>
                 <td>{{ row.recorded_month_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>
                 <td>{{ row.recorded_month_non_taxable_gross_pay|default:"0.00"|floatformat:2|intcomma }}</td>

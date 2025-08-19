@@ -582,7 +582,7 @@ class EarningAdjustment(models.Model):
     # Model fields as described
     organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     #
-    original_payroll_record = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='earning_adjustments')
+    payroll_to_record = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='earning_adjustments')
     payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE)
     case = models.CharField(max_length=90, choices=ADJUSTMENT_CASES_CHOICES)
 
@@ -652,16 +652,16 @@ class EarningAdjustment(models.Model):
 
     def clean(self):
         # First, ensure both ForeignKeys are set
-        if not self.payroll_needing_adjustment_id or not self.original_payroll_record_id:
+        if not self.payroll_needing_adjustment_id or not self.payroll_to_record_id:
             raise ValidationError("Both 'payroll needing adjustment' and 'record month' must be set.")
 
         # Safely get related objects
         payroll_adj = getattr(self, 'payroll_needing_adjustment', None)
-        original_payroll_record_obj = getattr(self, 'original_payroll_record', None)
+        payroll_to_record_obj = getattr(self, 'payroll_to_record', None)
 
-        if original_payroll_record_obj:
-            personnel = getattr(original_payroll_record_obj, 'personnel_full_name', None)
-            payroll_month = getattr(original_payroll_record_obj, 'payroll_month', None)
+        if payroll_to_record_obj:
+            personnel = getattr(payroll_to_record_obj, 'personnel_full_name', None)
+            payroll_month = getattr(payroll_to_record_obj, 'payroll_month', None)
 
             # Example check using personnel
             if self.earning_amount and self.component == 'per_diem':
@@ -725,7 +725,7 @@ class DeductionAdjustment(models.Model):
     # Model fields as described
     organization_name = models.ForeignKey(OrganizationalProfile, on_delete=models.PROTECT)
     #
-    original_payroll_record = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='deduction_adjustments')
+    payroll_to_record = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE, related_name='deduction_adjustments')
     payroll_needing_adjustment = models.ForeignKey(RegularPayroll, on_delete=models.CASCADE)
     case = models.CharField(max_length=90, choices=ADJUSTMENT_CASES_CHOICES)
 
@@ -751,7 +751,7 @@ class DeductionAdjustment(models.Model):
     updated_at = models.DateField(default=datetime.date.today, help_text="Date when this record was last updated")
 
     def clean(self):
-        if not self.payroll_needing_adjustment or not self.original_payroll_record:
+        if not self.payroll_needing_adjustment or not self.payroll_to_record:
             raise ValidationError("Both 'Payroll Needing Adjustment' and 'Record Month' must be set.")
 
     def save(self, *args, **kwargs):

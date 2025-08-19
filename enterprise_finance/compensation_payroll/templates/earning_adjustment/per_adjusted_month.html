@@ -63,12 +63,12 @@
             {% for adjustment in earning_per_adjusted_month %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ adjustment.original_payroll_record__payroll_month__payroll_month__payroll_month }}</td>
+                <td>{{ adjustment.payroll_to_record__payroll_month__payroll_month__payroll_month }}</td>
                 <td>{{ adjustment.payroll_needing_adjustment__payroll_month__payroll_month__payroll_month }}</td>
-                <td>{{ adjustment.original_payroll_record__personnel_full_name__personnel_id }}</td>
-                <td class="text-start">{{ adjustment.original_payroll_record__personnel_full_name__first_name }}</td>
-                <td class="text-start">{{ adjustment.original_payroll_record__personnel_full_name__father_name }}</td>
-                <td class="text-start">{{ adjustment.original_payroll_record__personnel_full_name__last_name }}</td>
+                <td>{{ adjustment.payroll_to_record__personnel_full_name__personnel_id }}</td>
+                <td class="text-start">{{ adjustment.payroll_to_record__personnel_full_name__first_name }}</td>
+                <td class="text-start">{{ adjustment.payroll_to_record__personnel_full_name__father_name }}</td>
+                <td class="text-start">{{ adjustment.payroll_to_record__personnel_full_name__last_name }}</td>
                 <td>
                         <span class="badge bg-warning text-dark">
                             Gross Taxable: {{ adjustment.payroll_needing_adjustment__gross_taxable_pay|default:"0.00"|floatformat:2|intcomma }}

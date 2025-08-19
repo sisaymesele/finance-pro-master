@@ -14,19 +14,19 @@ class DeductionAdjustmentBusinessService:
         self.calculate_monthly_deduction_adjustment()
 
     def calculate_deduction_adjustment_per_adjusted_month(self):
-        if not self.instance or not self.instance.original_payroll_record:
+        if not self.instance or not self.instance.payroll_to_record:
             return
 
         from compensation_payroll.models import DeductionAdjustment
-        original_payroll_record = self.instance.original_payroll_record
+        payroll_to_record = self.instance.payroll_to_record
         payroll_needing_adjustment = self.instance.payroll_needing_adjustment
 
         # Get all deduction adjustments for same month and person
         deductions = DeductionAdjustment.objects.filter(
-            original_payroll_record=original_payroll_record,
+            payroll_to_record=payroll_to_record,
             payroll_needing_adjustment=payroll_needing_adjustment
         ).select_related(
-            'original_payroll_record',
+            'payroll_to_record',
             'payroll_needing_adjustment'
         )
 
@@ -41,17 +41,17 @@ class DeductionAdjustmentBusinessService:
         )
 
     def calculate_monthly_deduction_adjustment(self):
-        if not self.instance or not self.instance.original_payroll_record:
+        if not self.instance or not self.instance.payroll_to_record:
             return
 
         from decimal import Decimal
         from compensation_payroll.models import DeductionAdjustment
 
-        original_payroll_record = self.instance.original_payroll_record
+        payroll_to_record = self.instance.payroll_to_record
 
-        # Get all deductions for the current original_payroll_record and personnel
+        # Get all deductions for the current payroll_to_record and personnel
         deductions = DeductionAdjustment.objects.filter(
-            original_payroll_record=original_payroll_record
+            payroll_to_record=payroll_to_record
         ).select_related('payroll_needing_adjustment')
 
         # Use payroll_needing_adjustment.payroll_month to ensure one per adjusted month

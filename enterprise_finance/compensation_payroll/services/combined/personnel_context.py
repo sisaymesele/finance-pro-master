@@ -119,13 +119,13 @@ def get_combined_personnel_payroll_context(request):
         }
         #adjustment
         earning_adj = payroll.earning_adjustments.order_by(
-            '-original_payroll_record__payroll_month__payroll_month__year',
-            '-original_payroll_record__payroll_month__payroll_month__month'
+            '-payroll_to_record__payroll_month__payroll_month__year',
+            '-payroll_to_record__payroll_month__payroll_month__month'
         ).first() or type('Empty', (), {})()
 
         deduction_adj = payroll.deduction_adjustments.order_by(
-            '-original_payroll_record__payroll_month__payroll_month__year',
-            '-original_payroll_record__payroll_month__payroll_month__month'
+            '-payroll_to_record__payroll_month__payroll_month__year',
+            '-payroll_to_record__payroll_month__payroll_month__month'
         ).first() or type('Empty', (), {})()
          #get total data from deduction adjustment
         adjusted_deduction = safe_dec(getattr(deduction_adj, 'recorded_month_total_deduction', 0))

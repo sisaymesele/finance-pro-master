@@ -94,7 +94,7 @@ class EarningAdjustmentBusinessService:
         from compensation_payroll.models import EarningAdjustment
 
         # ✅ Prevent AttributeError
-        if not self.instance or not self.instance.original_payroll_record or not self.instance.payroll_needing_adjustment:
+        if not self.instance or not self.instance.payroll_to_record or not self.instance.payroll_needing_adjustment:
             return
 
         # Calculate pension only if component is pensionable
@@ -108,14 +108,14 @@ class EarningAdjustmentBusinessService:
         self.instance.employer_pension_contribution = employer_pension
         self.instance.total_pension = total_pension
 
-        original_payroll_record = self.instance.original_payroll_record
+        payroll_to_record = self.instance.payroll_to_record
         payroll_needing_adjustment = self.instance.payroll_needing_adjustment
 
         adjustments = EarningAdjustment.objects.filter(
-            original_payroll_record=original_payroll_record,
+            payroll_to_record=payroll_to_record,
             payroll_needing_adjustment=payroll_needing_adjustment
         ).select_related(
-            'original_payroll_record',
+            'payroll_to_record',
             'payroll_needing_adjustment',
         )
 
@@ -174,13 +174,13 @@ class EarningAdjustmentBusinessService:
         from compensation_payroll.models import EarningAdjustment
 
         # ✅ Prevent AttributeError
-        if not self.instance or not self.instance.original_payroll_record or not self.instance.payroll_needing_adjustment:
+        if not self.instance or not self.instance.payroll_to_record or not self.instance.payroll_needing_adjustment:
             return
 
-        original_payroll_record = self.instance.original_payroll_record
+        payroll_to_record = self.instance.payroll_to_record
 
         adjustments = EarningAdjustment.objects.filter(
-            original_payroll_record=original_payroll_record
+            payroll_to_record=payroll_to_record
         ).select_related('payroll_needing_adjustment')
 
         # Ensure one entry per adjusted month

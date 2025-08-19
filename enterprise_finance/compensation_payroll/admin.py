@@ -290,8 +290,8 @@ class EarningAdjustmentAdmin(admin.ModelAdmin):
 
     )
 
-    list_filter = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
-    search_fields = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
+    list_filter = ('component', 'payroll_to_record', 'payroll_needing_adjustment',)
+    search_fields = ('component', 'payroll_to_record', 'payroll_needing_adjustment',)
     ordering = ('-created_at',)
 
     readonly_fields = (
@@ -308,28 +308,28 @@ class EarningAdjustmentAdmin(admin.ModelAdmin):
 
     # Group fields into logical sections
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__personnel_id', description='Personnel ID')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__personnel_id', description='Personnel ID')
     def get_personnel_id(self, obj):
-        return obj.original_payroll_record.personnel_full_name.personnel_id
+        return obj.payroll_to_record.personnel_full_name.personnel_id
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__first_name', description='First Name')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__first_name', description='First Name')
     def get_first_name(self, obj):
-        return obj.original_payroll_record.personnel_full_name.first_name
+        return obj.payroll_to_record.personnel_full_name.first_name
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__father_name', description='Father Name')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__father_name', description='Father Name')
     def get_father_name(self, obj):
-        return obj.original_payroll_record.personnel_full_name.father_name
+        return obj.payroll_to_record.personnel_full_name.father_name
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__last_name', description='Last Name')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__last_name', description='Last Name')
     def get_last_name(self, obj):
-        return obj.original_payroll_record.personnel_full_name.last_name
+        return obj.payroll_to_record.personnel_full_name.last_name
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser and hasattr(request.user, 'organization_name'):
             org = request.user.organization_name
             if db_field.name == 'organization_name':
                 kwargs["queryset"] = OrganizationalProfile.objects.filter(organization_name=org)
-            if db_field.name == 'original_payroll_record':
+            if db_field.name == 'payroll_to_record':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)
             if db_field.name == 'payroll_needing_adjustment':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)
@@ -364,33 +364,33 @@ class DeductionAdjustmentAdmin(admin.ModelAdmin):
         'period_start', 'period_end', 'created_at', 'updated_at',
     )
 
-    list_filter = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
-    search_fields = ('component', 'original_payroll_record', 'payroll_needing_adjustment',)
+    list_filter = ('component', 'payroll_to_record', 'payroll_needing_adjustment',)
+    search_fields = ('component', 'payroll_to_record', 'payroll_needing_adjustment',)
     readonly_fields = ('created_at', 'updated_at')
     ordering = ('-created_at',)
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__personnel_id', description='Personnel ID')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__personnel_id', description='Personnel ID')
     def get_personnel_id(self, obj):
-        return obj.original_payroll_record.personnel_full_name.personnel_id
+        return obj.payroll_to_record.personnel_full_name.personnel_id
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__first_name', description='First Name')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__first_name', description='First Name')
     def get_first_name(self, obj):
-        return obj.original_payroll_record.personnel_full_name.first_name
+        return obj.payroll_to_record.personnel_full_name.first_name
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__father_name', description='Father Name')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__father_name', description='Father Name')
     def get_father_name(self, obj):
-        return obj.original_payroll_record.personnel_full_name.father_name
+        return obj.payroll_to_record.personnel_full_name.father_name
 
-    @admin.display(ordering='original_payroll_record__personnel_full_name__last_name', description='Last Name')
+    @admin.display(ordering='payroll_to_record__personnel_full_name__last_name', description='Last Name')
     def get_last_name(self, obj):
-        return obj.original_payroll_record.personnel_full_name.last_name
+        return obj.payroll_to_record.personnel_full_name.last_name
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if not request.user.is_superuser and hasattr(request.user, 'organization_name'):
             org = request.user.organization_name
             if db_field.name == 'organization_name':
                 kwargs["queryset"] = OrganizationalProfile.objects.filter(organization_name=org)
-            if db_field.name == 'original_payroll_record':
+            if db_field.name == 'payroll_to_record':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)
             if db_field.name == 'payroll_needing_adjustment':
                 kwargs["queryset"] = RegularPayroll.objects.filter(organization_name=org)

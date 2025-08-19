@@ -73,11 +73,11 @@
             {% for deduction in page_obj %}
             <tr>
                 <td>{{ forloop.counter }}</td>
-                <td>{{ deduction.original_payroll_record.payroll_month.payroll_month.payroll_month }}</td>
+                <td>{{ deduction.payroll_to_record.payroll_month.payroll_month.payroll_month }}</td>
                 <td>{{ deduction.payroll_needing_adjustment.payroll_month.payroll_month.payroll_month }}</td>
-                <td>{{ deduction.original_payroll_record.personnel_full_name.first_name }}</td>
-                <td>{{ deduction.original_payroll_record.personnel_full_name.father_name }}</td>
-                <td>{{ deduction.original_payroll_record.personnel_full_name.last_name }}</td>
+                <td>{{ deduction.payroll_to_record.personnel_full_name.first_name }}</td>
+                <td>{{ deduction.payroll_to_record.personnel_full_name.father_name }}</td>
+                <td>{{ deduction.payroll_to_record.personnel_full_name.last_name }}</td>
                 <td>{{ deduction.get_case_display }}</td>
                 <td>{{ deduction.get_component_display }}</td>
                 <td>{{ deduction.deduction_amount|default:"0.00"|floatformat:2|intcomma }}</td>

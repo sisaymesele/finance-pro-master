@@ -70,23 +70,67 @@
                     <details>
                         <summary class="fw-semibold">How does adjustment work?</summary>
                         <p class="mt-2 text-muted">
-                            An adjustment is made when an error or update—such as a missing earning, incorrect
-                            deduction, or when additional earning or deduction is needed—is discovered after the
-                            original payroll period.
-                            The user selects the payroll component to adjust and the reason for the adjustment (e.g.,
-                            underpayment, overpayment, correction).
-                            They then link the original payroll needing correction (payroll_needing_adjustment) to the
-                            affected period and assign the current payroll (original_payroll_record) where the adjustment will
-                            be recorded.
-                            After entering the adjustment amount, the system automatically calculates the taxable and
-                            non-taxable portions, updates the corrected values for the original period (adjusted_month_*
-                            fields), and updates the totals in the current period (recorded_month_* fields), including
-                            tax, pension, and expense figures.
-
+                            Payroll adjustments are used when an error or update is discovered after the original
+                            payroll has been processed.
+                            This can include missing earnings, incorrect deductions, or additional earnings/deductions
+                            that need to be applied.
                         </p>
+                        <p class="mt-2 text-muted">
+                            To process an adjustment:
+                        <ol>
+                            <li><strong>Select the current payroll:</strong> the payroll record where the adjustment
+                                will be recorded.
+                            </li>
+                            <li><strong>Choose the payroll needing adjustment:</strong> the original payroll period that
+                                contains the error or requires correction.
+                            </li>
+                            <li><strong>Specify the adjustment details:</strong> select the payroll component to adjust
+                                (e.g., basic salary, allowance, deduction) and provide the reason (e.g., underpayment,
+                                overpayment, correction).
+                            </li>
+                            <li><strong>Enter the adjustment amount:</strong> the system will automatically calculate
+                                taxable and non-taxable portions.
+                            </li>
+                            <li><strong>Review updates:</strong> the system updates the corrected values in the original
+                                payroll period (adjusted fields) and updates totals in the current payroll period
+                                (recorded fields), including tax, pension, and expenses.
+                            </li>
+                        </ol>
+                        </p>
+                        <p class="mt-2 text-muted">
+                            Following this process ensures accurate payroll records and proper reflection of all
+                            adjustments across both the original and current payroll periods.
+                        </p>
+
                     </details>
                 </div>
             </div>
+
+            <div class="col">
+                <div class="p-4 bg-white rounded shadow-sm">
+                    <details>
+                        <summary class="fw-semibold">How to Process Unpaid Salary for Multiple Months at Once?</summary>
+                        <p class="mt-2 text-muted">
+                            To process unpaid salaries for multiple months:
+                        </p>
+                        <ol class="mt-2 text-muted">
+                            <li>
+                                <strong>Step 1:</strong> In the <em>Regular Payroll</em> table, set the salary amount to
+                                0 for each month that was unpaid.
+                            </li>
+                            <li>
+                                <strong>Step 2:</strong> In the <em>Earning Adjustment</em> table, select each month
+                                with 0 salary and enter the correct salary amount individually for each month.
+                            </li>
+                            <li>
+                                <strong>Step 3:</strong> The system will automatically calculate the taxable and
+                                non-taxable portions and update the payroll totals accordingly.
+                            </li>
+                        </ol>
+                    </details>
+                </div>
+            </div>
+
 
             <!-- Generic -->
             <div class="col">
